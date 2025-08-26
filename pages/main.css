@@ -1,0 +1,22 @@
+
+
+.introduce-title {
+    text-align: center;
+    position: relative;
+    padding: 0 0 15px;
+    margin: 25px 0px 30px;
+     color: #d80027;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+.introduce-title:after {
+    content: "";
+    background: #f25862;
+    bottom: 0;
+    display: block;
+    height: 2px;
+    left: 50%;
+    margin-left: -30px;
+    position: absolute;
+    width: 60px;
+}

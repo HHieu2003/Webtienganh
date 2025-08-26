@@ -1,0 +1,164 @@
+.introduce-title {
+    text-align: center;
+    position: relative;
+    padding: 0 0 15px;
+    margin: 25px 0px 30px;
+     color: #d80027;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+.introduce-title:after {
+    content: "";
+    background: #f25862;
+    bottom: 0;
+    display: block;
+    height: 2px;
+    left: 50%;
+    margin-left: -30px;
+    position: absolute;
+    width: 60px;
+}
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Times New Roman', Times, serif;
+    }
+
+    a {
+        text-decoration: none !important;
+    }
+
+    .account {
+        display: flex;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .account-left {
+        background-color: #f4f4f4;
+        padding: 20px;
+        border-radius: 8px;
+        height: 280px;
+        box-shadow: 0 4px 8px #666;
+        margin-left: 90px;
+    }
+
+    .account-left h3 {
+        font-size: 18px;
+        color: #0db33b;
+        margin-bottom: 20px;
+    }
+
+    .account-left ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .account-left ul li {
+        margin-bottom: 15px;
+    }
+
+    .account-left ul li a {
+        text-decoration: none;
+        color: #0a5131;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+    }
+
+    .account-right {
+        flex: 3;
+        background-color: #ffff;
+        border-radius: 8px;
+        padding: 20px;
+
+        gap: 20px;
+    }
+
+    .account-row {
+        display: flex;
+        gap: 20px;
+        justify-content: space-between;
+    }
+
+    .account-1 {
+        min-width: 22%;
+        height: 100px;
+        box-shadow: 0 4px 8px #666;
+        background-color: #a8d15c;
+    }
+
+    .account-1:hover {
+        background-color: #850435;
+    }
+
+    .account-1-item {
+        margin: 10px;
+    }
+
+    .account-1-item h1 {
+        font-size: 20px;
+        color: #ffff;
+    }
+
+    .account-1-item p {
+        font-size: 25px;
+        color: #ffff; 
+        font-weight: 600;
+    }
+
+    .account-2 {
+        height: 100px;
+        box-shadow: 0 4px 8px #666;
+        background-color: #e14a4a;
+    }
+
+    .account-2:hover {
+        background-color: #15149f;
+    }
+
+    .account-3 {
+        height: 100px;
+        box-shadow: 0 4px 8px #666;
+        background-color: #2dcf5d;
+    }
+
+    .account-3:hover {
+        background-color: #9d0505;
+    }
+
+    .avatar {
+        text-align: left;
+        margin-left: 30px;
+        margin-bottom: 20px;
+    }
+
+    .avatar img {
+        height: 100px;
+        border-radius: 50%;
+        background-color: #d9f99d;
+        font-size: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #333;
+    }
+
+    .list {
+        width: 100%;
+        margin-top: 20px;
+        background-color: #ffff;
+    }
+
+    .tab-list {
+        margin: 0;
+    }
+
+    .tab-content {
+        padding: 0;
+        margin: 10px;
+    }
