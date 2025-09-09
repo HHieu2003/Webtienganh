@@ -27,6 +27,7 @@
     <div class="wrapper">
         <header>
             <?php
+            
             include('./pages/header.php');
             ?>
         </header>

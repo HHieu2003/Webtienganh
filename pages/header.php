@@ -1,4 +1,5 @@
 <?php
+
 $isLoggedIn = isset($_SESSION['id_hocvien']);
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra nếu là admin
 ?>
