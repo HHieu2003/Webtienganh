@@ -1,5 +1,5 @@
 <?php
-// File: xoa_donhang.php
+// File: huy_donhang.php
 header('Content-Type: application/json');
 
 if (session_status() == PHP_SESSION_NONE) {
@@ -17,10 +17,10 @@ require('../../../config/config.php');
 $id_hocvien = $_SESSION['id_hocvien'];
 $dangky_id = (int)$_POST['dangky_id'];
 
-// Xóa vĩnh viễn đơn hàng khỏi CSDL
-// Chỉ xóa những đơn hàng đang ở trạng thái 'cho xac nhan'
-// và phải thuộc về học viên đang đăng nhập để đảm bảo an toàn
-$sql = "DELETE FROM dangkykhoahoc 
+// Cập nhật trạng thái đơn hàng thành 'da huy'
+// Chỉ cập nhật những đơn hàng đang ở trạng thái 'cho xac nhan'
+$sql = "UPDATE dangkykhoahoc 
+        SET trang_thai = 'da huy' 
         WHERE id_dangky = ? 
         AND id_hocvien = ? 
         AND trang_thai = 'cho xac nhan'";
@@ -29,11 +29,10 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("ii", $dangky_id, $id_hocvien);
 
 if ($stmt->execute()) {
-    // a_rows > 0 nghĩa là có 1 dòng được xóa thành công
     if ($stmt->affected_rows > 0) {
-        echo json_encode(['success' => true, 'message' => 'Đã xóa đơn hàng hết hạn.']);
+        echo json_encode(['success' => true, 'message' => 'Đã hủy đơn hàng hết hạn.']);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Đơn hàng không cần xóa.']);
+        echo json_encode(['success' => false, 'message' => 'Đơn hàng không cần hủy.']);
     }
 } else {
     echo json_encode(['success' => false, 'message' => 'Lỗi CSDL.']);
