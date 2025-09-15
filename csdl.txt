@@ -37,6 +37,7 @@ CREATE TABLE `hocvien` (
   `is_admin` BOOLEAN DEFAULT FALSE
 ) ENGINE=InnoDB;
 
+ALTER TABLE `hocvien` ADD `trinh_do` VARCHAR(50) NULL DEFAULT NULL COMMENT 'Trình độ được phân loại sau bài test' AFTER `mat_khau`;
 -- --------------------------------------------------------
 -- Bảng có tham chiếu đến các bảng trên
 -- --------------------------------------------------------
@@ -52,7 +53,7 @@ CREATE TABLE `khoahoc` (
   `danh_gia_tb` DECIMAL(3, 2),
   FOREIGN KEY (`id_giangvien`) REFERENCES `giangvien`(`id_giangvien`) ON DELETE SET NULL
 ) ENGINE=InnoDB;
-
+ALTER TABLE `khoahoc` CHANGE `thoi_gian` `thoi_gian` INT(11) NULL DEFAULT NULL COMMENT 'Thời lượng khóa học (tính bằng số buổi)';
 CREATE TABLE `lop_hoc` (
   `id_lop` VARCHAR(50) PRIMARY KEY,
   `id_khoahoc` INT NOT NULL,
@@ -121,6 +122,8 @@ CREATE TABLE `baitest` (
   `ngay_tao` DATETIME,
   FOREIGN KEY (`id_khoahoc`) REFERENCES `khoahoc`(`id_khoahoc`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+ALTER TABLE `baitest` ADD `is_placement_test` BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Đánh dấu đây là bài test đầu vào' AFTER `ten_baitest`;
+
 
 CREATE TABLE `cauhoi` (
   `id_cauhoi` INT PRIMARY KEY AUTO_INCREMENT,
@@ -162,6 +165,9 @@ CREATE TABLE `thongbao` (
   FOREIGN KEY (`id_hocvien`) REFERENCES `hocvien`(`id_hocvien`),
   FOREIGN KEY (`id_khoahoc`) REFERENCES `khoahoc`(`id_khoahoc`)
 ) ENGINE=InnoDB;
+ALTER TABLE `thongbao` CHANGE `ngay_tao` `ngay_tao` DATETIME NULL DEFAULT NULL;
+
+ALTER TABLE `thongbao` ADD `trang_thai` VARCHAR(50) NOT NULL DEFAULT 'chưa đọc' AFTER `tieu_de`;
 
 CREATE TABLE `danhgiakhoahoc` (
   `id_danhgia` INT PRIMARY KEY AUTO_INCREMENT,
@@ -271,26 +277,60 @@ BEGIN
     WHERE dk.id_lop = NEW.id_lop;
 END$$
 DELIMITER ;
+-- Xóa các trigger cũ không chính xác
+DROP TRIGGER IF EXISTS `update_soluong_hocvien_after_insert`;
+DROP TRIGGER IF EXISTS `update_soluong_hocvien_after_delete`;
 
+-- Bắt đầu định nghĩa trigger mới
 DELIMITER $$
-CREATE TRIGGER update_soluong_hocvien_after_insert
-AFTER INSERT ON dangkykhoahoc
+
+-- Trigger này sẽ chạy SAU KHI một bản ghi đăng ký được THÊM MỚI
+CREATE TRIGGER `after_dangkykhoahoc_insert`
+AFTER INSERT ON `dangkykhoahoc`
 FOR EACH ROW
 BEGIN
-    UPDATE lop_hoc
-    SET so_luong_hoc_vien = so_luong_hoc_vien + 1
-    WHERE id_lop = NEW.id_lop;
+    -- Nếu học viên được gán vào một lớp ngay khi đăng ký, tăng sĩ số lớp đó lên 1
+    IF NEW.id_lop IS NOT NULL THEN
+        UPDATE lop_hoc SET so_luong_hoc_vien = so_luong_hoc_vien + 1 WHERE id_lop = NEW.id_lop;
+    END IF;
 END$$
 
-CREATE TRIGGER update_soluong_hocvien_after_delete
-AFTER DELETE ON dangkykhoahoc
+-- Trigger này sẽ chạy SAU KHI một bản ghi đăng ký bị XÓA
+CREATE TRIGGER `after_dangkykhoahoc_delete`
+AFTER DELETE ON `dangkykhoahoc`
 FOR EACH ROW
 BEGIN
-    UPDATE lop_hoc
-    SET so_luong_hoc_vien = so_luong_hoc_vien - 1
-    WHERE id_lop = OLD.id_lop;
+    -- Nếu học viên bị xóa khỏi một lớp, giảm sĩ số lớp đó đi 1
+    IF OLD.id_lop IS NOT NULL THEN
+        UPDATE lop_hoc SET so_luong_hoc_vien = so_luong_hoc_vien - 1 WHERE id_lop = OLD.id_lop;
+    END IF;
 END$$
+
+-- Trigger QUAN TRỌNG NHẤT: chạy SAU KHI một bản ghi đăng ký được CẬP NHẬT
+CREATE TRIGGER `after_dangkykhoahoc_update`
+AFTER UPDATE ON `dangkykhoahoc`
+FOR EACH ROW
+BEGIN
+    -- Trường hợp 1: Học viên được xếp vào một lớp mới (từ trạng thái chưa có lớp)
+    IF OLD.id_lop IS NULL AND NEW.id_lop IS NOT NULL THEN
+        UPDATE lop_hoc SET so_luong_hoc_vien = so_luong_hoc_vien + 1 WHERE id_lop = NEW.id_lop;
+    END IF;
+    
+    -- Trường hợp 2: Học viên bị xóa khỏi một lớp (chuyển về trạng thái chờ xếp lớp)
+    IF OLD.id_lop IS NOT NULL AND NEW.id_lop IS NULL THEN
+        UPDATE lop_hoc SET so_luong_hoc_vien = so_luong_hoc_vien - 1 WHERE id_lop = OLD.id_lop;
+    END IF;
+    
+    -- Trường hợp 3: Học viên được chuyển từ lớp cũ sang lớp mới
+    IF OLD.id_lop IS NOT NULL AND NEW.id_lop IS NOT NULL AND OLD.id_lop != NEW.id_lop THEN
+        UPDATE lop_hoc SET so_luong_hoc_vien = so_luong_hoc_vien - 1 WHERE id_lop = OLD.id_lop;
+        UPDATE lop_hoc SET so_luong_hoc_vien = so_luong_hoc_vien + 1 WHERE id_lop = NEW.id_lop;
+    END IF;
+END$$
+
 DELIMITER ;
+
+
 
 DELIMITER $$
 CREATE TRIGGER update_tong_so_buoi_after_insert

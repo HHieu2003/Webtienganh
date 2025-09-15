@@ -1,38 +1,41 @@
+<?php
+// Lấy giá trị của 'nav' từ URL, nếu không có thì mặc định là rỗng để tải trang 'home'
+$nav = $_GET['nav'] ?? '';
 
-<?php {
-    if (isset($_GET['nav'])) {
-        $temp = $_GET['nav'];
-    } else {
-        $temp = '';
-    }
-}
+// Sử dụng switch-case để code dễ đọc và bảo trì hơn
+switch ($nav) {
+    case 'khoahoc':
+        include("modules/khoahoc.php");
+        break;
 
-if ($temp == 'khoahoc') {
-    include("modules/khoahoc.php");
-} 
+    case 'lichhoc':
+        include("modules/lichhoc.php");
+        break;
 
-else if ($temp == 'lichhoc') {
-    include("modules/lichhoc.php");
-} 
-else if ($temp == 'thongtin') {
-    include("modules/thongtintaikhoan.php");
-} 
-else if ($temp == 'thongtin') {
-    include("modules/thongtintaikhoan.php");
-} 
-else if ($temp == 'baomat') {
-    include("modules/baomattk.php");
-} 
-else if ($temp == 'tiendo') {
-    include("modules/tiendo.php");
-} 
-else if ($temp == 'lichsuthanhtoan') {
-    include("modules/lichsuthanhtoan.php");
-} 
-else if ($temp == 'ketquakiemtra') {
-    include("modules/ketquakiemtra.php");
-} 
-else {
-    include("modules/home.php");
+    case 'thongtin':
+        include("modules/thongtintaikhoan.php");
+        break;
+
+    case 'baomat':
+        include("modules/baomattk.php");
+        break;
+
+    case 'tiendo':
+        include("modules/tiendo.php");
+        break;
+case 'hoclieu':
+        include("modules/hoclieu.php");
+        break;
+    case 'lichsuthanhtoan':
+        include("modules/lichsuthanhtoan.php");
+        break;
+        
+    case 'ketquakiemtra':
+        include("modules/ketquakiemtra.php");
+        break;
+
+    default: // Nếu 'nav' không khớp hoặc rỗng, sẽ chạy trang chủ của dashboard
+        include("modules/home.php");
+        break;
 }
 ?>

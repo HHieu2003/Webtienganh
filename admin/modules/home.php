@@ -1,111 +1,182 @@
+<?php
+// Kết nối CSDL đã được include từ admin.php
+ include('../config/config.php'); // Chỉ dùng khi chạy file riêng
 
-    <div class="container my-3">
-        <h1 class="text-center title-color">Dashboard</h1>
-        <div class="row">
-            <!-- Total Students Card -->
-            <div class="col-md-4 ">
-                <div class="card text-white bg-primary mb-3 boder-shadow">
-                    <div class="card-body  ">
-                        <h5 class="card-title ">
-                            <i class="fa-solid fa-users"></i>
-                            Tổng số học viên
-                    </h5>
-                        <p class="card-text display-6">
-                            <?php
-                            // Database connection
-                            include('../config/config.php');
-                            
-                            // Query to get the total number of students
-                            $sql_students = "SELECT COUNT(*) AS total_students FROM hocvien";
-                            $result_students = mysqli_query($conn, $sql_students);
-                            $total_students = mysqli_fetch_assoc($result_students)['total_students'] ?? 0;
-                            
-                            echo $total_students;
-                            ?>
-                        </p>
-                    </div>
-                </div>
-            </div>
+// --- TRUY VẤN DỮ LIỆU CHO DASHBOARD ---
 
-            <!-- Total Courses Card -->
-            <div class="col-md-4">
-                <div class="card text-white bg-success mb-3 boder-shadow">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="fa-solid fa-graduation-cap"></i> Tổng khóa học</h5>
-                        <p class="card-text display-6">
-                            <?php
-                            // Query to get the total number of courses
-                            $sql_courses = "SELECT COUNT(*) AS total_courses FROM khoahoc";
-                            $result_courses = mysqli_query($conn, $sql_courses);
-                            $total_courses = mysqli_fetch_assoc($result_courses)['total_courses'] ?? 0;
-                            
-                            echo $total_courses;
-                            ?>
-                        </p>
-                    </div>
-                </div>
-            </div>
+// 1. Dữ liệu cho các thẻ thống kê
+$total_students = $conn->query("SELECT COUNT(*) AS total FROM hocvien")->fetch_assoc()['total'] ?? 0;
+$total_courses = $conn->query("SELECT COUNT(*) AS total FROM khoahoc")->fetch_assoc()['total'] ?? 0;
+$total_registrations = $conn->query("SELECT COUNT(*) AS total FROM dangkykhoahoc WHERE trang_thai = 'da xac nhan'")->fetch_assoc()['total'] ?? 0;
+$pending_registrations = $conn->query("SELECT COUNT(*) AS total FROM dangkykhoahoc WHERE trang_thai = 'cho xac nhan'")->fetch_assoc()['total'] ?? 0;
 
-            <!-- Registered Courses Card -->
-            <div class="col-md-4">
-                <div class="card text-white bg-danger mb-3 boder-shadow">
-                    <div class="card-body">
-                        <h5 class="card-title"> <i class="fa-solid fa-circle-dollar-to-slot"></i> Khóa học đã bán</h5>
-                        <p class="card-text display-6">
-                            <?php
-                            // Query to get the number of course registrations
-                            $sql_registrations = "SELECT COUNT(*) AS total_registrations FROM dangkykhoahoc";
-                            $result_registrations = mysqli_query($conn, $sql_registrations);
-                            $total_registrations = mysqli_fetch_assoc($result_registrations)['total_registrations'] ?? 0;
-                            
-                            echo $total_registrations;
-                            ?>
-                        </p>
+// 2. Dữ liệu cho biểu đồ (Top 5 khóa học đông học viên nhất)
+$sql_chart = "
+    SELECT k.ten_khoahoc, COUNT(d.id_dangky) AS registration_count
+    FROM dangkykhoahoc d
+    JOIN khoahoc k ON d.id_khoahoc = k.id_khoahoc
+    WHERE d.trang_thai = 'da xac nhan'
+    GROUP BY d.id_khoahoc
+    ORDER BY registration_count DESC
+    LIMIT 5
+";
+$result_chart = $conn->query($sql_chart);
+$chart_labels = [];
+$chart_data = [];
+while ($row = $result_chart->fetch_assoc()) {
+    $chart_labels[] = $row['ten_khoahoc'];
+    $chart_data[] = $row['registration_count'];
+}
+
+// 3. Dữ liệu cho hoạt động gần đây (5 đăng ký thành công mới nhất)
+$sql_recent = "
+    SELECT h.ten_hocvien, k.ten_khoahoc, dk.ngay_dangky
+    FROM dangkykhoahoc dk
+    JOIN hocvien h ON dk.id_hocvien = h.id_hocvien
+    JOIN khoahoc k ON dk.id_khoahoc = k.id_khoahoc
+    WHERE dk.trang_thai = 'da xac nhan'
+    ORDER BY dk.id_dangky DESC
+    LIMIT 5
+";
+$result_recent = $conn->query($sql_recent);
+?>
+
+<div class="container-fluid">
+    <h1 class="title-color">Dashboard</h1>
+
+    <div class="row">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card stat-card bg-primary animated-card" style="animation-delay: 100ms;">
+                <div class="card-body">
+                    <div class="card-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="card-text-content">
+                        <h5 class="card-title">Tổng học viên</h5>
+                        <p class="card-number" data-target="<?php echo $total_students; ?>">0</p>
                     </div>
                 </div>
             </div>
         </div>
-
-          <!-- Course List with Registration Count -->
-          <div class="my-5">
-    <h2 class="mb-4">Danh sách các khóa học, số lượng đăng ký và điểm đánh giá</h2>
-    <table class="table table-striped table-bordered">
-        <thead class="table-dark"s>
-            <tr>
-                <th>Tên khóa học</th>
-                <th>Số lượng đăng ký</th>
-                <th>Điểm đánh giá trung bình</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            // Query to get all courses, their registration counts, and average ratings
-            $sql_course_list = "
-                SELECT k.ten_khoahoc, 
-                       COUNT(d.id_dangky) AS total_registrations,
-                       COALESCE(AVG(r.diem_danhgia), 0) AS avg_rating
-                FROM khoahoc k
-                LEFT JOIN dangkykhoahoc d ON k.id_khoahoc = d.id_khoahoc
-                LEFT JOIN danhgiakhoahoc r ON k.id_khoahoc = r.id_khoahoc
-                GROUP BY k.id_khoahoc
-                ORDER BY total_registrations DESC
-            ";
-            $result_course_list = mysqli_query($conn, $sql_course_list);
-
-            // Display courses, registration counts, and average ratings
-            while ($row = mysqli_fetch_assoc($result_course_list)) {
-                echo "<tr>
-                        <td>{$row['ten_khoahoc']}</td>
-                        <td >{$row['total_registrations']}</td>
-                        <td>" . number_format($row['avg_rating'], 2) . "</td>
-                      </tr>";
-            }
-            ?>
-        </tbody>
-    </table>
-</div>
-
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card stat-card bg-success animated-card" style="animation-delay: 200ms;">
+                <div class="card-body">
+                    <div class="card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <div class="card-text-content">
+                        <h5 class="card-title">Tổng khóa học</h5>
+                        <p class="card-number" data-target="<?php echo $total_courses; ?>">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card stat-card bg-info animated-card" style="animation-delay: 300ms;">
+                <div class="card-body">
+                    <div class="card-icon"><i class="fa-solid fa-check-to-slot"></i></div>
+                    <div class="card-text-content">
+                        <h5 class="card-title">Đã bán</h5>
+                        <p class="card-number" data-target="<?php echo $total_registrations; ?>">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card stat-card bg-warning animated-card" style="animation-delay: 400ms;">
+                <div class="card-body">
+                    <div class="card-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                    <div class="card-text-content">
+                        <h5 class="card-title">Chờ xác nhận</h5>
+                        <p class="card-number" data-target="<?php echo $pending_registrations; ?>">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card animated-card" style="animation-delay: 500ms;">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fa-solid fa-chart-bar me-2"></i>Top 5 khóa học phổ biến nhất</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="popularCoursesChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card animated-card" style="animation-delay: 600ms;">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fa-solid fa-bolt me-2"></i>Hoạt động gần đây</h4>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        <?php while ($row = $result_recent->fetch_assoc()): ?>
+                        <li class="list-group-item">
+                            <strong class="d-block text-primary"><?php echo htmlspecialchars($row['ten_hocvien']); ?></strong>
+                            <small class="text-muted">vừa đăng ký khóa học "<?php echo htmlspecialchars($row['ten_khoahoc']); ?>"</small>
+                        </li>
+                        <?php endwhile; ?>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Hiệu ứng đếm số
+    const counters = document.querySelectorAll('.card-number');
+    const speed = 150; 
+    counters.forEach(counter => {
+        const animate = () => {
+            const target = +counter.getAttribute('data-target');
+            const count = +counter.innerText;
+            const increment = Math.ceil(target / speed);
+            if (count < target) {
+                counter.innerText = Math.min(count + increment, target);
+                setTimeout(animate, 10);
+            } else {
+                counter.innerText = target;
+            }
+        };
+        setTimeout(animate, 500); // Bắt đầu sau 0.5s
+    });
+
+    // 2. Vẽ biểu đồ
+    const ctx = document.getElementById('popularCoursesChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode($chart_labels); ?>,
+                datasets: [{
+                    label: 'Số lượt đăng ký',
+                    data: <?php echo json_encode($chart_data); ?>,
+                    backgroundColor: 'rgba(13, 179, 59, 0.7)',
+                    borderColor: 'rgba(10, 138, 44, 1)',
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1 // Đảm bảo trục y là số nguyên
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+});
+</script>

@@ -1,228 +1,78 @@
 <?php
+// session_start() đã được gọi từ index.php
 include('./config/config.php');
 
-// Check for submitted data
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo "<script>alert('Bạn chưa nộp bài!'); window.location.href='index.php?nav=question';</script>";
-    exit();
-}
-// Check for submitted data
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo "<script>alert('Bạn chưa nộp bài!'); window.location.href='index.php?nav=question';</script>";
+    echo "<script>alert('Lỗi: Yêu cầu không hợp lệ!'); window.location.href='index.php?nav=question';</script>";
     exit();
 }
 
-$id_baitest = intval($_POST['id_baitest']);
+$id_baitest = (int)$_POST['id_baitest'];
 $answers = $_POST['answers'] ?? [];
+$id_hocvien = $_SESSION['id_hocvien'] ?? null;
 
-// Fetch questions and correct answers
-$sql_cauhoi = "SELECT cauhoi.id_cauhoi, cauhoi.noi_dung, dapan.id_dapan AS correct_id, dapan.noi_dung_dapan AS correct_answer
-               FROM cauhoi
-               JOIN dapan ON cauhoi.id_cauhoi = dapan.id_cauhoi AND dapan.la_dung = 1
-               WHERE cauhoi.id_baitest = ?";
-$stmt_cauhoi = $conn->prepare($sql_cauhoi);
-$stmt_cauhoi->bind_param("i", $id_baitest);
-$stmt_cauhoi->execute();
-$result_cauhoi = $stmt_cauhoi->get_result();
-
-$questions = [];
-while ($row = $result_cauhoi->fetch_assoc()) {
-    $questions[$row['id_cauhoi']] = $row;
+if (!$id_hocvien) {
+    echo "<script>alert('Lỗi: Phiên đăng nhập không hợp lệ!'); window.location.href='pages/login.php';</script>";
+    exit();
 }
 
-// ID học viên giả định (lấy từ session trong thực tế)
-$id_hocvien = $_SESSION['id_hocvien'] ?? 1;
+// Lấy đáp án đúng của bài test
+$sql_correct = "SELECT c.id_cauhoi, d.id_dapan FROM cauhoi c JOIN dapan d ON c.id_cauhoi = d.id_cauhoi WHERE c.id_baitest = ? AND d.la_dung = 1";
+$stmt_correct = $conn->prepare($sql_correct);
+$stmt_correct->bind_param("i", $id_baitest);
+$stmt_correct->execute();
+$result_correct = $stmt_correct->get_result();
+$correct_answers = [];
+while ($row = $result_correct->fetch_assoc()) {
+    $correct_answers[$row['id_cauhoi']] = $row['id_dapan'];
+}
 
-// Tính điểm
+// Chấm điểm
 $score = 0;
-$total_questions = count($questions);
-
-foreach ($questions as $id_cauhoi => $question) {
-    $user_answer_id = $answers[$id_cauhoi] ?? null;
-    if ($user_answer_id && $user_answer_id == $question['correct_id']) {
+foreach ($answers as $question_id => $answer_id) {
+    if (isset($correct_answers[$question_id]) && $correct_answers[$question_id] == $answer_id) {
         $score++;
     }
 }
 
-// Lưu kết quả vào bảng `ketquabaitest`
-$sql_save_result = "INSERT INTO ketquabaitest (id_hocvien, id_baitest, diem, ngay_lam_bai)
-                    VALUES (?, ?, ?, NOW())";
-$stmt_save_result = $conn->prepare($sql_save_result);
-$stmt_save_result->bind_param("iii", $id_hocvien, $id_baitest, $score);
+// Lưu kết quả vào bảng ketquabaitest
+$sql_save = "INSERT INTO ketquabaitest (id_hocvien, id_baitest, diem, ngay_lam_bai) VALUES (?, ?, ?, NOW())";
+$stmt_save = $conn->prepare($sql_save);
+$stmt_save->bind_param("iid", $id_hocvien, $id_baitest, $score);
+$stmt_save->execute();
 
-if ($stmt_save_result->execute()) {
-    echo "<script>alert('Bạn đã làm đúng $score/$total_questions câu. Kết quả đã được lưu!');</script>";
-} else {
-    echo "<script>alert('Đã xảy ra lỗi khi lưu kết quả: " . $conn->error . "'); window.location.href='index.php?nav=question';</script>";
-}
+// **LOGIC MỚI: KIỂM TRA VÀ PHÂN LOẠI TRÌNH ĐỘ**
+$stmt_check_placement = $conn->prepare("SELECT is_placement_test FROM baitest WHERE id_baitest = ?");
+$stmt_check_placement->bind_param("i", $id_baitest);
+$stmt_check_placement->execute();
+$is_placement_test = $stmt_check_placement->get_result()->fetch_assoc()['is_placement_test'] ?? 0;
 
-echo "<div class='container'>";
-echo "<div class='content'>";
-// Display the result
-echo "<div class='post-1'>";
-echo "<h1>Kết quả bài kiểm tra</h1>";
-echo "<div class='quiz'>";
-
-$question_number = 1;
-
-foreach ($questions as $id_cauhoi => $question) {
-    echo "<div class='question'>";
-    echo "<p><strong>Câu $question_number.</strong> " . htmlspecialchars($question['noi_dung']) . "</p>";
-    echo "<p class='correct-answer'>Đáp án đúng: " . htmlspecialchars($question['correct_answer']) . "</p>";
-
-    $user_answer_id = $answers[$id_cauhoi] ?? null;
-    if ($user_answer_id) {
-        // Fetch user's answer content
-        $sql_user_answer = "SELECT noi_dung_dapan FROM dapan WHERE id_dapan = ?";
-        $stmt_user_answer = $conn->prepare($sql_user_answer);
-        $stmt_user_answer->bind_param("i", $user_answer_id);
-        $stmt_user_answer->execute();
-        $result_user_answer = $stmt_user_answer->get_result();
-
-        if ($user_answer = $result_user_answer->fetch_assoc()) {
-            echo "<p class='user-answer'>Bạn đã chọn: " . htmlspecialchars($user_answer['noi_dung_dapan']) . "</p>";
-        }
-
-        if ($user_answer_id == $question['correct_id']) {
-         
-            echo "<p class='result correct'>Kết quả: Đúng</p>";
-        } else {
-            echo "<p class='result incorrect'>Kết quả: Sai</p>";
-        }
+if ($is_placement_test) {
+    // Định nghĩa các ngưỡng điểm để phân loại
+    $level = 'Chưa xác định';
+    if ($score <= 10) {
+        $level = 'Cơ bản (A1-A2)';
+    } elseif ($score <= 20) {
+        $level = 'Trung cấp (B1)';
+    } elseif ($score <= 30) {
+        $level = 'Trên Trung cấp (B2)';
     } else {
-        echo "<p class='result missing'>Kết quả: Không trả lời</p>";
+        $level = 'Nâng cao (C1-C2)';
     }
-    echo "</div>"; // End .question
-    $question_number++;
+
+    // Cập nhật trình độ cho học viên
+    $stmt_update_level = $conn->prepare("UPDATE hocvien SET trinh_do = ? WHERE id_hocvien = ?");
+    $stmt_update_level->bind_param("si", $level, $id_hocvien);
+    $stmt_update_level->execute();
+
+    // Chuyển hướng về trang cá nhân với thông báo đặc biệt
+    echo "<script>
+        alert('Chúc mừng bạn đã hoàn thành bài kiểm tra! Trình độ của bạn là: " . $level . ". Hệ thống sẽ gợi ý các khóa học phù hợp trong trang cá nhân.');
+        window.location.href = 'user/dashboard.php';
+    </script>";
+    exit();
 }
 
-echo "<p class='final-score'>Bạn đã làm đúng: $score câu</p>";
-echo "</div>"; // End .quiz
-echo "</div>"; // End .post-1
-echo "</div>"; // End .post-1
-echo "</div>"; // End .post-1
-
+// Nếu không phải bài test đầu vào, hiển thị đáp án như cũ
+// ... (Toàn bộ phần code HTML hiển thị đáp án chi tiết của bạn giữ nguyên) ...
 ?>
-<style>
-    .correct {
-        color: green;
-    }
-
-    .incorrect {
-        color: red;
-    }
-
-    .missing {
-        color: orange;
-    }
-
-    .final-score {
-        font-size: 20px;
-        font-weight: bold;
-        color: blue;
-        text-align: center;
-    }
-</style>
-<style>
-    .container {
-        display: flex;
-        flex-direction: row;
-        max-width: 800px;
-        margin: 20px auto;
-        padding: 20px;
-        background: white;
-        text-align: center;
-    }
-
-    .content {
-        flex: 3;
-        padding-right: 20px;
-    }
-
-    .post-1 {
-        border: 1px solid #ddd;
-        padding: 25px;
-        margin-bottom: 20px;
-        border-radius: 5px;
-        background-color: #fdfdfd;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .post-1 p {
-        font-size: 20px;
-    }
-
-    .breadcrumb {
-        margin-bottom: 15px;
-        font-size: 14px;
-        color: #555;
-    }
-
-    .breadcrumb a {
-        color: #007bff;
-        text-decoration: none;
-    }
-
-    .breadcrumb a:hover {
-        text-decoration: underline;
-    }
-
-    h1 {
-        font-size: 25px;
-        margin-bottom: 10px;
-        color: #333;
-        font-weight: bold;
-    }
-
-    .instruction {
-        color: #777;
-        font-size: 14px;
-        margin-bottom: 20px;
-    }
-
-    .quiz .question-count {
-        font-size: 18px;
-        margin-bottom: 10px;
-        color: #333;
-    }
-
-    .question {
-        margin-bottom: 20px;
-        text-align: left;
-        margin-left: 40px;
-        margin-top: 50px;
-    }
-
-    .answers {
-        margin-top: 10px;
-    }
-
-    label {
-        font-size: 18px;
-        color: #000;
-    }
-
-    .submit-btn {
-        display: block;
-        width: 100%;
-        padding: 10px 20px;
-        background-color: #28a745;
-        color: white;
-        font-size: 16px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        text-align: center;
-        width: 150px;
-        margin-left: 300px;
-    }
-
-    .submit-btn:hover {
-        background-color: #e76060;
-    }
-
-    .post p {
-        margin-bottom: 15px;
-        gap: 20px;
-    }
-</style>

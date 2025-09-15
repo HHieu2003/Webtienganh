@@ -1,157 +1,115 @@
-<!-- file: gui_thongbao.php -->
 <?php
+// session_start(); đã được gọi ở file admin.php
+// Lấy danh sách khóa học và lớp học cho form
+$courses = $conn->query("SELECT id_khoahoc, ten_khoahoc FROM khoahoc");
+$classes = $conn->query("SELECT id_lop, ten_lop FROM lop_hoc");
 
-include('../config/config.php');
-$action = isset($_GET['action']) ? $_GET['action'] : ''; // Kiểm tra trạng thái hành động
+// Lấy danh sách thông báo đã gửi (được nhóm lại)
+$sql_notifications = "
+    SELECT 
+        thongbao.tieu_de, 
+        thongbao.noi_dung, 
+        thongbao.id_khoahoc,
+        khoahoc.ten_khoahoc, 
+        thongbao.ngay_tao
+    FROM thongbao
+    LEFT JOIN khoahoc ON thongbao.id_khoahoc = khoahoc.id_khoahoc
+    GROUP BY thongbao.tieu_de, thongbao.noi_dung, thongbao.id_khoahoc, khoahoc.ten_khoahoc, thongbao.ngay_tao
+    ORDER BY thongbao.ngay_tao DESC";
+$result_notifications = $conn->query($sql_notifications);
 ?>
-<div class="container my-3">
-    <h1 class="text-center title-color">Thông báo</h1>
 
-    <?php if ($action === 'send'): ?>
-        <!-- Giao diện gửi thông báo -->
-        <h3 class="m-4">Gửi Thông Báo Đến Học Viên</h3>
-        <form action="./modules/thongbao/send_notification.php" method="POST">
-            <div class="form-group">
-                <label for="tieu_de">Tiêu đề:</label>
-                <input type="text" name="tieu_de" id="tieu_de" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <label for="noi_dung">Nội dung:</label>
-                <textarea name="noi_dung" id="noi_dung" class="form-control" rows="5" required></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="id_khoahoc">Khóa học:</label>
-                <select name="id_khoahoc" id="id_khoahoc" class="form-control" required>
-                    <option value="all">Gửi cho tất cả học viên</option>
-                    <?php
-                    // Tải danh sách khóa học từ cơ sở dữ liệu
-                    $sql = "SELECT id_khoahoc, ten_khoahoc FROM khoahoc";
-                    $result = $conn->query($sql);
-                    while ($row = $result->fetch_assoc()) {
-                        echo "<option value='" . $row['id_khoahoc'] . "'>" . $row['ten_khoahoc'] . "</option>";
-                    }
-                    ?>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="id_lop">Lớp học:</label>
-                <select name="id_lop" id="id_lop" class="form-control">
-                    <option value="all">Gửi cho tất cả lớp</option>
-                    <?php
-                    // Tải danh sách lớp học từ cơ sở dữ liệu
-                    $sql = "SELECT id_lop, ten_lop FROM lop_hoc";
-                    $result = $conn->query($sql);
-                    while ($row = $result->fetch_assoc()) {
-                        echo "<option value='" . $row['id_lop'] . "'>" . $row['ten_lop'] . "</option>";
-                    }
-                    ?>
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary my-2">Gửi Thông Báo</button>
-            <a href="./admin.php?nav=thongbao" class="btn btn-secondary">Quay lại</a>
-        </form>
-
-    <?php else: ?>
-        <!-- Giao diện danh sách thông báo -->
-        <div class="sent-notifications">
-            <h3 class="">Danh Sách Thông Báo Đã Gửi</h3>
-            <a href="./admin.php?nav=thongbao&action=send" class="btn btn-success mb-3">Gửi Thông Báo</a>
-            <table class="table table-bordered table-hover">
+<div class="card animated-card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="fa-solid fa-bell me-2"></i>Quản lý Thông báo</h4>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#sendNotificationModal">
+                <i class="fa-solid fa-paper-plane"></i> Gửi Thông báo mới
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <?php
+        if (isset($_SESSION['message'])) {
+            echo '<div class="alert alert-' . $_SESSION['message']['type'] . ' alert-dismissible fade show" role="alert">
+                    ' . htmlspecialchars($_SESSION['message']['text']) . '
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>';
+            unset($_SESSION['message']);
+        }
+        ?>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
                 <thead class="table-dark">
                     <tr>
-                        <th>Tiêu đề</th>
-                        <th style="width: 300px;">Nội dung</th>
-                        <th>Khóa học</th>
-                        <th>Ngày tạo</th>
-                        <th>Hành động</th>
+                        <th>Tiêu đề</th><th style="width: 40%;">Nội dung</th><th>Gửi đến</th><th class="text-center">Ngày gửi</th><th class="text-center">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php
-                    // Lấy danh sách thông báo không trùng lặp từ cơ sở dữ liệu
-                    $sql_notifications = "
-        SELECT 
-            thongbao.id_thongbao, 
-            thongbao.tieu_de, 
-            thongbao.noi_dung, 
-            khoahoc.ten_khoahoc, 
-            thongbao.ngay_tao
-        FROM thongbao
-        LEFT JOIN khoahoc ON thongbao.id_khoahoc = khoahoc.id_khoahoc
-        GROUP BY thongbao.tieu_de, thongbao.noi_dung, khoahoc.ten_khoahoc, thongbao.ngay_tao
-        ORDER BY thongbao.ngay_tao DESC";
-
-                    $result_notifications = $conn->query($sql_notifications);
-
-                    if ($result_notifications->num_rows > 0) {
-                        while ($row = $result_notifications->fetch_assoc()) {
-                            $ten_khoahoc = $row['ten_khoahoc'] ? htmlspecialchars($row['ten_khoahoc']) : 'Tất cả';
-                            echo "<tr>
-                <td>" . htmlspecialchars($row['tieu_de']) . "</td>
-                
-                <td>" .  html_entity_decode($row['noi_dung']) . "</td>
-      
-                <td>" . $ten_khoahoc . "</td>
-                <td>" . htmlspecialchars($row['ngay_tao']) . "</td>
-                <td>
-                    <form action='modules/thongbao/delete_notification.php' method='POST' onsubmit='return confirm(\"Bạn có chắc chắn muốn xóa thông báo này?\");'>
-                        <input type='hidden' name='id_thongbao' value='" . $row['id_thongbao'] . "'>
-                        <button type='submit' class='btn btn-danger'> <i class='fa-solid fa-trash'></i> </button>
-                    </form>
-                </td>
-            </tr>";
-                        }
-                    } else {
-                        echo "<tr><td colspan='5'>Chưa có thông báo nào.</td></tr>";
-                    }
+                    <?php if ($result_notifications->num_rows > 0):
+                        $index = 0;
+                        while ($row = $result_notifications->fetch_assoc()): 
+                            $target = $row['ten_khoahoc'] ? htmlspecialchars($row['ten_khoahoc']) : 'Tất cả học viên';
                     ?>
+                        <tr class="animated-row" style="animation-delay: <?php echo $index++ * 50; ?>ms;">
+                            <td><?php echo htmlspecialchars($row['tieu_de']); ?></td>
+                            <td><?php echo htmlspecialchars($row['noi_dung']); ?></td>
+                            <td><span class="badge bg-info text-dark"><?php echo $target; ?></span></td>
+                            <td class="text-center"><?php echo date("d/m/Y H:i", strtotime($row['ngay_tao'])); ?></td>
+                            <td class="text-center">
+                                <form action='modules/thongbao/delete_notification.php' method='POST' onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhóm thông báo này?');">
+                                    <input type='hidden' name='tieu_de' value="<?php echo htmlspecialchars($row['tieu_de']); ?>">
+                                    <input type='hidden' name='id_khoahoc' value="<?php echo $row['id_khoahoc']; ?>">
+                                    <input type='hidden' name='ngay_tao' value="<?php echo $row['ngay_tao']; ?>">
+                                    <button type='submit' class='btn btn-danger btn-sm'><i class='fa-solid fa-trash'></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endwhile; else: ?>
+                        <tr><td colspan="5" class="text-center text-muted py-4">Chưa có thông báo nào được gửi.</td></tr>
+                    <?php endif; ?>
                 </tbody>
-
             </table>
         </div>
-    <?php endif; ?>
+    </div>
 </div>
 
-
-<style>
-    .form-group {
-        margin-bottom: 15px;
+<div class="modal fade" id="sendNotificationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Soạn và Gửi Thông báo</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form action="./modules/thongbao/send_notification.php" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3"><label for="tieu_de" class="form-label">Tiêu đề <span class="text-danger">*</span></label><input type="text" name="tieu_de" class="form-control" required></div>
+                    <div class="mb-3"><label for="noi_dung" class="form-label">Nội dung <span class="text-danger">*</span></label><textarea name="noi_dung" id="noi_dung_editor" class="form-control" rows="5"></textarea></div>
+                    <hr>
+                    <label class="form-label fw-bold">Gửi đến:</label>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Khóa học</label>
+                            <select name="id_khoahoc" class="form-select">
+                                <option value="all">Tất cả học viên</option>
+                                <?php mysqli_data_seek($courses, 0); while ($row = $courses->fetch_assoc()) { echo "<option value='" . $row['id_khoahoc'] . "'>" . htmlspecialchars($row['ten_khoahoc']) . "</option>"; } ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Lớp học (Ưu tiên cao hơn)</label>
+                            <select name="id_lop" class="form-select">
+                                <option value="all">-- Chọn lớp cụ thể --</option>
+                                <?php mysqli_data_seek($classes, 0); while ($row = $classes->fetch_assoc()) { echo "<option value='" . $row['id_lop'] . "'>" . htmlspecialchars($row['ten_lop']) . "</option>"; } ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-text">Lưu ý: Nếu bạn chọn một Lớp học, thông báo sẽ chỉ được gửi đến các học viên trong lớp đó.</div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Gửi đi</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    // Khởi tạo CKEditor cho textarea trong modal
+    if (document.getElementById('noi_dung_editor')) {
+        CKEDITOR.replace('noi_dung_editor');
     }
-
-    label {
-        font-weight: bold;
-        margin-bottom: 5px;
-        display: inline-block;
-    }
-
-    input[type="text"],
-    textarea,
-    select {
-        width: 100%;
-        padding: 8px;
-        margin-top: 5px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-
-    button[type="submit"] {
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 1em;
-    }
-
-    button[type="submit"]:hover {
-        background-color: #0056b3;
-    }
-
-    .sent-notifications {
-        margin-top: 30px;
-    }
-</style>
+</script>

@@ -1,78 +1,57 @@
 <?php
-// file: modules/send_notification.php
 include('../../../config/config.php');
+session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tieu_de = $_POST['tieu_de'];
     $noi_dung = $_POST['noi_dung'];
-    $id_khoahoc = $_POST['id_khoahoc'];
+    $id_khoahoc_form = $_POST['id_khoahoc'];
     $id_lop = $_POST['id_lop'];
 
-    if ($id_khoahoc === 'all' && $id_lop === 'all') {
-        // Gửi thông báo cho tất cả học viên
-        $sql_all_students = "SELECT id_hocvien FROM hocvien";
-        $result = $conn->query($sql_all_students);
+    // Lấy thời gian hiện tại một lần duy nhất
+    $current_datetime = date('Y-m-d H:i:s');
 
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $id_hocvien = $row['id_hocvien'];
-                $sql_insert_notification = "INSERT INTO thongbao (id_hocvien, tieu_de, noi_dung, ngay_tao) VALUES (?, ?, ?, NOW())";
-                $stmt = $conn->prepare($sql_insert_notification);
-                $stmt->bind_param("iss", $id_hocvien, $tieu_de, $noi_dung);
-                $stmt->execute();
-            }
-            echo "Đã gửi thông báo cho tất cả học viên.";
+    $conn->begin_transaction();
+    try {
+        if ($id_lop !== 'all') {
+            // Ưu tiên gửi cho một lớp cụ thể
+            $sql = "INSERT INTO thongbao (id_hocvien, tieu_de, noi_dung, ngay_tao, trang_thai)
+                    SELECT id_hocvien, ?, ?, ?, 'chưa đọc' 
+                    FROM dangkykhoahoc 
+                    WHERE id_lop = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sss", $tieu_de, $noi_dung, $current_datetime, $id_lop);
+
+        } elseif ($id_khoahoc_form !== 'all') {
+            // Gửi cho một khóa học cụ thể
+            $id_khoahoc = (int)$id_khoahoc_form;
+            $sql = "INSERT INTO thongbao (id_hocvien, id_khoahoc, tieu_de, noi_dung, ngay_tao, trang_thai)
+                    SELECT dk.id_hocvien, ?, ?, ?, ?, 'chưa đọc' 
+                    FROM dangkykhoahoc dk 
+                    WHERE dk.id_khoahoc = ?";
+            $stmt = $conn->prepare($sql);
+            // Sửa lại bind_param: id_khoahoc, tieu_de, noi_dung, ngay_tao, id_khoahoc (cho WHERE)
+            $stmt->bind_param("isssi", $id_khoahoc, $tieu_de, $noi_dung, $current_datetime, $id_khoahoc);
+            
         } else {
-            echo "Không có học viên nào để gửi thông báo.";
+            // Gửi cho tất cả học viên
+            $sql = "INSERT INTO thongbao (id_hocvien, tieu_de, noi_dung, ngay_tao, trang_thai)
+                    SELECT id_hocvien, ?, ?, ?, 'chưa đọc' 
+                    FROM hocvien";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sss", $tieu_de, $noi_dung, $current_datetime);
         }
-    } elseif ($id_lop !== 'all') {
-        // Gửi thông báo cho học viên trong lớp học cụ thể
-        $sql_students_in_class = "SELECT dk.id_hocvien 
-                                  FROM dangkykhoahoc dk 
-                                  JOIN lop_hoc lh ON dk.id_lop = lh.id_lop
-                                  WHERE dk.id_lop = ?";
-        $stmt = $conn->prepare($sql_students_in_class);
-        $stmt->bind_param("s", $id_lop);
+
         $stmt->execute();
-        $result = $stmt->get_result();
+        $conn->commit();
+        $_SESSION['message'] = ['type' => 'success', 'text' => 'Đã gửi thông báo thành công!'];
 
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $id_hocvien = $row['id_hocvien'];
-                $sql_insert_notification = "INSERT INTO thongbao (id_hocvien, tieu_de, noi_dung, ngay_tao) VALUES (?, ?, ?, NOW())";
-                $stmt_insert = $conn->prepare($sql_insert_notification);
-                $stmt_insert->bind_param("iss", $id_hocvien, $tieu_de, $noi_dung);
-                $stmt_insert->execute();
-            }
-            echo "Đã gửi thông báo cho học viên trong lớp học.";
-        } else {
-            echo "Không có học viên nào trong lớp học để gửi thông báo.";
-        }
-    } else {
-        // Gửi thông báo cho học viên trong khóa học cụ thể
-        $sql_students_in_course = "SELECT dk.id_hocvien 
-                                   FROM dangkykhoahoc dk
-                                   WHERE dk.id_khoahoc = ?";
-        $stmt = $conn->prepare($sql_students_in_course);
-        $stmt->bind_param("i", $id_khoahoc);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $id_hocvien = $row['id_hocvien'];
-                $sql_insert_notification = "INSERT INTO thongbao (id_hocvien, tieu_de, noi_dung, ngay_tao) VALUES (?, ?, ?, NOW())";
-                $stmt_insert = $conn->prepare($sql_insert_notification);
-                $stmt_insert->bind_param("iss", $id_hocvien, $tieu_de, $noi_dung);
-                $stmt_insert->execute();
-            }
-            echo "Đã gửi thông báo cho học viên trong khóa học.";
-        } else {
-            echo "Không có học viên nào trong khóa học để gửi thông báo.";
-        }
+    } catch (Exception $e) {
+        $conn->rollback();
+        // Ghi lại lỗi chi tiết hơn
+        $_SESSION['message'] = ['type' => 'danger', 'text' => 'Lỗi khi gửi thông báo: ' . $e->getMessage()];
     }
 
-    $conn->close();
     header('Location: ../../admin.php?nav=thongbao');
     exit();
 }

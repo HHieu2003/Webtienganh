@@ -9,7 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
         .header-top{
-            padding: 15px;
+            padding: 5px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;

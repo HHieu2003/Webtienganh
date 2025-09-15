@@ -1,5 +1,4 @@
 <?php
-// Luôn bắt đầu session ở đầu file
 session_start();
 include("../config/config.php");
 
@@ -9,7 +8,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_teacher'])) {
     $mat_khau = $_POST['mat_khau'];
     
     // Sử dụng Prepared Statements để chống SQL Injection
-    // Truy vấn vào bảng `giangvien` thay vì `hocvien`
     $stmt = $conn->prepare("SELECT * FROM giangvien WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -18,18 +16,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_teacher'])) {
     if ($result->num_rows > 0) {
         $teacher = $result->fetch_assoc();
         
-        // ================================================================
-        // KIỂM TRA MẬT KHẨU ĐÃ MÃ HÓA
-        // Cần đảm bảo mật khẩu trong bảng `giangvien` cũng được hash
-        // ================================================================
+        // **Quan trọng**: Giả định mật khẩu giảng viên được mã hóa bằng password_hash()
+        // Nếu bạn chưa mã hóa, hãy làm ngay để đảm bảo bảo mật.
         if (password_verify($mat_khau, $teacher['mat_khau'])) {
-            // Đăng nhập thành công
-            $_SESSION['teacher_name'] = $teacher['ten_giangvien'];
+            // Đăng nhập thành công, thiết lập các session quan trọng
             $_SESSION['id_giangvien'] = $teacher['id_giangvien'];
-            $_SESSION['is_teacher'] = true; // Tạo một session để xác định đây là giáo viên
+            $_SESSION['teacher_name'] = $teacher['ten_giangvien'];
+            $_SESSION['is_teacher'] = true; // Session để nhận diện đây là giảng viên
             
-            // Chuyển hướng đến trang dashboard của giáo viên
-            header("Location: ./admin/admin.php");
+            // Xóa session của admin nếu có để tránh xung đột
+            unset($_SESSION['is_admin']);
+
+            header("Location: ../admin/admin.php"); // Chuyển hướng đến trang admin chung
             exit();
         } else {
             $message = "Email hoặc mật khẩu không đúng!";
@@ -37,9 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_teacher'])) {
     } else {
         $message = "Email hoặc mật khẩu không đúng!";
     }
-
     $stmt->close();
-    $conn->close();
 }
 ?>
 <!DOCTYPE html>

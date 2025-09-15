@@ -1,128 +1,90 @@
 <?php
-include('../config/config.php');
+// include('../config/config.php');
+if (session_status() == PHP_SESSION_NONE) { session_start(); }
 
 // Lấy danh sách bài test
-$sql = "SELECT bt.id_baitest, bt.ten_baitest,  bt.ngay_tao, kh.ten_khoahoc 
+$sql = "SELECT bt.id_baitest, bt.ten_baitest, bt.ngay_tao, kh.ten_khoahoc, bt.is_placement_test 
         FROM baitest bt 
-        JOIN khoahoc kh ON bt.id_khoahoc = kh.id_khoahoc";
-$result = mysqli_query($conn, $sql);
-if (!$result) {
-    die("Lỗi truy vấn: " . mysqli_error($conn));
-}
+        JOIN khoahoc kh ON bt.id_khoahoc = kh.id_khoahoc
+        ORDER BY bt.id_baitest DESC";
+$result = $conn->query($sql);
 
-// Lấy danh sách khóa học để hiển thị trong dropdown
-$sql_khoahoc = "SELECT id_khoahoc, ten_khoahoc FROM khoahoc";
-$result_khoahoc = mysqli_query($conn, $sql_khoahoc);
-if (!$result_khoahoc) {
-    die("Lỗi truy vấn: " . mysqli_error($conn));
-}
+// Lấy danh sách khóa học cho form modal
+$courses = $conn->query("SELECT id_khoahoc, ten_khoahoc FROM khoahoc");
 ?>
 
-
-
-<?php
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $ten_baitest = mysqli_real_escape_string($conn, $_POST['ten_baitest']);
-    $id_khoahoc = mysqli_real_escape_string($conn, $_POST['id_khoahoc']);
-    $thoi_gian = (int)$_POST['thoi_gian'];
-
-    // Kiểm tra dữ liệu hợp lệ
-    if (empty($ten_baitest) || empty($id_khoahoc) || $thoi_gian <= 0) {
-        echo "<div class='alert alert-danger'>Vui lòng nhập đầy đủ thông tin hợp lệ!</div>";
-    } else {
-        // Thêm bài test vào cơ sở dữ liệu
-        $sql_insert = "INSERT INTO baitest (ten_baitest, id_khoahoc,thoi_gian, ngay_tao)
-                       VALUES (?, ?,  ?, NOW())";
-        $stmt = mysqli_prepare($conn, $sql_insert);
-        mysqli_stmt_bind_param($stmt, 'sii', $ten_baitest, $id_khoahoc,  $thoi_gian);
-
-        if (mysqli_stmt_execute($stmt)) {
-            // Chuyển hướng về danh sách bài test sau khi thêm thành công
-            header("Location: ./admin.php?nav=question");
-            exit();
-        } else {
-            header("Location: ./admin.php?nav=question");
+<div class="card animated-card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="fa-solid fa-circle-question me-2"></i>Quản lý Bài Test</h4>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTestModal"><i class="fa-solid fa-plus"></i> Thêm Bài Test</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <?php
+        if (isset($_SESSION['message'])) {
+            echo '<div class="alert alert-' . $_SESSION['message']['type'] . ' alert-dismissible fade show">' . htmlspecialchars($_SESSION['message']['text']) . '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+            unset($_SESSION['message']);
         }
-    }
-}
+        ?>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr><th>ID</th><th>Tên Bài Test</th><th>Thuộc Khóa học</th><th>Ngày Tạo</th><th class="text-center">Loại Test</th><th class="text-center">Hành động</th></tr>
+                </thead>
+                <tbody>
+                    <?php 
+                    $index = 0;
+                    while ($row = $result->fetch_assoc()): 
+                    ?>
+                        <tr class="animated-row" style="animation-delay: <?php echo $index++ * 50; ?>ms;">
+                            <td><?php echo $row['id_baitest']; ?></td>
+                            <td><?php echo htmlspecialchars($row['ten_baitest']); ?></td>
+                            <td><?php echo htmlspecialchars($row['ten_khoahoc']); ?></td>
+                            <td><?php echo date("d/m/Y", strtotime($row['ngay_tao'])); ?></td>
+                            <td class="text-center">
+                                <?php if($row['is_placement_test']): ?>
+                                    <span class="badge bg-primary">Test đầu vào</span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary">Test thường</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="text-center">
+                                <a href="./admin.php?nav=ds_cauhoi&id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-primary btn-sm" title="Quản lý câu hỏi"><i class="fa-solid fa-list-check"></i> Câu hỏi</a>
+                                <a href="./admin.php?nav=kqhocvien&id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-info btn-sm text-white" title="Xem kết quả"><i class="fa-solid fa-square-poll-vertical"></i> Kết quả</a>
+                                <a href="./modules/cauhoi/delete_test.php?id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Xóa bài test này sẽ xóa tất cả câu hỏi, đáp án và kết quả liên quan. Bạn có chắc chắn?');" title="Xóa"><i class="fa-solid fa-trash"></i></a>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-mysqli_close($conn);
-?>
-
-
-
-
-
-<div class="container my-3">
-    <h1 class="text-center title-color">Quản lý Bài Test</h1>
-    <!-- Nút thêm bài test -->
-    <a href="./admin.php?nav=question&action=add" class="btn btn-success mb-3">Thêm Bài Test</a>
-    <?php
-    if (isset($_GET['status'])) {
-        if ($_GET['status'] === 'delete_success') {
-            echo "<div class='alert alert-success'>Xóa bài test thành công!</div>";
-        } elseif ($_GET['status'] === 'delete_error' && isset($_GET['message'])) {
-            echo "<div class='alert alert-danger'>Lỗi khi xóa bài test: " . htmlspecialchars(urldecode($_GET['message'])) . "</div>";
-        }
-    }
-    ?>
-
-    <?php if (isset($_GET['action'])) : ?>
-
-        <div class="container my-3">
-            <h3 class="">Thêm Bài Test</h3>
-
-            <!-- Form thêm bài test -->
-            <form action="" method="POST">
-                <div class="mb-3">
-                    <label for="ten_baitest">Tên Bài Test</label>
-                    <input type="text" name="ten_baitest" id="ten_baitest" class="form-control" required>
+<div class="modal fade" id="addTestModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Thêm Bài Test mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form action="modules/cauhoi/add_test.php" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3"><label class="form-label">Tên Bài Test <span class="text-danger">*</span></label><input type="text" name="ten_baitest" class="form-control" required></div>
+                    <div class="mb-3">
+                        <label class="form-label">Thuộc Khóa Học <span class="text-danger">*</span></label>
+                        <select name="id_khoahoc" class="form-select" required>
+                            <?php mysqli_data_seek($courses, 0); while ($course = $courses->fetch_assoc()): ?>
+                                <option value="<?php echo $course['id_khoahoc']; ?>"><?php echo htmlspecialchars($course['ten_khoahoc']); ?></option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3"><label class="form-label">Thời Gian Làm Bài (phút) <span class="text-danger">*</span></label><input type="number" name="thoi_gian" class="form-control" required></div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="is_placement_test" value="1" id="is_placement_test">
+                        <label class="form-check-label" for="is_placement_test">Đánh dấu là bài kiểm tra đầu vào</label>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="id_khoahoc">Chọn Khóa Học</label>
-                    <select name="id_khoahoc" id="id_khoahoc" class="form-control" required>
-                        <?php while ($row = mysqli_fetch_assoc($result_khoahoc)): ?>
-                            <option value="<?= $row['id_khoahoc'] ?>"><?= htmlspecialchars($row['ten_khoahoc']) ?></option>
-                        <?php endwhile; ?>
-                    </select>
-                </div>
-              
-                <div class="mb-3">
-                    <label for="thoi_gian">Thời Gian Làm Bài (phút)</label>
-                    <input type="number" name="thoi_gian" id="thoi_gian" class="form-control" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Thêm Bài Test</button>
-                <a href="./admin.php?nav=question" class="btn btn-secondary">Quay lại</a>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-primary">Thêm</button></div>
             </form>
         </div>
-
-    <?php else : ?>
-
-        <!-- Bảng danh sách bài test -->
-        <table class="table table-bordered table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Tên Bài Test</th>
-                    <th>Ngày Tạo</th>
-                    <th>Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($row['id_baitest']) ?></td>
-                        <td><?= htmlspecialchars($row['ten_baitest']) ?></td>
-                        <td><?= htmlspecialchars($row['ngay_tao']) ?></td>
-                        <td style="width: 280px;">
-                            <a href="./admin.php?nav=ds_cauhoi&id_baitest=<?= $row['id_baitest'] ?>" class="btn btn-primary btn-sm">Xem câu hỏi </a>
-                            <a href="./admin.php?nav=kqhocvien&id_baitest=<?= $row['id_baitest'] ?>" class="btn btn-info btn-sm">Kết quả học Viên</a>
-                            <a href="./modules/cauhoi/delete_test.php?id_baitest=<?= $row['id_baitest'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa bài test này?')"><i class="fa-solid fa-trash"></i></a>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
-    <?php endif; ?>
+    </div>
 </div>

@@ -1,128 +1,101 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Điểm danh lớp học</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .scrollable-table {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-        .table th, .table td {
-            text-align: center;
-            vertical-align: middle;
-        }
-        .form-header {
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container p-0">
-        <div class="card shadow">
-            <div class="card-header text-center ">
-                <h3>Điểm danh lớp học</h3>
-            </div>
-            <div class="card-body">
-                <?php
-                $servername = "localhost";
-                $username = "root";
-                $password = "";
-                $database = "quanlykhoahoc";
+<?php
+// Giả định $conn và $lop_id đã có từ file lichhoc.php
+if (!isset($lop_id)) die("Lỗi: Không tìm thấy thông tin lớp học.");
 
-                // Tạo kết nối
-                $conn = new mysqli($servername, $username, $password, $database);
+// Lấy thông tin lịch học của lớp
+$lichHocResult = $conn->query("SELECT id_lichhoc, ngay_hoc FROM lichhoc WHERE id_lop = '$lop_id' ORDER BY ngay_hoc ASC");
+$lichHoc = $lichHocResult->fetch_all(MYSQLI_ASSOC);
 
-                // Kiểm tra kết nối
-                if ($conn->connect_error) {
-                    die("Kết nối thất bại: " . $conn->connect_error);
-                }
+// Lấy danh sách học viên của lớp
+$hocVienResult = $conn->query("SELECT hv.id_hocvien, hv.ten_hocvien FROM hocvien hv JOIN dangkykhoahoc dk ON hv.id_hocvien = dk.id_hocvien WHERE dk.id_lop = '$lop_id'");
+$hocVien = $hocVienResult->fetch_all(MYSQLI_ASSOC);
 
-                // Lấy ID lớp học từ URL
-                $id_lop = $_GET['lop_id'] ?? null;
+// Lấy dữ liệu điểm danh hiện tại
+$diemDanhResult = $conn->query("SELECT id_hocvien, id_lichhoc, trang_thai FROM diem_danh WHERE id_lop = '$lop_id'");
+$diemDanhData = [];
+while ($row = $diemDanhResult->fetch_assoc()) {
+    $diemDanhData[$row['id_hocvien']][$row['id_lichhoc']] = $row['trang_thai'];
+}
+?>
 
-                if (!$id_lop) {
-                    die("<div class='alert alert-danger'>Không tìm thấy lớp học.</div>");
-                }
-
-                // Lấy thông tin lịch học
-                $lichHocResult = $conn->query("
-                    SELECT id_lichhoc, ngay_hoc, gio_bat_dau, gio_ket_thuc
-                    FROM lichhoc
-                    WHERE id_lop = '$id_lop'
-                ");
-                $lichHoc = $lichHocResult->fetch_all(MYSQLI_ASSOC);
-
-                // Lấy danh sách học viên
-                $hocVienResult = $conn->query("
-                    SELECT hv.id_hocvien, hv.ten_hocvien
-                    FROM hocvien hv
-                    JOIN dangkykhoahoc dk ON hv.id_hocvien = dk.id_hocvien
-                    WHERE dk.id_lop = '$id_lop'
-                ");
-                $hocVien = $hocVienResult->fetch_all(MYSQLI_ASSOC);
-
-                // Lấy dữ liệu điểm danh hiện tại
-                $diemDanhResult = $conn->query("
-                    SELECT id_hocvien, id_lichhoc, trang_thai
-                    FROM diem_danh
-                    WHERE id_lop = '$id_lop'
-                ");
-                $diemDanhData = [];
-                while ($row = $diemDanhResult->fetch_assoc()) {
-                    $diemDanhData[$row['id_hocvien']][$row['id_lichhoc']] = $row['trang_thai'];
-                }
-                ?>
-                <form action="modules/diemdanh/diemdanh_save.php" method="POST">
-                    <input type="hidden" name="id_lop" value="<?= $id_lop ?>">
-                    <div class="text-end ">
-                        <button type="submit" class="btn btn-success">Lưu điểm danh</button>
-                     
-                    </div>
-                    <div class="scrollable-table">
-                        <table class="table table-bordered table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th >Học viên</th>
-                                    <?php foreach ($lichHoc as $lich): ?>
-                                        <th><?= $lich['ngay_hoc'] ?><br>(<?= $lich['gio_bat_dau'] ?> - <?= $lich['gio_ket_thuc'] ?>)</th>
-                                    <?php endforeach; ?>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($hocVien as $hv): ?>
-                                    <tr>
-                                        <td><?= $hv['ten_hocvien'] ?></td>
-                                        <?php foreach ($lichHoc as $lich): ?>
-                                            <?php
-                                            $checked = isset($diemDanhData[$hv['id_hocvien']][$lich['id_lichhoc']]) &&
-                                                       $diemDanhData[$hv['id_hocvien']][$lich['id_lichhoc']] === 'co mat';
-                                            ?>
-                                            <td>
-                                                <input type="hidden" 
-                                                       name="diemdanh[<?= $hv['id_hocvien'] ?>][lichhoc][<?= $lich['id_lichhoc'] ?>]" 
-                                                       value="vang">
-                                                <input type="checkbox" 
-                                                       name="diemdanh[<?= $hv['id_hocvien'] ?>][lichhoc][<?= $lich['id_lichhoc'] ?>]" 
-                                                       value="co mat" 
-                                                       <?= $checked ? 'checked' : '' ?>>
-                                            </td>
-                                        <?php endforeach; ?>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                   
-                </form>
-            </div>
+<div class="card mt-4 animated-card">
+    <form action="modules/diemdanh/diemdanh_save.php" method="POST">
+        <input type="hidden" name="id_lop" value="<?php echo $lop_id; ?>">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Bảng điểm danh</h5>
+            <button type="submit" class="btn btn-success"><i class="fa-solid fa-save me-2"></i>Lưu điểm danh</button>
         </div>
-    </div>
+        <div class="card-body">
+            <?php if (count($lichHoc) > 0 && count($hocVien) > 0): ?>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover text-center" id="attendance-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-start">Học viên</th>
+                            <?php foreach ($lichHoc as $lich): ?>
+                                <th>
+                                    <?php echo date("d/m", strtotime($lich['ngay_hoc'])); ?>
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-outline-success btn-sm check-all" data-col="<?php echo $lich['id_lichhoc']; ?>">All</button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm uncheck-all" data-col="<?php echo $lich['id_lichhoc']; ?>">None</button>
+                                    </div>
+                                </th>
+                            <?php endforeach; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($hocVien as $hv): ?>
+                            <tr>
+                                <td class="text-start fw-bold"><?php echo htmlspecialchars($hv['ten_hocvien']); ?></td>
+                                <?php foreach ($lichHoc as $lich): ?>
+                                    <?php
+                                    $status = $diemDanhData[$hv['id_hocvien']][$lich['id_lichhoc']] ?? 'vang'; // Mặc định là vắng
+                                    $is_present = ($status === 'co mat');
+                                    ?>
+                                    <td>
+                                        <input type="hidden" name="diemdanh[<?php echo $hv['id_hocvien']; ?>][<?php echo $lich['id_lichhoc']; ?>]" value="vang">
+                                        <input type="checkbox" class="form-check-input attendance-check" 
+                                               name="diemdanh[<?php echo $hv['id_hocvien']; ?>][<?php echo $lich['id_lichhoc']; ?>]" 
+                                               value="co mat" 
+                                               data-col="<?php echo $lich['id_lichhoc']; ?>"
+                                               <?php echo $is_present ? 'checked' : ''; ?>>
+                                    </td>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php else: ?>
+                <div class="alert alert-warning text-center">Lớp học này chưa có lịch học hoặc chưa có học viên. Vui lòng thêm lịch học và học viên trước khi điểm danh.</div>
+            <?php endif; ?>
+        </div>
+    </form>
+</div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.getElementById('attendance-table');
+    if (!table) return;
+
+    // Xử lý nút "Check All"
+    table.querySelectorAll('.check-all').forEach(button => {
+        button.addEventListener('click', function() {
+            const colId = this.getAttribute('data-col');
+            table.querySelectorAll(`.attendance-check[data-col="${colId}"]`).forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        });
+    });
+
+    // Xử lý nút "Uncheck All"
+    table.querySelectorAll('.uncheck-all').forEach(button => {
+        button.addEventListener('click', function() {
+            const colId = this.getAttribute('data-col');
+            table.querySelectorAll(`.attendance-check[data-col="${colId}"]`).forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        });
+    });
+});
+</script>

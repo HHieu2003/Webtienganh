@@ -1,48 +1,26 @@
 <?php
 include('../../../config/config.php');
+header('Content-Type: application/json');
 
-// Kiểm tra phương thức
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ.']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id_cauhoi = (int)($_POST['id_cauhoi'] ?? 0);
+    $noi_dung = trim($_POST['noi_dung_dapan'] ?? '');
+    $la_dung = isset($_POST['la_dung']) ? 1 : 0;
+
+    if (empty($noi_dung)) {
+        echo json_encode(['success' => false, 'message' => 'Nội dung đáp án không được để trống.']);
+        exit;
+    }
+
+    $sql = "INSERT INTO dapan (id_cauhoi, noi_dung_dapan, la_dung) VALUES (?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('isi', $id_cauhoi, $noi_dung, $la_dung);
+
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Lỗi CSDL khi thêm đáp án.']);
+    }
     exit;
 }
-
-// Lấy dữ liệu từ request
-$noiDungDapan = filter_input(INPUT_POST, 'noi_dung_dapan', FILTER_SANITIZE_STRING);
-$idCauHoi = filter_input(INPUT_POST, 'id_cauhoi', FILTER_VALIDATE_INT);
-$laDung = isset($_POST['la_dung']) ? 1 : 0;
-
-if (!$noiDungDapan || !$idCauHoi) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Dữ liệu không hợp lệ.']);
-    exit;
-}
-
-// Chèn đáp án vào cơ sở dữ liệu
-$sql = "INSERT INTO dapan (id_cauhoi, noi_dung_dapan, la_dung) VALUES (?, ?, ?)";
-$stmt = mysqli_prepare($conn, $sql);
-
-if (!$stmt) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Lỗi khi chuẩn bị truy vấn: ' . mysqli_error($conn)]);
-    exit;
-}
-
-mysqli_stmt_bind_param($stmt, 'isi', $idCauHoi, $noiDungDapan, $laDung);
-
-if (mysqli_stmt_execute($stmt)) {
-    // Phản hồi thành công
-    echo json_encode([
-        'success' => true,
-        'id_dapan' => mysqli_insert_id($conn),
-        'id_cauhoi' => $idCauHoi,
-        'noi_dung_dapan' => $noiDungDapan,
-        'la_dung' => $laDung
-    ]);
-} else {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Lỗi khi chèn dữ liệu: ' . mysqli_error($conn)]);
-}
-exit;
 ?>

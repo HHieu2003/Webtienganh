@@ -1,62 +1,71 @@
+<?php
+session_start();
+include('../config/config.php');
+// Kiểm tra đăng nhập (quan trọng)
+if (!isset($_SESSION['is_admin']) && !isset($_SESSION['is_teacher'])) {
+    header("Location: ../pages/login.php");
+    exit();
+}
+
+$is_admin = $_SESSION['is_admin'] ?? false;
+$is_teacher = $_SESSION['is_teacher'] ?? false;
+?>
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Quản Trị</title>
-    <!-- Bootstrap CSS -->
+    <title><?php echo $is_admin ? 'Trang Quản Trị' : 'Trang Giảng viên'; ?></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/admin.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-
 </head>
-
 <body>
-    <div>
-        <header>
-            <?php
-            include('./modules/header.php');
+    <div class="wrapper">
+        <aside class="admin-sidebar">
+            <?php 
+            if ($is_admin) {
+                include('modules/menu.php'); 
+            } else {
+                // Giả định bạn có file teacher_menu.php cho giảng viên
+                include('modules/teacher_menu.php');
+            }
             ?>
-        </header>
+        </aside>
 
-        <section class="admin-container">
+        <main class="admin-main">
+            <header class="admin-header">
+                <?php include('modules/header.php'); ?>
+            </header>
 
-            <?php
-            include('./modules/menu.php');
-            ?>
-            <div class="admin-container2">
-
-                <?php
-                include('./modules/main.php');
+            <section class="admin-content">
+                <?php 
+                if ($is_admin) {
+                    include('modules/main.php');
+                } else {
+                    // Giả định bạn có file teacher_main.php cho giảng viên
+                    include('modules/teacher_main.php');
+                }
                 ?>
-            </div>
+            </section>
 
-
-        </section>
-
-        <footer>
-            <?php
-
-            include('./modules/footer.php');
-            ?>
-        </footer>
+            <footer class="admin-footer">
+                <?php include('modules/footer.php'); ?>
+            </footer>
+        </main>
     </div>
 
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
-
     <script>
-        CKEDITOR.replace('mo_ta');
-        CKEDITOR.replace('noi_dung');
+        // Khởi tạo CKEditor một cách an toàn
+        if (document.getElementById('mo_ta')) {
+            CKEDITOR.replace('mo_ta');
+        }
+        if (document.getElementById('noi_dung_editor')) {
+            CKEDITOR.replace('noi_dung_editor');
+        }
     </script>
-
-    <!-- Bootstrap và jQuery JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

@@ -20,8 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
         // Điều này yêu cầu mật khẩu trong CSDL của bạn phải được lưu bằng password_hash()
         // ================================================================
         if (password_verify($mat_khau, $user['mat_khau'])) {
-        //   if ($mat_khau == $user['mat_khau']) {
-
+      
             $_SESSION['user'] = $user['ten_hocvien'];
             $_SESSION['email'] = $email;
             $_SESSION['id_hocvien'] = $user['id_hocvien'];

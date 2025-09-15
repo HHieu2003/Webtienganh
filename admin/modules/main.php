@@ -57,7 +57,9 @@ else if ($temp == 'kqhocvien') {
 else if ($temp == 'add_answer') {
     include("modules/cauhoi/add_answer.php");
 } 
-
+else if ($temp == 'lecturers') {
+    include("modules/giangvien/manage_lecturers.php");
+}
 else {
     include("modules/home.php");
 }

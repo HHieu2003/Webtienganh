@@ -2,27 +2,34 @@
 include('../../../config/config.php');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Lấy dữ liệu từ form chỉnh sửa
-    $id_hocvien = $_POST['id_hocvien'];
-    $ten_hocvien = mysqli_real_escape_string($conn, $_POST['ten_hocvien']);
-    $so_dien_thoai = mysqli_real_escape_string($conn, $_POST['so_dien_thoai']);
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $mat_khau = mysqli_real_escape_string($conn, $_POST['mat_khau']);
+    $id_hocvien = (int)$_POST['id_hocvien'];
+    $ten_hocvien = $_POST['ten_hocvien'];
+    $so_dien_thoai = $_POST['so_dien_thoai'];
+    $email = $_POST['email'];
+    $mat_khau = $_POST['mat_khau'];
     $is_admin = isset($_POST['is_admin']) ? 1 : 0;
-    
-    // Mã hóa mật khẩu
-   // $mat_khau_hash = password_hash($mat_khau, PASSWORD_DEFAULT);
 
-    // Cập nhật thông tin học viên vào cơ sở dữ liệu
-    $sql = "UPDATE hocvien 
-            SET ten_hocvien = '$ten_hocvien', so_dien_thoai = '$so_dien_thoai', email = '$email', mat_khau = '$mat_khau', is_admin = '$is_admin'
-            WHERE id_hocvien = $id_hocvien";
-
-    if (mysqli_query($conn, $sql)) {
-        header('Location: ../../admin.php?nav=students');
-
+    // Kiểm tra xem người dùng có nhập mật khẩu mới hay không
+    if (!empty($mat_khau)) {
+        // Nếu có, mã hóa và cập nhật mật khẩu mới
+        $hashedPassword = password_hash($mat_khau, PASSWORD_DEFAULT);
+        $sql = "UPDATE hocvien SET ten_hocvien = ?, so_dien_thoai = ?, email = ?, mat_khau = ?, is_admin = ? WHERE id_hocvien = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ssssii", $ten_hocvien, $so_dien_thoai, $email, $hashedPassword, $is_admin, $id_hocvien);
     } else {
-        echo "Lỗi: " . mysqli_error($conn);
+        // Nếu không, chỉ cập nhật các thông tin khác và giữ nguyên mật khẩu cũ
+        $sql = "UPDATE hocvien SET ten_hocvien = ?, so_dien_thoai = ?, email = ?, is_admin = ? WHERE id_hocvien = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sssii", $ten_hocvien, $so_dien_thoai, $email, $is_admin, $id_hocvien);
     }
+
+    if ($stmt->execute()) {
+        header('Location: ../../admin.php?nav=students&status=edit_success');
+    } else {
+        header('Location: ../../admin.php?nav=students&status=edit_error');
+    }
+    
+    $stmt->close();
+    $conn->close();
 }
 ?>
