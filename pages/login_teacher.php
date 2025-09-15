@@ -4,30 +4,32 @@ session_start();
 include("../config/config.php");
 
 $message = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_teacher'])) {
     $email = $_POST['email'];
     $mat_khau = $_POST['mat_khau'];
     
     // Sử dụng Prepared Statements để chống SQL Injection
-    $stmt = $conn->prepare("SELECT * FROM hocvien WHERE email = ?");
+    // Truy vấn vào bảng `giangvien` thay vì `hocvien`
+    $stmt = $conn->prepare("SELECT * FROM giangvien WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        $user = $result->fetch_assoc();
+        $teacher = $result->fetch_assoc();
         
-        // Điều này yêu cầu mật khẩu trong CSDL của bạn phải được lưu bằng password_hash()
         // ================================================================
-        if (password_verify($mat_khau, $user['mat_khau'])) {
-        //   if ($mat_khau == $user['mat_khau']) {
-
-            $_SESSION['user'] = $user['ten_hocvien'];
-            $_SESSION['email'] = $email;
-            $_SESSION['id_hocvien'] = $user['id_hocvien'];
-            $_SESSION['is_admin'] = $user['is_admin']; // Lưu trạng thái admin
+        // KIỂM TRA MẬT KHẨU ĐÃ MÃ HÓA
+        // Cần đảm bảo mật khẩu trong bảng `giangvien` cũng được hash
+        // ================================================================
+        if (password_verify($mat_khau, $teacher['mat_khau'])) {
+            // Đăng nhập thành công
+            $_SESSION['teacher_name'] = $teacher['ten_giangvien'];
+            $_SESSION['id_giangvien'] = $teacher['id_giangvien'];
+            $_SESSION['is_teacher'] = true; // Tạo một session để xác định đây là giáo viên
             
-            header("Location: ../index.php");
+            // Chuyển hướng đến trang dashboard của giáo viên
+            header("Location: ./admin/admin.php");
             exit();
         } else {
             $message = "Email hoặc mật khẩu không đúng!";
@@ -45,15 +47,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - Tiếng Anh Fighter!</title>
+    <title>Đăng nhập Giáo viên - Tiếng Anh Fighter!</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 
     <style>
-        /* CSS được thiết kế lại hoàn toàn cho trang đăng nhập */
+        /* CSS được tùy chỉnh cho trang đăng nhập giáo viên (đồng bộ với trang học viên) */
         :root {
-            --primary-color: #0db33b;
+            --primary-color: #007bff; /* Thay đổi màu chủ đạo một chút để phân biệt */
             --light-gray: #f3f7f8;
             --dark-text: #333;
             --gray-text: #666;
@@ -61,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 
         body {
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #e0f7fa, #ffffff);
+            background: linear-gradient(135deg, #f0f8ff, #ffffff);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -108,17 +110,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
         }
 
         .form-group input {
-            width: 93%;
+            width: 100%;
             padding: 12px 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
-            transition: all 0.3s ease; /* Hiệu ứng mượt mà */
+            transition: all 0.3s ease;
         }
         .form-group input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(13, 179, 59, 0.2);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
         }
 
         .btn-login {
@@ -136,23 +138,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
         }
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(13, 179, 59, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
         }
-
-        .login-footer {
-            text-align: center;
-            margin-top: 25px;
-            color: var(--gray-text);
-        }
-        .login-footer a {
-            color: var(--primary-color);
-            font-weight: bold;
-            text-decoration: none;
-        }
-        .login-footer a:hover {
-            text-decoration: underline;
-        }
-
+        
         .error-message {
             color: #dc3545;
             text-align: center;
@@ -168,10 +156,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                     <img src="../images/logo2.jpg" alt="Logo">
                 </div>
             </a>
-            <h2>Đăng nhập tài khoản</h2>
+            <h2>Đăng nhập Giáo viên</h2>
         </div>
 
-        <form method="post" action="login.php">
+        <form method="post" action="login_teacher.php">
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" placeholder="Nhập email của bạn" required>
@@ -185,12 +173,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                 <p class="error-message"><?php echo $message; ?></p>
             <?php endif; ?>
             
-            <button type="submit" name="login" class="btn-login">Đăng nhập</button>
+            <button type="submit" name="login_teacher" class="btn-login">Đăng nhập</button>
         </form>
-
         <div class="login-footer">
-            <p>Bạn chưa có tài khoản? <a href="register.php">Đăng ký ngay</a></p>
-            <p><a href="login_teacher.php" style= "font-size: 15px">Đăng nhập dành cho giáo viên</a></p>
+            <p> <a href="login.php">Quay về trang đăng nhập cho học sinh</a></p>
         </div>
     </div>
 

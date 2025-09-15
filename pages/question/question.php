@@ -287,7 +287,7 @@ $result_courses = $stmt->get_result();
                             <!-- Tên học viên -->
                             <div class="card-item">
                                 <i class="fa-solid fa-user" style="color: #bf082d;"></i>
-                                <p><?php echo htmlspecialchars($ten_hocvien); ?></p>
+                                <!-- <p></p> -->
                             </div>
 
                             <!-- Nút bắt đầu -->

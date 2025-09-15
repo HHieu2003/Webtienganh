@@ -1,162 +1,199 @@
+<footer class="footer-wrapper" data-aos="fade-up">
+    <div class="footer-main">
+        <div class="footer-content">
+            <h4>TRUNG TÂM ANH NGỮ FIGHTER</h4>
+            <p><i class="fa-solid fa-location-dot"></i> Lê Văn Lương - Thanh Xuân - Hà Nội</p>
+            <p><i class="fa-solid fa-phone-volume"></i> Hotline: 0962.501.832 - 0336.123.130</p>
+            <p><i class="fa-solid fa-envelope"></i> Email: <a href="mailto:nthuphuong2710@gmail.com">nthuphuong2710@gmail.com</a></p>
+            <div class="social-icons">
+                <a href="#" aria-label="Telegram"><i class="fa-brands fa-telegram"></i></a>
+                <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+                <a href="#" aria-label="Youtube"><i class="fa-brands fa-youtube"></i></a>
+                <a href="#" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
+            </div>
+        </div>
+
+        <div class="footer-content">
+            <h4>HỖ TRỢ KHÁCH HÀNG</h4>
+            <ul class="footer-links">
+                <li><a href="./index.php?nav=huongdandangky">Hướng dẫn đăng ký khóa học</a></li>
+                <li><a href="./index.php?nav=huongdandangky">Hướng dẫn đăng ký và đăng nhập</a></li>
+                <li><a href="./index.php?nav=huongdandangky">Hướng dẫn đổi mật khẩu</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-content">
+            <h4>ĐỒNG HÀNH CÙNG CHÚNG TÔI</h4>
+            <img class="logo-footer" src="images/logo.png" alt="Logo Footer">
+             <img class="logo-footer-small" src="./images/logofooter.png" alt="Logo Bộ Công Thương">
+        </div>
+    </div>
+
+    <div class="footer-bar">
+        <div class="left">
+            &copy; 2024 Tiếng Anh Fighter. All rights reserved.
+        </div>
+        <div class="right">
+            <a href="./index.php?nav=about">Giới thiệu</a>
+            <a href="./index.php?nav=huongdandangky">Điều khoản dịch vụ</a>
+            <a href="./index.php?nav=huongdandangky">Chính sách bảo mật</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script>
+  AOS.init({
+      duration: 1000, // Thời gian hiệu ứng diễn ra (miligiây)
+      once: true,     // Chỉ chạy hiệu ứng một lần
+  });
+</script>
+
 <style>
-    /*-----------footer-----------*/
-    .footer {
-        border-top: 2px solid #0b9331;
+    /* ==================================================================
+    CSS cho Footer
+    ==================================================================
+    */
+
+    /* Phần bao ngoài cùng */
+    .footer-wrapper {
         background-color: #f3f7f8;
-        padding: 30px 40px 20px 40px;
+        border-top: 3px solid #0b9331;
         color: #333;
+        font-family: Arial, sans-serif;
+    }
+
+    /* Phần nội dung chính của footer */
+    .footer-main {
         display: flex;
+        flex-wrap: wrap; /* Cho phép các cột xuống hàng trên màn hình nhỏ */
         justify-content: space-between;
-        align-items: flex-start;
-        width: 100%;
+        padding: 40px 5%; /* Dùng % để co giãn */
+        gap: 20px; /* Khoảng cách giữa các cột */
     }
 
     .footer-content {
-        width: 30%;
-
+        flex: 1; /* Các cột tự động chia đều không gian */
+        min-width: 250px; /* Chiều rộng tối thiểu cho mỗi cột */
     }
-
 
     .footer-content h4 {
-        font-size: 16px;
-        margin-bottom: 10px;
+        font-size: 18px;
+        margin-bottom: 20px;
         color: #000;
         font-weight: bold;
+        position: relative;
+        padding-bottom: 10px;
+    }
+    /* Gạch chân cho tiêu đề */
+    .footer-content h4::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 40px;
+        height: 2px;
+        background-color: #0db33b;
     }
 
-    .footer-content .logo-footer {
-        width: auto;
-        height: 150px;
-        margin-top: 5px;
-        box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-        border-radius: 10px;
+    .footer-content p {
+        font-size: 15px;
+        line-height: 1.7;
+        margin-bottom: 12px;
+        color: #555;
     }
-
-    .footer-content img:hover {
-        transform: scale(1.05);
-        transition: 0.5s;
-
+    .footer-content p i {
+        margin-right: 10px;
+        color: #0db33b;
     }
-
-    .footer-content p,
-    .footer-content a {
-        font-size: 14px;
-        color: #333;
+    .footer-content p a {
+        color: #555;
         text-decoration: none;
-        margin: 8px 0px;
-
+        transition: color 0.3s ease;
+    }
+    .footer-content p a:hover {
+        color: #0db33b;
+        text-decoration: underline;
     }
 
-    .footer-content,
-    .icon {
-        font-size: 24px;
-        color: #333;
-        margin-right: 10px;
-        margin-left: 40px;
-    }
-
-    .footer {
-        font-size: 20px;
-        color: #333;
-        margin-right: 10px;
-    }
-    .social-icons{
-        margin: 5px;
-    }
+    /* Liên kết mạng xã hội */
     .social-icons a {
-        font-size: 35px;
-        color: #333;
-        margin-right: 16px;
-        
+        font-size: 28px;
+        color: #555;
+        margin-right: 15px;
+        transition: transform 0.3s ease, color 0.3s ease;
+    }
+    .social-icons a:hover {
+        transform: translateY(-3px);
+        color: #0db33b;
     }
 
-    .footer .social-icons a:hover {
-        color: #007bff;
+    /* Danh sách liên kết hỗ trợ */
+    .footer-links {
+        list-style: none;
+        padding-left: 0;
+    }
+    .footer-links li a {
+        color: #555;
+        text-decoration: none;
+        line-height: 2;
+        transition: color 0.3s ease, padding-left 0.3s ease;
+    }
+    .footer-links li a:hover {
+        color: #0db33b;
+        padding-left: 5px;
     }
 
+    /* Hình ảnh trong footer */
+    .logo-footer {
+        width: auto;
+        height: 120px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    .logo-footer:hover {
+        transform: scale(1.05);
+    }
+    .logo-footer-small {
+        width: 180px;
+        height: auto;
+        margin-top: 15px;
+    }
 
-    /*-----------footer end-------*/
+    /*----------- Thanh footer cuối cùng -----------*/
     .footer-bar {
         background-color: #0b9331;
         color: white;
-        padding: 20px;
+        padding: 15px 5%;
         font-size: 14px;
         display: flex;
+        flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
+        gap: 10px;
     }
-
-    .footer-bar .left,
-    .footer-bar .right {
-        display: flex;
-        align-items: center;
-    }
-
     .footer-bar .right a {
-        text-decoration: none;
-        margin-left: 15px;
-        font-size: 14px;
-    }
-
-    .footer-bar a:not(:last-child)::after {
-        content: " | ";
         color: white;
-        padding-left: 10px;
-        font-weight: 900;
+        text-decoration: none;
+        margin-left: 20px;
+        transition: text-decoration 0.3s ease;
     }
-
     .footer-bar .right a:hover {
         text-decoration: underline;
     }
+
+    /* Reponsive cho Footer trên màn hình nhỏ */
+    @media (max-width: 768px) {
+        .footer-main {
+            flex-direction: column; /* Xếp các cột theo chiều dọc */
+        }
+        .footer-bar {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
 </style>
-
-<div>
-    <!-------footer----->
-    <div class="footer">
-        <div class="footer-content">
-            <h4>TIẾNG ANH FIGHTER!</h4>
-            <P><i class="fa-solid fa-location-dot" style="color: #000000;"></i>   Lê Văn Lương - Thanh Xuân - Hà Nội</P>
-            <P><i class="fa-solid fa-phone-volume" style="color: #000000;"></i> &nbsp;Hotline: 0962 501 832 - 0336 123 130</P>
-            <p>
-            <i class="fa-solid fa-envelope" style="color: #000000;"></i> &nbsp;Email: <a href="mailto:nthuphuong2710@gmail.com"> nthuphuong2710@gmail.com</a>
-            </p>
-
-            <div class="social-icons" >
-                <a href="#"><i class="fa-brands fa-telegram" style="color: #5cb0f0;"></i></a>
-                <a href="#"><i class="fa-brands fa-facebook" style="color:rgb(12, 52, 121);"></i></a>
-                <a href="https://www.youtube.com/"><i class="fa-brands fa-youtube" style="color:rgb(255, 0, 38);"></i></a>
-                <a href=""><i class="fa-brands fa-twitter" style="color:rgb(0, 157, 236);;"></i></a>
-            </div>
-        </div>
-        <div class="footer-content">
-            <h4>ĐỒNG HÀNH CÙNG CHÚNG TÔI </h4>
-            <img class="logo-footer" src="images/logo.png" alt="">
-        </div>
-        <div class="footer-content">
-            <h4>HỖ TRỢ KHÁCH HÀNG</h4>
-            <div class="icon">
-                <a href=""></a>
-                <a href=""></a>
-                <a href=""></a>
-            </div>
-            <p><a href="./index.php?nav=huongdandangky"> - &nbsp; Hướng dẫn đăng ký khóa học</a></p>
-            <p><a href="./index.php?nav=huongdandangky"> - &nbsp; Hướng dẫn đăng ký và đăng nhập</a></p>
-            <p><a href="./index.php?nav=huongdandangky"> - &nbsp; Hướng dẫn đổi mật khẩu</a></p>
-
-            <img src="./images/logofooter.png" alt="" style="    width: 222px;
-    height: auto;">
-        </div>
-    </div>
-    <!------footer end------>
-    <div class="footer-bar">
-        <div class="left">
-            @ 2024 Tiếng Anh Fighter!
-        </div>
-        <div class="right">
-            <a href="./index.php?nav=about" style="color: #fff;">Giới thiệu</a>
-            <a href="./index.php?nav=huongdandangky" style="color: #fff;">Điều khoản dịch vụ</a>
-            <a href="./index.php?nav=huongdandangky" style="color: #fff;">Quy định về khóa học</a>
-            <a href="./index.php?nav=huongdandangky" style="color: #fff;">Chính sách bảo mật</a>
-        </div>
-    </div>
-</div>

@@ -1,49 +1,51 @@
-
 <?php
-{
-    if (isset($_GET['nav']))
-    {
-        $temp = $_GET['nav'];
-    }
-    else if (isset($_GET['course_detail']))
-    {
-        $temp = $_GET['course_detail'];
-    }
-    else {
-        $temp = '';
-        
-    }
-}
+// Lấy giá trị của 'nav' từ URL, nếu không có thì mặc định là 'home'
+$nav = $_GET['nav'] ?? 'home';
 
-if ( $temp=='khoahoc')
-{
-    include("main/khoahoc.php");
-}
-else if($temp=='about'){
-    include("main/about.php");
-}
-else if($temp=='question'){
+// Sử dụng switch-case để code dễ đọc và bảo trì hơn
+switch ($nav) {
+    case 'khoahoc':
+        include("main/khoahoc.php");
+        break;
     
-    include("question/question.php");
-}
-else if($temp=='dapan'){
-    
-    include("question/dapan.php");
-}
-else if($temp=='question_detail'){
-    
-    include("question/question_detail.php");
-}
-else if($temp=='course_detail'){
-    include("./pages/main/course_detail.php");
-}
-else if($temp=='huongdandangky'){
-    include("./pages/main/huongdandangky.php");
-}
-else if($temp=='dangkykhoahoc'){
-    include("./pages/main/dangkykhoahoc.php");
-}
-else {
-    include("./pages/main/home.php");
+    case 'dskhoahoc':
+        include("main/dskhoahoc.php");
+        break;
+
+    case 'about':
+        include("main/about.php");
+        break;
+
+    case 'question':
+        include("question/question.php");
+        break;
+
+    case 'dapan':
+        include("question/dapan.php");
+        break;
+
+    case 'question_detail':
+        include("question/question_detail.php");
+        break;
+
+    case 'course_detail':
+        // Sửa lại đường dẫn cho chính xác
+        include("main/course_detail.php");
+        break;
+
+    case 'huongdandangky':
+        // Sửa lại đường dẫn cho chính xác
+        include("main/huongdandangky.php");
+        break;
+
+    case 'dangkykhoahoc':
+        // Sửa lại đường dẫn cho chính xác
+        include("main/dangkykhoahoc.php");
+        break;
+
+    case 'home':
+    default: // Nếu 'nav' không khớp với bất kỳ case nào, sẽ chạy default
+        include("main/home.php");
+        break;
 }
 ?>

@@ -1,48 +1,27 @@
-<link rel="stylesheet" href="./pages/main.css">
-<section>
+<section class="home-slider">
+    <?php include('./pages/main/hero_intro.php'); ?>
+
+</section>
+
+<section class="home-banner" data-aos="fade-up">
+    <?php include('pages/main/banner.php'); ?>
+</section>
+
+<section class="home-courses" data-aos="fade-up">
     <?php
-    include('./pages/slider.php');
+        // Section này đã có sẵn trong file dskhoahoc.php nên không cần h2 ở đây
+        include('pages/main/dskhoahoc.php');
     ?>
 </section>
-<?php
-        include('pages/main/banner.php');
-        ?>
-<div>
-    <!---------------section container------------>
-    <div class="section" style="background-color: white;">
-   
-        <!-------------khoa hoc tieu bieu------------->
-        <h2 class="introduce-title">CÁC KHÓA HỌC TIÊU BIỂU</h2>
-   
-        <?php
-        include('pages/main/dskhoahoc.php');
-        ?>
 
+<section class="home-roadmap" data-aos="fade-up">
+    <?php include('pages/main/roadmap.php'); ?>
+</section>
 
-        <div class="container">
-            <div class="anh-img" align="center">
-                <img src="images/anh2.png" alt="">
-            </div>
-        </div>
-        <?php
-        include('pages/main/binhluan.php');
-        ?>
+<section class="home-testimonials" data-aos="fade-up">
+     <?php include('pages/main/binhluan.php'); ?>
+</section>
 
-        <!---------đối tác--------->
-        <!-- <div class="partner">
-            <h2 class="introduce-title" >ĐỐI TÁC HÀNG ĐẦU</h2>
-            <div class="partner-logo">
-                <img src="images/viettinbank.png" alt="VietinBank">
-                <img src="images/vpbank.png" alt="VPBAnk">
-                <img src="images/Viettel.png" alt="Viettel">
-                <img src="images/tpbank.png" alt="TPBank">
-                <img src="images/telecom.png" alt="Telecom">
-            </div>
-        </div> -->
-      
-        
-        <?php
-        include('pages/main/form-dk.php');
-        ?>
-
-    </div>
+<section class="home-consult-form" data-aos="fade-up">
+    <?php include('pages/main/form-dk.php'); ?>
+</section>

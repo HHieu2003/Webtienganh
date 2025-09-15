@@ -1,112 +1,127 @@
-<!-- Bootstrap 5 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-    .container-banner {
-        background-color: #0b9331;
-        padding: 20px 60px 50px 60px;
-        margin: 0px auto;
-        color: #fff;
-    }
-
-    .custom-img {
-        max-width: 90%;
-        /* Tăng kích thước hình */
-        height: 210px;
-        filter: hue-rotate(231deg);
-    }
-
-    .highlight-text {
-        font-weight: bold;
-        color: #FFCC00;
-    }
-
-    .text-container {
-            position: relative;
-            height: 7vh; /* Chiều cao khối văn bản */
-            text-align: center;
-            overflow: hidden;
-            margin: 0px 60px;
-        }
-
-        .lead {
-        position: absolute;
-        top: 0;
-        left: 100%; /* Bắt đầu ngoài khung nhìn bên phải */
-        right: -100%; /* Vượt ra ngoài bên trái */
-        opacity: 0; /* Ẩn đoạn văn */
-        transition: transform 1s ease-in-out, opacity 1s ease-in-out; /* Hiệu ứng chuyển động */
-    }
-
-    .lead.active {
-        left: 0; /* Vị trí chính giữa khung nhìn */
-        right: 0;
-        opacity: 1; /* Hiện đoạn văn */
-        transform: translateX(0); /* Không dịch chuyển */
-    }
-
-    .lead.inactive {
-        transform: translateX(-100%); /* Lướt sang bên trái khi ẩn */
-        opacity: 0;
-    }
-
-</style>
-
-<div class="container-banner text-center ">
-    <!-- Title Section -->
-    <h1 class="mb-4 introduce-title" style="color: white;">TRIẾT LÝ GIÁO DỤC CỐT LÕI</h1>
-    <div class="text-container">
-        <p class="lead px-3 fs-6 active" id="text1">
-            Chào mừng bạn đến với Tiếng Anh Fighter – nơi khởi đầu hành trình chinh phục tiếng Anh một cách thú vị và hiệu quả! Chúng tôi tin rằng "Learning is an adventure" – học tập chính là một cuộc phiêu lưu kỳ thú, và chúng tôi ở đây để đồng hành cùng bạn!
-        </p>
-        <p class="lead px-3 fs-6" id="text2">
-            Tiếng Anh Fighter cam kết giúp học sinh sử dụng thành thạo khả năng tiếng Anh của mình. Chúng tôi thiết kế một chương trình giảng dạy toàn diện nhằm phát triển trình độ “Tiếng Anh quốc tế” cho học sinh, giúp các em có thể giao tiếp hiệu quả trên toàn thế giới!
-        </p>
-    </div>
-
-
-
-    <!-- 2 Column Section -->
-    <div class="row mt-5 mx-5 px-5 fs-5 g-2 ">
-        <!-- Left Column -->
-        <div class="col-md-5 mx-auto ">
-            <div class="d-flex justify-content-center">
-                <img src="https://vn.winningenglishschool.com/wp-content/uploads/2024/08/icon-1.png"
-                    alt="Systematic Learning" class="img-fluid custom-img">
-            </div>
-            <p class="mt-3">Phương pháp học tập có hệ thống làm giảm độ phức tạp của kiến thức</p>
+<div class="differentiators-section">
+    <div class="container">
+        <div class="section-header text-center" data-aos="fade-up" style="margin-bottom: 0px;">
+            <h2 class="introduce-title">Giá Trị Khác Biệt Để Bứt Phá</h2>
+            <p class="section-subtitle">Phương pháp học đúng, tài liệu chuẩn và công nghệ hiện đại là ba yếu tố chính giúp bạn tự tin chinh phục mục tiêu.</p>
         </div>
 
-        <!-- Right Column -->
-        <div class="col-md-5 mx-auto">
-            <div class="d-flex justify-content-center">
-                <img src="https://vn.winningenglishschool.com/wp-content/uploads/2024/08/icon-1-1.png"
-                    alt="Light Bulb Idea" class="img-fluid custom-img">
+        <div class="row g-4 align-items-center feature-row">
+            <div class="col-lg-6" data-aos="fade-right">
+                <div class="feature-card">
+                    <div class="feature-content">
+                        <h3>Phương pháp E.M.P.O.W.E.R</h3>
+                        <p>Là phương pháp học tập độc quyền, giúp học viên chủ động tiếp thu và ứng dụng tiếng Anh thực tế vào đời sống, công việc.</p>
+                    </div>
+                    <div class="feature-image">
+                        <img src="https://vietop.edu.vn/wp-content/uploads/2025/03/phuong-phap-EMPOWER.webp" alt="Phương pháp EMPOWER">
+                    </div>
+                </div>
             </div>
-            <p class="mt-3">Dạy ít hơn, học nhiều hơn <br> + Công thức học MMS</p>
+            <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
+                <div class="feature-card">
+                    <div class="feature-content">
+                        <h3>Tài liệu học tập độc quyền</h3>
+                        <p>Được nghiên cứu và biên soạn bởi đội ngũ giáo viên giàu kinh nghiệm, chuyên môn cao theo tiêu chuẩn quốc tế.</p>
+                    </div>
+                    <div class="feature-image">
+                        <img src="https://vietop.edu.vn/wp-content/uploads/2025/03/tai-lieu-hoc-doc-quyen.webp" alt="Tài liệu học tập độc quyền">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 align-items-center feature-row flex-row-reverse" style="background-color: #f4fbf7; padding: 20px 0px;">
+            <div class="col-lg-6" data-aos="fade-right" data-aos-delay="200">
+                <div class="feature-image-large">
+                    <img src="https://vietop.edu.vn/wp-content/uploads/2025/03/cong-nghe-hoc-tap.webp" alt="Nền tảng công nghệ">
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left">
+                <div class="feature-content-large">
+                    <h3>Nền tảng công nghệ – Học hiệu quả, đạt điểm cao</h3>
+                    <ul class="tech-features-list">
+                        <li><i class="fas fa-check"></i> Trợ lý AI hỗ trợ học tập 24/7</li>
+                        <li><i class="fas fa-check"></i> Chấm chữa Speaking & Writing bằng công nghệ</li>
+                        <li><i class="fas fa-check"></i> Thuận tiện luyện tập mọi lúc, mọi nơi</li>
+                        <li><i class="fas fa-check"></i> Thi thử IELTS Online, trả kết quả tức thì</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Bootstrap 5 JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<!-- JavaScript chuyển văn bản -->
-<script>
-    const texts = document.querySelectorAll('.lead'); // Lấy tất cả các đoạn văn
-    let currentIndex = 0;
+<style>
+    .differentiators-section {
+        padding: 0px 0;
+        background-color: #fff;
+    }
 
-    setInterval(() => {
-        // Ẩn đoạn văn hiện tại
-        texts[currentIndex].classList.remove('active');
-        texts[currentIndex].classList.add('inactive');
+    .feature-row {
+        margin-bottom: 40px;
+    }
 
-        // Tính toán chỉ số của đoạn văn tiếp theo
-        const nextIndex = (currentIndex + 1) % texts.length;
+    .feature-card {
+        background-color: #f4fbf7;
+        /* Màu xanh lá rất nhạt */
+        border-radius: 15px;
+        padding: 30px;
+        height: 100%;
+        border: 1px solid #eaf2eb;
+        transition: all 0.3s ease;
+    }
 
-        // Hiển thị đoạn văn tiếp theo
-        texts[nextIndex].classList.remove('inactive');
-        texts[nextIndex].classList.add('active');
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
 
-        // Cập nhật chỉ số hiện tại
-        currentIndex = nextIndex;
-    }, 7000); // Chuyển đoạn văn mỗi 4 giây
-</script>
+    .feature-content h3 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #0db33b;
+        margin-bottom: 15px;
+    }
+
+    .feature-content p {
+        font-size: 16px;
+        line-height: 1.7;
+        color: #555;
+    }
+
+    .feature-image img {
+        border-radius: 10px;
+        width: 80%;
+        
+    }
+
+    /* CSS cho hàng thứ 2 */
+    .feature-image-large img {
+        width: 100%;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-content-large h3 {
+        font-size: 28px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .tech-features-list {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .tech-features-list li {
+        font-size: 17px;
+        color: #555;
+        margin-bottom: 15px;
+    }
+
+    .tech-features-list i {
+        color: #0db33b;
+        margin-right: 10px;
+        font-size: 18px;
+    }
+</style>
