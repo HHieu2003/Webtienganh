@@ -48,11 +48,17 @@ $result_payments = $stmt->get_result();
             <h4 class="mb-0">
                 <i class="fa-solid fa-money-check-dollar me-2"></i>Lịch sử thanh toán
             </h4>
-            <form method="GET" action="./admin.php" class="d-flex">
-                <input type="hidden" name="nav" value="thanhtoan">
-                <input type="text" name="search" class="form-control" placeholder="Tìm theo tên HV, email, khóa học..." value="<?php echo htmlspecialchars($search_term); ?>" style="min-width: 300px;">
-                <button type="submit" class="btn btn-primary ms-2"><i class="fa-solid fa-magnifying-glass"></i></button>
-            </form>
+            <div class="d-flex">
+                <form method="GET" action="./admin.php" class="d-flex me-2">
+                    <input type="hidden" name="nav" value="thanhtoan">
+                    <input type="text" name="search" class="form-control" placeholder="Tìm theo tên HV, email, khóa học..." value="<?php echo htmlspecialchars($search_term); ?>" style="min-width: 300px;">
+                    <button type="submit" class="btn btn-primary ms-2"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </form>
+                
+                <a href="modules/export_payments.php" class="btn btn-info text-white">
+                    <i class="fa-solid fa-file-excel"></i> Xuất Excel
+                </a>
+            </div>
         </div>
     </div>
     <div class="card-body">
@@ -86,7 +92,7 @@ $result_payments = $stmt->get_result();
                             <td class="text-center"><?php echo htmlspecialchars($row['hinh_thuc']); ?></td>
                             <td class="text-center"><?php echo date("d/m/Y H:i", strtotime($row['ngay_thanhtoan'])); ?></td>
                             <td class="text-center">
-                                <form method="POST" action="modules/delete_thanhtoan.php" onsubmit="return confirm('Bạn có chắc chắn muốn xóa giao dịch này?');">
+                                <form method="POST" action="modules/lichsuthanhtoan/delete_thanhtoan.php" onsubmit="return confirm('Bạn có chắc chắn muốn xóa giao dịch này?');">
                                     <input type="hidden" name="id_thanhtoan" value="<?php echo $row['id_thanhtoan']; ?>">
                                     <button type="submit" class="btn btn-danger btn-sm">
                                         <i class="fa-solid fa-trash"></i>

@@ -9,58 +9,34 @@
 
 if ($temp == 'courses') {
     include("modules/khoahoc/manage_courses.php");
-} 
-
-else if ($temp == 'students') {
+} else if ($temp == 'students') {
     include("modules/hocvien/manage_students.php");
-} 
-
-else if ($temp == 'thongbao') {
+} else if ($temp == 'thongbao') {
     include("modules/thongbao/thongbao.php");
-} 
-
-else if ($temp == 'add_course') {
+} else if ($temp == 'add_course') {
     include("modules/khoahoc/add_course.php");
-} 
-else if ($temp == 'edit_course') {
+} else if ($temp == 'edit_course') {
 
     include("modules/khoahoc/edit_course.php");
-} 
-
-else if ($temp == 'dangkykhoahoc') {
-    include("modules/dangkykhoahoc.php");
-} 
-
-else if ($temp == 'lichhoc') {
+} else if ($temp == 'dangkykhoahoc') {
+    include("modules/xacnhandangky/dangkykhoahoc.php");
+} else if ($temp == 'lichhoc') {
     include("modules/lichhoc/lichhoc.php");
-} 
-
-else if ($temp == 'thanhtoan') {
-    include("modules/lichsu_thanhtoan.php");
-} 
-
-else if ($temp == 'question') {
+} else if ($temp == 'thanhtoan') {
+    include("modules/lichsuthanhtoan/lichsu_thanhtoan.php");
+} else if ($temp == 'question') {
     include("modules/cauhoi/question.php");
-} 
-
-else if ($temp == 'ds_cauhoi') {
+} else if ($temp == 'ds_cauhoi') {
     include("modules/cauhoi/ds_cauhoi.php");
-} 
-
-else if ($temp == 'ds_dapan') {
+} else if ($temp == 'ds_dapan') {
     include("modules/cauhoi/ds_dapan.php");
-} 
-else if ($temp == 'kqhocvien') {
+} else if ($temp == 'kqhocvien') {
     include("modules/cauhoi/kqhocvien.php");
-} 
-
-else if ($temp == 'add_answer') {
+} else if ($temp == 'add_answer') {
     include("modules/cauhoi/add_answer.php");
-} 
-else if ($temp == 'lecturers') {
+} else if ($temp == 'lecturers') {
     include("modules/giangvien/manage_lecturers.php");
-}
-else {
+} else {
     include("modules/home.php");
 }
 ?>

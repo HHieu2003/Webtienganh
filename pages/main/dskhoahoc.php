@@ -63,7 +63,6 @@ $result_courses = $conn->query($sql_courses);
 <style>
     .featured-courses-section {
         padding: 0px 0;
-        background-color: #f8f9fa; /* Màu nền xám rất nhẹ để tách biệt với các khu vực khác */
     }
 
     /* Tinh chỉnh lại tiêu đề chung */

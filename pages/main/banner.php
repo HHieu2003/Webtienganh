@@ -29,8 +29,7 @@
                 </div>
             </div>
         </div>
-
-        <div class="row g-4 align-items-center feature-row flex-row-reverse" style="background-color: #f4fbf7; padding: 20px 0px;">
+        <div class="row g-4 align-items-center feature-row flex-row-reverse" style="background-color: #d1f8e2;; padding: 20px 0px; border-radius: 15px;">
             <div class="col-lg-6" data-aos="fade-right" data-aos-delay="200">
                 <div class="feature-image-large">
                     <img src="https://vietop.edu.vn/wp-content/uploads/2025/03/cong-nghe-hoc-tap.webp" alt="Nền tảng công nghệ">
@@ -62,7 +61,7 @@
     }
 
     .feature-card {
-        background-color: #f4fbf7;
+        background-color: #d1f8e2;
         /* Màu xanh lá rất nhạt */
         border-radius: 15px;
         padding: 30px;

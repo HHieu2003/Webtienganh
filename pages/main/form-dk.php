@@ -46,8 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_consult'])) {
 }
 ?>
 
-<div class="consult-section" style="    background-color: #d7eddc;
-">
+<div class="consult-section" style=" background-color: #d1f8e2;">
     <div class="container">
         <div class="row align-items-center g-5">
             <div class="col-lg-6" data-aos="fade-right">

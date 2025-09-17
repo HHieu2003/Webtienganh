@@ -19,7 +19,15 @@ $is_teacher = $_SESSION['is_teacher'] ?? false;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/admin.css">
+
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+
 </head>
+<style>
+    .cke_notifications_area{
+        top: 0px !important;
+    }
+</style>
 <body>
     <div class="wrapper">
         <aside class="admin-sidebar">
@@ -57,15 +65,5 @@ $is_teacher = $_SESSION['is_teacher'] ?? false;
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
-    <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
-    <script>
-        // Khởi tạo CKEditor một cách an toàn
-        if (document.getElementById('mo_ta')) {
-            CKEDITOR.replace('mo_ta');
-        }
-        if (document.getElementById('noi_dung_editor')) {
-            CKEDITOR.replace('noi_dung_editor');
-        }
-    </script>
-</body>
+    </body>
 </html>

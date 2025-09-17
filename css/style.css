@@ -40,7 +40,7 @@ section{
     justify-content: center;
     gap: 20px;
     padding: 20px 20px;
-    margin-top: 23px;
+    /* margin-top: 23px; */
 }
 .container-item{
     position: relative;

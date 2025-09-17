@@ -14,6 +14,24 @@ if (!empty($search_term)) {
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
+
+<style>
+    .description-cell {
+        max-width: 350px; /* Giới hạn chiều rộng tối đa của cột mô tả */
+    }
+    .description-truncate {
+        display: -webkit-box;
+        -webkit-line-clamp: 4; /* Giới hạn 4 dòng */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .actions-cell {
+        white-space: nowrap; /* Ngăn các nút xuống dòng */
+        min-width: 180px; /* Đặt chiều rộng tối thiểu để chứa các nút */
+    }
+</style>
+
 <div class="card animated-card">
     <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
@@ -23,6 +41,11 @@ $result = $stmt->get_result();
                     <input type="text" name="search" class="form-control" placeholder="Tìm kiếm giảng viên..." value="<?php echo htmlspecialchars($search_term); ?>">
                     <button type="submit" class="btn btn-primary ms-2"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </form>
+
+                <a href="modules/giangvien/export_lecturers.php" class="btn btn-info text-white me-2">
+                    <i class="fa-solid fa-file-excel"></i> Xuất Excel
+                </a>
+
                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addLecturerModal"><i class="fa-solid fa-plus"></i> Thêm Giảng viên</button>
             </div>
         </div>
@@ -31,7 +54,7 @@ $result = $stmt->get_result();
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead class="table-dark">
-                    <tr><th>ID</th><th>Hình ảnh</th><th>Tên giảng viên</th><th>Email</th><th>Số điện thoại</th><th class="text-center">Hành động</th></tr>
+                    <tr><th>ID</th><th  class="text-center">Hình ảnh</th><th>Tên giảng viên</th><th>Email</th><th>Số điện thoại</th><th>Mô tả</th><th class="text-center">Hành động</th></tr>
                 </thead>
                 <tbody>
                     <?php 
@@ -44,7 +67,14 @@ $result = $stmt->get_result();
                             <td><?php echo htmlspecialchars($row['ten_giangvien']); ?></td>
                             <td><?php echo htmlspecialchars($row['email']); ?></td>
                             <td><?php echo htmlspecialchars($row['so_dien_thoai']); ?></td>
-                            <td class="text-center">
+                            
+                            <td class="description-cell" title="<?php echo htmlspecialchars($row['mo_ta']); ?>">
+                                <div class="description-truncate">
+                                    <?php echo htmlspecialchars($row['mo_ta']); ?>
+                                </div>
+                            </td>
+
+                            <td class="text-center actions-cell">
                                 <button class="btn btn-primary btn-sm" onclick="openEditModal(<?php echo $row['id_giangvien']; ?>)"><i class="fa-solid fa-pen-to-square"></i> Sửa</button>
                                 <button class="btn btn-danger btn-sm" onclick="deleteLecturer(<?php echo $row['id_giangvien']; ?>)"><i class="fa-solid fa-trash"></i> Xóa</button>
                             </td>
@@ -105,6 +135,7 @@ $result = $stmt->get_result();
 </div>
 
 <script>
+// JavaScript giữ nguyên không thay đổi
 document.addEventListener("DOMContentLoaded", function() {
     const modalElement = document.getElementById('editLecturerModal');
     if (modalElement) {
@@ -116,7 +147,6 @@ async function openEditModal(lecturerId) {
     try {
         const response = await fetch(`./modules/giangvien/get_lecturer_info.php?id=${lecturerId}`);
         
-        // Kiểm tra nếu response không thành công (vd: 404, 500)
         if (!response.ok) {
             throw new Error(`Lỗi Server: ${response.status} ${response.statusText}`);
         }
@@ -128,7 +158,6 @@ async function openEditModal(lecturerId) {
             return;
         }
 
-        // Điền dữ liệu vào form
         document.getElementById('editLecturerId').value = data.id_giangvien;
         document.getElementById('editTenGiangVien').value = data.ten_giangvien;
         document.getElementById('editEmail').value = data.email;
@@ -148,7 +177,6 @@ async function openEditModal(lecturerId) {
 }
 
 function deleteLecturer(lecturerId) {
-    // Logic xóa giữ nguyên như cũ
     if (confirm("Bạn có chắc chắn muốn xóa giảng viên này?")) {
         fetch(`./modules/giangvien/delete_lecturer.php`, {
             method: 'POST',

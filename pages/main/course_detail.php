@@ -1,11 +1,9 @@
 <?php
-// File này được include từ index.php nên biến $conn và session đã có sẵn
-
-// --- PHẦN 1: LẤY DỮ LIỆU KHÓA HỌC ---
+// --- PHẦN 1: LẤY DỮ LIỆU KHÓA HỌC (Giữ nguyên logic PHP của bạn) ---
 if (isset($_GET['course_id'])) {
     $course_id = (int)$_GET['course_id'];
 
-    // CẬP NHẬT SQL: JOIN với bảng `giangvien` để lấy tên giảng viên
+    // Lấy thông tin khóa học và giảng viên
     $sql_course = "SELECT kh.*, gv.ten_giangvien 
                    FROM khoahoc kh
                    LEFT JOIN giangvien gv ON kh.id_giangvien = gv.id_giangvien
@@ -22,7 +20,7 @@ if (isset($_GET['course_id'])) {
         exit;
     }
 
-    // Lấy điểm đánh giá trung bình và tổng số lượt đánh giá
+    // Lấy thông tin đánh giá
     $sql_avg_rating = "SELECT AVG(diem_danhgia) AS avg_rating, COUNT(*) as total_reviews FROM danhgiakhoahoc WHERE id_khoahoc = ?";
     $stmt_avg = $conn->prepare($sql_avg_rating);
     $stmt_avg->bind_param("i", $course_id);
@@ -45,34 +43,63 @@ if (isset($_GET['course_id'])) {
     exit;
 }
 
-// --- PHẦN 2: XỬ LÝ GỬI ĐÁNH GIÁ ---
+// --- PHẦN 2: SỬA LỖI XỬ LÝ GỬI ĐÁNH GIÁ ---
+$review_message = '';
+$review_message_type = ''; // 'success' hoặc 'danger'
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_rating'])) {
     $diem_danhgia = $_POST['diem_danhgia'];
-    $nhan_xet = $_POST['nhan_xet'];
+    $nhan_xet = trim($_POST['nhan_xet']);
     $hocvien_id = $_SESSION['id_hocvien'] ?? null;
-    $message = '';
 
     if ($hocvien_id) {
-        // Kiểm tra xem đã đăng ký chưa
-        $sql_check_reg = "SELECT * FROM dangkykhoahoc WHERE id_hocvien = ? AND id_khoahoc = ?";
+        // Kiểm tra xem học viên đã đăng ký khóa học này chưa
+        $sql_check_reg = "SELECT * FROM dangkykhoahoc WHERE id_hocvien = ? AND id_khoahoc = ? AND trang_thai = 'da xac nhan'";
         $stmt_check = $conn->prepare($sql_check_reg);
         $stmt_check->bind_param("ii", $hocvien_id, $course_id);
         $stmt_check->execute();
+        
         if ($stmt_check->get_result()->num_rows > 0) {
-            // Lưu đánh giá
-            $sql_insert = "INSERT INTO danhgiakhoahoc (id_hocvien, id_khoahoc, diem_danhgia, nhan_xet) VALUES (?, ?, ?, ?)";
-            $stmt_insert = $conn->prepare($sql_insert);
-            $stmt_insert->bind_param("iiis", $hocvien_id, $course_id, $diem_danhgia, $nhan_xet);
-            $stmt_insert->execute();
-            echo "<script>alert('Cảm ơn bạn đã đánh giá!'); window.location.href=window.location.href;</script>";
-            exit;
+            // Kiểm tra xem đã đánh giá trước đó chưa
+            $sql_check_existing_review = "SELECT id_danhgia FROM danhgiakhoahoc WHERE id_hocvien = ? AND id_khoahoc = ?";
+            $stmt_check_review = $conn->prepare($sql_check_existing_review);
+            $stmt_check_review->bind_param("ii", $hocvien_id, $course_id);
+            $stmt_check_review->execute();
+            if ($stmt_check_review->get_result()->num_rows > 0) {
+                $review_message = 'Bạn đã đánh giá khóa học này rồi!';
+                $review_message_type = 'warning';
+            } else {
+                // Lưu đánh giá vào CSDL
+                $sql_insert = "INSERT INTO danhgiakhoahoc (id_hocvien, id_khoahoc, diem_danhgia, nhan_xet) VALUES (?, ?, ?, ?)";
+                $stmt_insert = $conn->prepare($sql_insert);
+                $stmt_insert->bind_param("iiis", $hocvien_id, $course_id, $diem_danhgia, $nhan_xet);
+                if ($stmt_insert->execute()) {
+                    // Sử dụng session để lưu thông báo và chuyển hướng để tránh gửi lại form
+                    $_SESSION['review_message'] = 'Cảm ơn bạn đã đánh giá khóa học!';
+                    $_SESSION['review_message_type'] = 'success';
+                    header("Location: " . $_SERVER['REQUEST_URI'] . "#reviews");
+                    exit;
+                } else {
+                    $review_message = 'Đã có lỗi xảy ra. Vui lòng thử lại.';
+                    $review_message_type = 'danger';
+                }
+            }
         } else {
-            $message = 'Bạn cần đăng ký khóa học để có thể đánh giá!';
+            $review_message = 'Bạn cần hoàn tất đăng ký khóa học này để có thể đánh giá!';
+            $review_message_type = 'danger';
         }
     } else {
-        $message = 'Vui lòng đăng nhập để đánh giá khóa học!';
+        $review_message = 'Vui lòng đăng nhập để đánh giá khóa học!';
+        $review_message_type = 'danger';
     }
-    if ($message) echo "<script>alert('" . addslashes($message) . "');</script>";
+}
+
+// Lấy thông báo từ session (nếu có) và xóa nó đi
+if (isset($_SESSION['review_message'])) {
+    $review_message = $_SESSION['review_message'];
+    $review_message_type = $_SESSION['review_message_type'];
+    unset($_SESSION['review_message']);
+    unset($_SESSION['review_message_type']);
 }
 ?>
 <div class="course-hero-section">
@@ -83,36 +110,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_rating'])) {
                 <h1 class="course-main-title"><?php echo htmlspecialchars($course['ten_khoahoc']); ?></h1>
                 <div class="course-meta-info">
                     <span><i class="fas fa-chalkboard-teacher"></i> Giảng viên: <strong><?php echo htmlspecialchars($course['ten_giangvien'] ?? 'Đang cập nhật'); ?></strong></span>
-                    <span>
-                        <i class="fas fa-star"></i>
-                        <strong><?php echo $avg_rating; ?></strong>
-                        (<?php echo $total_reviews; ?> đánh giá)
-                    </span>
+                    <span><i class="fas fa-star"></i><strong><?php echo $avg_rating; ?></strong> (<?php echo $total_reviews; ?> đánh giá)</span>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 <div class="course-detail-container">
     <div class="container">
         <div class="row">
             <div class="col-lg-8">
                 <div class="course-tabs" data-aos="fade-up">
                     <ul class="nav nav-tabs" id="courseTab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="description-tab" data-toggle="tab" data-target="#description" type="button" role="tab">Mô Tả Khóa Học</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="reviews-tab" data-toggle="tab" data-target="#reviews" type="button" role="tab">Đánh Giá (<?php echo $total_reviews; ?>)</button>
-                        </li>
+                        <li class="nav-item" role="presentation"><button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">Mô Tả Khóa Học</button></li>
+                        <li class="nav-item" role="presentation"><button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">Đánh Giá (<?php echo $total_reviews; ?>)</button></li>
                     </ul>
                     <div class="tab-content" id="courseTabContent">
                         <div class="tab-pane fade show active" id="description" role="tabpanel">
                             <div class="course-description-content">
-                                <div class="course-main-image" data-aos="fade-up">
-                                    <img src="<?php echo htmlspecialchars($course['hinh_anh']); ?>" alt="<?php echo htmlspecialchars($course['ten_khoahoc']); ?>">
-                                </div>
+                                <div class="course-main-image" data-aos="fade-up"><img src="<?php echo htmlspecialchars($course['hinh_anh']); ?>" alt="<?php echo htmlspecialchars($course['ten_khoahoc']); ?>"></div>
                                 <?php echo !empty($course['mo_ta']) ? $course['mo_ta'] : '<p>Nội dung đang được cập nhật...</p>'; ?>
                             </div>
                         </div>
@@ -132,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_rating'])) {
                                                         <?php endfor; ?>
                                                     </span>
                                                 </div>
-                                                <p><?php echo htmlspecialchars($comment['nhan_xet']); ?></p>
+                                                <p><?php echo nl2br(htmlspecialchars($comment['nhan_xet'])); ?></p>
                                             </div>
                                         </div>
                                     <?php endwhile; ?>
@@ -143,10 +159,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_rating'])) {
                                 <hr>
                                 <div class="submit-review-form">
                                     <h5>Gửi đánh giá của bạn</h5>
-                                    <form method="POST">
-                                        <div class="form-group">
-                                            <label for="diem_danhgia">Đánh giá của bạn *</label>
-                                            <select name="diem_danhgia" id="diem_danhgia" class="form-control" required>
+                                    <?php if (!empty($review_message)): ?>
+                                        <div class="alert alert-<?php echo $review_message_type; ?>"><?php echo $review_message; ?></div>
+                                    <?php endif; ?>
+                                    
+                                    <form method="POST" action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>#reviews">
+                                        <div class="form-group mb-3">
+                                            <label for="diem_danhgia" class="form-label">Đánh giá của bạn *</label>
+                                            <select name="diem_danhgia" id="diem_danhgia" class="form-select" required>
                                                 <option value="5">5 - Tuyệt vời</option>
                                                 <option value="4">4 - Tốt</option>
                                                 <option value="3">3 - Trung bình</option>
@@ -154,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_rating'])) {
                                                 <option value="1">1 - Rất kém</option>
                                             </select>
                                         </div>
-                                        <div class="form-group">
+                                        <div class="form-group mb-3">
                                             <textarea name="nhan_xet" class="form-control" placeholder="Viết nhận xét của bạn tại đây..." rows="4" required></textarea>
                                         </div>
                                         <button type="submit" name="submit_rating" class="btn btn-success">Gửi đánh giá</button>
@@ -165,7 +185,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_rating'])) {
                     </div>
                 </div>
             </div>
-
             <div class="col-lg-4">
                 <div class="sidebar-sticky" data-aos="fade-left" data-aos-delay="200">
                     <div class="course-summary-card">
@@ -173,9 +192,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_rating'])) {
                         <ul class="summary-list">
                             <li><i class="fas fa-tag"></i><strong>Giá:</strong> <span><?php echo number_format($course['chi_phi'], 0, ',', '.'); ?> VNĐ</span></li>
                             <li><i class="fas fa-user-tie"></i><strong>Giảng viên:</strong> <span><?php echo htmlspecialchars($course['ten_giangvien'] ?? 'N/A'); ?></span></li>
-                            <li><i class="fas fa-calendar-alt"></i><strong>Khai giảng:</strong> <span><?php echo date('d/m/Y', strtotime($course['thoi_gian'])); ?></span></li>
+                            <li><i class="fas fa-calendar-alt"></i><strong>Thời lượng:</strong> <span><?php echo htmlspecialchars($course['thoi_gian']); ?> buổi</span></li>
                         </ul>
-                        <a href="./index.php?nav=dangkykhoahoc&id_khoahoc=<?php echo $course['id_khoahoc']; ?>" class="btn-enroll">Đăng Ký Ngay <i class="fas fa-arrow-right"></i></a>
+                        <button class="btn-enroll" data-bs-toggle="modal" data-bs-target="#classSelectionModal">
+                            Đăng Ký Ngay <i class="fas fa-arrow-right"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -183,232 +204,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_rating'])) {
     </div>
 </div>
 
+<div class="modal fade" id="classSelectionModal" tabindex="-1" aria-labelledby="classSelectionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="classSelectionModalLabel">Chọn Lớp Học Phù Hợp</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="classListContainer">
+        <div class="text-center p-5">
+            <div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading...</span></div>
+            <p class="mt-2">Đang tải danh sách lớp...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <style>
-    /* ... (CSS cho các phần khác đã có) ... */
-    .course-hero-section {
-        padding: 60px 0;
-        background: linear-gradient(135deg, #0db33b, #28a745);
-        color: #fff;
-    }
-
-    .course-main-title {
-        font-size: 42px;
-        font-weight: 700;
-        margin-bottom: 15px;
-    }
-
-    .course-meta-info {
-        display: flex;
-        gap: 25px;
-        font-size: 16px;
-        opacity: 0.9;
-    }
-
-    .course-meta-info i {
-        margin-right: 8px;
-    }
-
-    /* Bố cục chính */
-    .course-detail-container {
-        margin: 40px auto;
-    }
-
-    .course-main-image {
-        margin-bottom: 30px;
-        position: relative;
-    }
-
-    .course-main-image img {
-        width: 50%;
-        height: auto;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease;
-    }
-
-    .course-main-image:hover img {
-        transform: scale(1.03);
-    }
-
-    /* Viền gradient phát sáng */
-    .course-main-image::after {
-        content: '';
-        position: absolute;
-        inset: -3px;
-        border-radius: 18px;
-        background: conic-gradient(from 90deg, #84fab0, #8fd3f4, #d4a4f2, #f78ca0, #84fab0);
-        z-index: -1;
-        filter: blur(5px);
-        opacity: 0;
-        transition: opacity 0.4s ease;
-    }
-
-    .course-main-image:hover::after {
-        opacity: 0.8;
-    }
-
-
-    /* Hệ thống Tabs */
-    .course-tabs .nav-tabs {
-        border-bottom: 2px solid #eee;
-    }
-
-    .course-tabs .nav-link {
-        border: none;
-        padding: 15px 25px;
-        font-size: 18px;
-        font-weight: 600;
-        color: #666;
-        border-bottom: 3px solid transparent;
-        transition: all 0.3s ease;
-    }
-
-    .course-tabs .nav-link.active {
-        color: #0db33b;
-        border-bottom-color: #0db33b;
-        background-color: transparent;
-    }
-
-    .tab-content {
-        padding: 30px;
-        border: 1px solid #eee;
-        border-top: none;
-        border-radius: 0 0 15px 15px;
-    }
-
-    .course-description-content {
-        font-size: 16px;
-        line-height: 1.8;
-        color: #555;
-    }
-
-    /* Khu vực đánh giá */
-    .reviews-section h4 {
-        font-weight: 600;
-        margin-bottom: 20px;
-    }
-
-    .review-item {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 25px;
-        padding-bottom: 25px;
-        border-bottom: 1px solid #f0f0f0;
-    }
-
-    .review-item:last-child {
-        border-bottom: none;
-    }
-
-    .review-item img {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-    }
-
-    .review-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .review-stars i {
-        color: #ccc;
-    }
-
-    .review-stars i.filled {
-        color: #ffc107;
-    }
-
-    .review-content p {
-        margin: 5px 0 0 0;
-        color: #555;
-    }
-
-    .submit-review-form h5 {
-        font-weight: 600;
-        margin-bottom: 15px;
-    }
-
-    .submit-review-form .form-control {
-        border-radius: 8px;
-    }
-
-    .submit-review-form .btn {
-        border-radius: 8px;
-        font-weight: 600;
-    }
-
-    /* Sidebar */
-    .sidebar-sticky {
-        position: -webkit-sticky;
-        position: sticky;
-        top: 100px;
-    }
-
-    .course-summary-card {
-        background-color: #fff;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 8px 35px rgba(0, 0, 0, 0.08);
-        border: 1px solid #eee;
-    }
-
-    .card-title {
-        font-size: 22px;
-        font-weight: 600;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-
-    .summary-list {
-        list-style: none;
-        padding: 0;
-        margin-bottom: 25px;
-    }
-
-    .summary-list li {
-        display: flex;
-        justify-content: space-between;
-        padding: 12px 0;
-        border-bottom: 1px dashed #eee;
-    }
-
-    .summary-list li i {
-        color: #0db33b;
-        margin-right: 10px;
-    }
-
-    .summary-list li span {
-        color: #555;
-    }
-
-    .btn-enroll {
-        display: block;
-        width: 100%;
-        text-align: center;
-        color: #fff;
-        padding: 14px;
-        border-radius: 8px;
-        font-size: 18px;
-        font-weight: bold;
-        text-decoration: none;
-        background: linear-gradient(45deg, #ff416c, #ff4b2b);
-        transition: all 0.3s ease;
-    }
-
-    .btn-enroll:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4);
-        color: #fff;
-    }
-
-    .btn-enroll i {
-        margin-left: 5px;
-        transition: transform 0.3s ease;
-    }
-
-    .btn-enroll:hover i {
-        transform: translateX(5px);
-    }
+/* ... (GIỮ NGUYÊN CSS CŨ CỦA BẠN VÀ CSS CHO MODAL) ... */
+.course-hero-section{padding:60px 0;background:linear-gradient(135deg,#0db33b,#28a745);color:#fff}.course-main-title{font-size:42px;font-weight:700;margin-bottom:15px}.course-meta-info{display:flex;gap:25px;font-size:16px;opacity:.9}.course-meta-info i{margin-right:8px}.course-detail-container{margin:40px auto}.course-main-image{margin-bottom:30px;position:relative}.course-main-image img{width:100%;max-width: 500px; height:auto;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,.1);transition:transform .3s ease}.course-main-image:hover img{transform:scale(1.03)}.course-tabs .nav-tabs{border-bottom:2px solid #eee}.course-tabs .nav-link{border:none;padding:15px 25px;font-size:18px;font-weight:600;color:#666;border-bottom:3px solid transparent;transition:all .3s ease}.course-tabs .nav-link.active{color:#0db33b;border-bottom-color:#0db33b;background-color:transparent}.tab-content{padding:30px;border:1px solid #eee;border-top:none;border-radius:0 0 15px 15px}.course-description-content{font-size:16px;line-height:1.8;color:#555}.reviews-section h4{font-weight:600;margin-bottom:20px}.review-item{display:flex;gap:15px;margin-bottom:25px;padding-bottom:25px;border-bottom:1px solid #f0f0f0}.review-item:last-child{border-bottom:none}.review-item img{width:50px;height:50px;border-radius:50%}.review-header{display:flex;justify-content:space-between;align-items:center; flex-wrap: wrap;}.review-stars i{color:#ccc}.review-stars i.filled{color:#ffc107}.review-content p{margin:5px 0 0 0;color:#555}.submit-review-form h5{font-weight:600;margin-bottom:15px}.submit-review-form .form-control,.submit-review-form .form-select{border-radius:8px}.submit-review-form .btn{border-radius:8px;font-weight:600}.sidebar-sticky{position:-webkit-sticky;position:sticky;top:100px}.course-summary-card{background-color:#fff;padding:30px;border-radius:15px;box-shadow:0 8px 35px rgba(0,0,0,.08);border:1px solid #eee}.card-title{font-size:22px;font-weight:600;margin-bottom:20px;text-align:center}.summary-list{list-style:none;padding:0;margin-bottom:25px}.summary-list li{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px dashed #eee}.summary-list li i{color:#0db33b;margin-right:10px}.summary-list li span{color:#555}.btn-enroll{display:block;width:100%;text-align:center;color:#fff;padding:14px;border-radius:8px;font-size:18px;font-weight:bold;text-decoration:none;background:linear-gradient(45deg,#ff416c,#ff4b2b);transition:all .3s ease; border: none;}.btn-enroll:hover{transform:translateY(-3px);box-shadow:0 5px 15px rgba(255,65,108,.4);color:#fff}.btn-enroll i{margin-left:5px;transition:transform .3s ease}.btn-enroll:hover i{transform:translateX(5px)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes slideInUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}.modal-content{border:none;border-radius:15px}.modal-header{background-color:#f8f9fa;border-bottom:1px solid #dee2e6}.modal-title{font-weight:600;color:#333}.modal-body{background-color:#f8f9fa;padding:25px}.class-item{background-color:#fff;border-radius:12px;padding:20px;margin-bottom:15px;box-shadow:0 4px 15px rgba(0,0,0,.05);border:1px solid #e9ecef;animation:slideInUp .5s ease-out forwards;opacity:0}.class-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}.class-header h6{font-size:18px;font-weight:600;color:#0db33b;margin:0}.class-meta{display:flex;gap:20px;font-size:14px;color:#6c757d}.class-actions .btn{font-size:14px;font-weight:500}.schedule-accordion .accordion-button{background-color:#f8f9fa;color:#333;font-weight:500}.schedule-accordion .accordion-button:not(.collapsed){background-color:#e7f7ec;color:#0a8a2c;box-shadow:none}.schedule-accordion .accordion-body{padding:0}.schedule-list{list-style:none;padding:0;margin:0;max-height:200px;overflow-y:auto}.schedule-list li{padding:10px 15px;border-bottom:1px solid #f0f0f0;font-size:14px;display:flex;justify-content:space-between; flex-wrap: wrap; gap: 10px;}.schedule-list li:last-child{border-bottom:none}
 </style>
+
+<script>
+// SCRIPT XỬ LÝ MODAL (Giữ nguyên như lần trước)
+document.addEventListener('DOMContentLoaded', function () {
+    // ... (Giữ nguyên toàn bộ script modal của bạn)
+    const classSelectionModal = document.getElementById('classSelectionModal');
+    const classListContainer = document.getElementById('classListContainer');
+    const courseId = <?php echo $course_id; ?>;
+
+    classSelectionModal.addEventListener('show.bs.modal', async function () {
+        classListContainer.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Đang tải danh sách lớp...</p></div>`;
+        try {
+            const response = await fetch(`./pages/main/get_classes_for_course.php?course_id=${courseId}`);
+            if (!response.ok) { throw new Error('Network response was not ok'); }
+            const classes = await response.json();
+            classListContainer.innerHTML = '';
+            if (classes.length > 0) {
+                classes.forEach((classItem, index) => {
+                    let scheduleHtml = '<p class="p-3 text-muted">Lớp này hiện chưa có lịch học chi tiết.</p>';
+                    if (classItem.schedules && classItem.schedules.length > 0) {
+                        scheduleHtml = '<ul class="schedule-list">';
+                        classItem.schedules.forEach(schedule => {
+                            const date = new Date(schedule.ngay_hoc).toLocaleDateString('vi-VN');
+                            scheduleHtml += `<li><span><i class="fas fa-calendar-day text-success"></i> ${date}</span><span><i class="fas fa-clock text-success"></i> ${schedule.gio_bat_dau.substr(0,5)} - ${schedule.gio_ket_thuc.substr(0,5)}</span><span><i class="fas fa-map-marker-alt text-success"></i> ${schedule.phong_hoc}</span></li>`;
+                        });
+                        scheduleHtml += '</ul>';
+                    }
+                    const classElementHtml = `
+                        <div class="class-item" style="animation-delay: ${index * 100}ms">
+                            <div class="class-header">
+                                <h6>${classItem.ten_lop}</h6>
+                                <div class="class-actions">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#schedule-${classItem.id_lop}">
+                                        <i class="fas fa-calendar-alt"></i> Xem lịch học
+                                    </button>
+                                    <a href="./index.php?nav=dangkykhoahoc&id_khoahoc=${courseId}&id_lop=${classItem.id_lop}" class="btn btn-success btn-sm">
+                                        <i class="fas fa-check-circle"></i> Chọn lớp này
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="class-meta mt-2">
+                                <span><i class="fas fa-user-tie"></i> GV: ${classItem.ten_giangvien || 'N/A'}</span>
+                                <span><i class="fas fa-users"></i> Sĩ số: ${classItem.so_luong_hoc_vien}</span>
+                            </div>
+                            <div class="collapse mt-3" id="schedule-${classItem.id_lop}">
+                                <div class="card card-body" style="padding: 0;">
+                                    ${scheduleHtml}
+                                </div>
+                            </div>
+                        </div>`;
+                    classListContainer.innerHTML += classElementHtml;
+                });
+            } else {
+                classListContainer.innerHTML = '<div class="alert alert-warning text-center">Hiện tại chưa có lớp học nào cho khóa học này. Vui lòng quay lại sau.</div>';
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải danh sách lớp:', error);
+            classListContainer.innerHTML = '<div class="alert alert-danger text-center">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.</div>';
+        }
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

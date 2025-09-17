@@ -16,6 +16,7 @@
             z-index: 1000;
             background-color: #f3f7f8; 
             display: flex;
+            border-bottom: 2px solid #60d02f;
         }
         .header-top .left, .header-top .right {
             display: flex;
@@ -24,8 +25,9 @@
         .right a {
             text-decoration: none;
             margin-left: 15px;
-            font-size: 16px;
-            color: green;
+            font-size: 15px;
+       color: #298f29;
+                font-weight: 700;
         }
         .right a:not(:last-child)::after {
             content: " | ";

@@ -46,7 +46,7 @@
 <style>
     .hero-intro-section {
         /* THAY ĐỔI 1: Đổi màu nền sang xanh nhạt của dự án */
-        background-color: #f4fbf7;
+        background-color: #d1f8e2;
         overflow: hidden;
     }
 

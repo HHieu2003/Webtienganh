@@ -220,14 +220,14 @@
 </div>
 
 <style>
-    body {
-        background-color: #eaf3ff; /* Màu nền xám xanh nhạt giống ảnh */
-        font-family: Arial, sans-serif; /* Chọn font chữ phù hợp */
-    }
+    /* body {
+        background-color: #eaf3ff;
+        font-family: Arial, sans-serif; 
 
+        */
     .roadmap-section {
         padding: 0px 0;
-            background-color: #d7eddc;
+        background-color: #d1f8e2;
     }
 
     .section-header {

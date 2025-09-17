@@ -50,7 +50,7 @@ $courses = $conn->query("SELECT id_khoahoc, ten_khoahoc FROM khoahoc");
                                 <?php endif; ?>
                             </td>
                             <td class="text-center">
-                                <a href="./admin.php?nav=ds_cauhoi&id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-primary btn-sm" title="Quản lý câu hỏi"><i class="fa-solid fa-list-check"></i> Câu hỏi</a>
+                                <a href="./admin.php?nav=ds_cauhoi&id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-primary btn-sm mb-1" title="Quản lý câu hỏi"><i class="fa-solid fa-list-check"></i> Câu hỏi</a>
                                 <a href="./admin.php?nav=kqhocvien&id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-info btn-sm text-white" title="Xem kết quả"><i class="fa-solid fa-square-poll-vertical"></i> Kết quả</a>
                                 <a href="./modules/cauhoi/delete_test.php?id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Xóa bài test này sẽ xóa tất cả câu hỏi, đáp án và kết quả liên quan. Bạn có chắc chắn?');" title="Xóa"><i class="fa-solid fa-trash"></i></a>
                             </td>

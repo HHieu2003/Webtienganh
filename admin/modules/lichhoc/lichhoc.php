@@ -7,14 +7,16 @@ if (session_status() == PHP_SESSION_NONE) {
 // Lấy các tham số từ URL
 $lop_id = $_GET['lop_id'] ?? null;
 $view = $_GET['view'] ?? 'students'; // Mặc định tab đầu tiên là 'students'
+$search_classes = $_GET['search_classes'] ?? '';
 
 // Lấy danh sách giảng viên và khóa học cho các form modal
 $lecturers = $conn->query("SELECT id_giangvien, ten_giangvien FROM giangvien ORDER BY ten_giangvien");
 $courses = $conn->query("SELECT id_khoahoc, ten_khoahoc FROM khoahoc ORDER BY ten_khoahoc");
 
 // Lấy dữ liệu cho Modal "Thêm học viên" nếu đang ở trang chi tiết
-$eligible_students = null; // Khởi tạo
+$eligible_students = null;
 if ($lop_id) {
+    // ... (logic lấy học viên đủ điều kiện giữ nguyên)
     $stmt_kh = $conn->prepare("SELECT id_khoahoc FROM lop_hoc WHERE id_lop = ?");
     $stmt_kh->bind_param('s', $lop_id);
     $stmt_kh->execute();
@@ -22,8 +24,6 @@ if ($lop_id) {
     if ($id_khoahoc_result->num_rows > 0) {
         $id_khoahoc = $id_khoahoc_result->fetch_assoc()['id_khoahoc'];
         $stmt_kh->close();
-
-        // Lấy danh sách học viên đủ điều kiện để thêm vào lớp
         $sql_eligible = "SELECT hv.id_hocvien, hv.ten_hocvien FROM dangkykhoahoc dk
                          JOIN hocvien hv ON dk.id_hocvien = hv.id_hocvien
                          WHERE dk.id_khoahoc = ? AND dk.trang_thai = 'da xac nhan' AND dk.id_lop IS NULL";
@@ -38,7 +38,6 @@ if ($lop_id) {
 <div class="container-fluid">
     <?php if ($lop_id): // --- GIAO DIỆN CHI TIẾT LỚP HỌC (VỚI TABS) --- ?>
         <?php
-        // Lấy thông tin chi tiết lớp học để hiển thị tiêu đề
         $sql_lop = "SELECT lh.ten_lop, kh.ten_khoahoc FROM lop_hoc lh
                     JOIN khoahoc kh ON lh.id_khoahoc = kh.id_khoahoc
                     WHERE lh.id_lop = ?";
@@ -48,7 +47,6 @@ if ($lop_id) {
         $lop = $stmt_lop->get_result()->fetch_assoc();
         if (!$lop) die("Lớp học không tồn tại.");
         ?>
-
         <div class="d-flex align-items-center mb-3">
             <a href="./admin.php?nav=lichhoc" class="btn btn-secondary me-3"><i class="fa-solid fa-arrow-left"></i> Quay lại</a>
             <h1 class="title-color mb-0" style="border: none; padding-bottom: 0; margin-bottom: 0;">Lớp: <?php echo htmlspecialchars($lop['ten_lop']); ?></h1>
@@ -76,13 +74,10 @@ if ($lop_id) {
             </div>
             <div class="card-body">
                 <?php
-                // Hiển thị thông báo (nếu có)
                 if (isset($_SESSION['message'])) {
                     echo '<div class="alert alert-' . $_SESSION['message']['type'] . ' alert-dismissible fade show">' . htmlspecialchars($_SESSION['message']['text']) . '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
                     unset($_SESSION['message']);
                 }
-
-                // Tải nội dung của tab tương ứng
                 if ($view === 'students' && file_exists('modules/lichhoc/view_students.php')) {
                     include('modules/lichhoc/view_students.php');
                 } elseif ($view === 'schedule' && file_exists('modules/lichhoc/view_schedule.php')) {
@@ -93,23 +88,41 @@ if ($lop_id) {
                 ?>
             </div>
         </div>
-
     <?php else: // --- GIAO DIỆN DANH SÁCH CÁC LỚP HỌC --- ?>
-        
         <?php
-            // Code hiển thị danh sách các lớp học
             $sql = "SELECT lh.id_lop, lh.ten_lop, lh.trang_thai, kh.ten_khoahoc, gv.ten_giangvien 
                     FROM lop_hoc lh 
                     JOIN khoahoc kh ON lh.id_khoahoc = kh.id_khoahoc 
-                    LEFT JOIN giangvien gv ON lh.id_giangvien = gv.id_giangvien 
-                    ORDER BY lh.id_lop ASC";
-            $result = $conn->query($sql);
+                    LEFT JOIN giangvien gv ON lh.id_giangvien = gv.id_giangvien";
+            $params = [];
+            $types = "";
+            if (!empty($search_classes)) {
+                $sql .= " WHERE lh.ten_lop LIKE ? OR kh.ten_khoahoc LIKE ? OR gv.ten_giangvien LIKE ?";
+                $search_param = "%" . $search_classes . "%";
+                $params = [$search_param, $search_param, $search_param];
+                $types = "sss";
+            }
+            $sql .= " ORDER BY lh.id_lop ASC";
+            $stmt = $conn->prepare($sql);
+            if (!empty($params)) {
+                $stmt->bind_param($types, ...$params);
+            }
+            $stmt->execute();
+            $result = $stmt->get_result();
         ?>
         <div class="card animated-card">
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <h4 class="mb-0"><i class="fa-solid fa-school me-2"></i>Quản lý Lớp học</h4>
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addClassModal"><i class="fa-solid fa-plus"></i> Thêm Lớp học</button>
+                    <div class="d-flex">
+                        <form method="GET" action="./admin.php" class="d-flex me-2">
+                             <input type="hidden" name="nav" value="lichhoc">
+                             <input type="text" name="search_classes" class="form-control" placeholder="Tìm tên lớp, khóa học..." value="<?php echo htmlspecialchars($search_classes); ?>">
+                             <button type="submit" class="btn btn-primary ms-2"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        </form>
+                        <a href="modules/lichhoc/export_classes.php?search=<?php echo htmlspecialchars($search_classes); ?>" class="btn btn-info text-white me-2"><i class="fa-solid fa-file-excel"></i> Excel</a>
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addClassModal"><i class="fa-solid fa-plus"></i> Thêm Lớp</button>
+                    </div>
                 </div>
             </div>
             <div class="card-body">
@@ -122,25 +135,27 @@ if ($lop_id) {
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="table-dark">
-                            <tr>
-                                <th>ID Lớp</th><th>Tên Lớp</th><th>Khóa học</th><th>Giảng viên</th><th class="text-center">Trạng thái</th><th class="text-center">Hành động</th>
-                            </tr>
+                            <tr><th>ID Lớp</th><th>Tên Lớp</th><th>Khóa học</th><th>Giảng viên</th><th class="text-center">Trạng thái</th><th class="text-center">Hành động</th></tr>
                         </thead>
                         <tbody>
-                            <?php $index = 0; while ($row = $result->fetch_assoc()): ?>
-                            <tr class="animated-row" style="animation-delay: <?php echo $index++ * 50; ?>ms;">
-                                <td><strong><?php echo htmlspecialchars($row['id_lop']); ?></strong></td>
-                                <td><?php echo htmlspecialchars($row['ten_lop']); ?></td>
-                                <td><?php echo htmlspecialchars($row['ten_khoahoc']); ?></td>
-                                <td><?php echo ($row['ten_giangvien'] ? htmlspecialchars($row['ten_giangvien']) : '<span class="text-muted">Chưa phân công</span>'); ?></td>
-                                <td class="text-center"><?php echo ($row['trang_thai'] === 'dang hoc') ? '<span class="badge bg-success">Đang học</span>' : '<span class="badge bg-secondary">Đã xong</span>'; ?></td>
-                                <td class="text-center">
-                                    <a href="./admin.php?nav=lichhoc&lop_id=<?php echo $row['id_lop']; ?>" class="btn btn-info btn-sm text-white" title="Quản lý chi tiết"><i class="fa-solid fa-arrow-right-to-bracket"></i> Chi tiết</a>
-                                    <button class="btn btn-primary btn-sm" onclick="openEditModal('<?php echo $row['id_lop']; ?>')" title="Sửa"><i class="fa-solid fa-pen-to-square"></i></button>
-                                    <a href="modules/lichhoc/delete_lop.php?delete_lop_id=<?php echo $row['id_lop'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('Xóa lớp học?');" title="Xóa"><i class="fa-solid fa-trash"></i></a>
-                                </td>
-                            </tr>
-                            <?php endwhile; ?>
+                            <?php if ($result->num_rows > 0):
+                                $index = 0; while ($row = $result->fetch_assoc()): ?>
+                                <tr class="animated-row" style="animation-delay: <?php echo $index++ * 50; ?>ms;">
+                                    <td><strong><?php echo htmlspecialchars($row['id_lop']); ?></strong></td>
+                                    <td><?php echo htmlspecialchars($row['ten_lop']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['ten_khoahoc']); ?></td>
+                                    <td><?php echo ($row['ten_giangvien'] ? htmlspecialchars($row['ten_giangvien']) : '<span class="text-muted">Chưa phân công</span>'); ?></td>
+                                    <td class="text-center"><?php echo ($row['trang_thai'] === 'dang hoc') ? '<span class="badge bg-success">Đang học</span>' : '<span class="badge bg-secondary">Đã xong</span>'; ?></td>
+                                    <td class="text-center">
+                                        <a href="./admin.php?nav=lichhoc&lop_id=<?php echo $row['id_lop']; ?>" class="btn btn-info btn-sm text-white mb-1" title="Quản lý chi tiết"><i class="fa-solid fa-arrow-right-to-bracket"></i> Chi tiết</a>
+                                        <button class="btn btn-primary btn-sm" onclick="openEditModal('<?php echo $row['id_lop']; ?>')" title="Sửa"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <a href="modules/lichhoc/delete_lop.php?delete_lop_id=<?php echo $row['id_lop'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('Xóa lớp học?');" title="Xóa"><i class="fa-solid fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                                <?php endwhile;
+                            else: ?>
+                                <tr><td colspan="6" class="text-center text-muted py-3">Không có lớp học nào phù hợp.</td></tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -179,7 +194,6 @@ if ($lop_id) {
             </div>
         </div>
     </div>
-    
     <div class="modal fade" id="editClassModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -205,7 +219,6 @@ if ($lop_id) {
             </div>
         </div>
     </div>
-    
     <div class="modal fade" id="addStudentToClassModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -237,7 +250,6 @@ if ($lop_id) {
             </div>
         </div>
     </div>
-
     <div class="modal fade" id="addScheduleModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -255,7 +267,6 @@ if ($lop_id) {
             </div>
         </div>
     </div>
-
     <div class="modal fade" id="editScheduleModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -277,7 +288,7 @@ if ($lop_id) {
 </div>
 
 <script>
-    // JavaScript để mở các Modal
+    // JavaScript để mở các Modal (Giữ nguyên không đổi)
     document.addEventListener("DOMContentLoaded", function() {
         if (document.getElementById('editClassModal')) {
             window.editClassModal = new bootstrap.Modal(document.getElementById('editClassModal'));
@@ -305,17 +316,13 @@ if ($lop_id) {
             const response = await fetch(`./modules/lichhoc/get_schedule_info.php?id=${scheduleId}`);
             if (!response.ok) throw new Error('Network response was not ok.');
             const data = await response.json();
-            
             document.getElementById('edit_id_lichhoc').value = data.id_lichhoc;
             document.getElementById('edit_ngay_hoc').value = data.ngay_hoc;
             document.getElementById('edit_gio_bat_dau').value = data.gio_bat_dau;
             document.getElementById('edit_gio_ket_thuc').value = data.gio_ket_thuc;
             document.getElementById('edit_phong_hoc').value = data.phong_hoc;
             document.getElementById('edit_ghi_chu').value = data.ghi_chu;
-            
-            if (window.editScheduleModal) {
-                window.editScheduleModal.show();
-            }
+            if (window.editScheduleModal) { window.editScheduleModal.show(); }
         } catch (error) {
             console.error('Lỗi:', error);
             alert('Không thể lấy dữ liệu buổi học.');

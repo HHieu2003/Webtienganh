@@ -26,6 +26,11 @@ $result = $stmt->get_result();
                     <input type="text" name="search" class="form-control" placeholder="Tìm kiếm học viên..." value="<?php echo htmlspecialchars($search_term); ?>">
                     <button type="submit" class="btn btn-primary ms-2"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </form>
+                
+                <a href="modules/hocvien/export_students.php" class="btn btn-info text-white me-2">
+                    <i class="fa-solid fa-file-excel"></i> Xuất Excel
+                </a>
+                
                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addStudentModal">
                     <i class="fa-solid fa-plus"></i> Thêm Học viên
                 </button>

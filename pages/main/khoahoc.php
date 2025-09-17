@@ -75,6 +75,7 @@
         max-width: 1200px;
         margin: 0px auto;
         padding: 20px;
+            min-height: 418px;
     }
     
     .section-header {

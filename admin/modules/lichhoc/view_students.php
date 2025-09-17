@@ -1,15 +1,27 @@
 <?php
-// Giả định $conn và $lop_id đã có từ file lichhoc.php
 if (!isset($lop_id)) {
     die("Lỗi: Không tìm thấy thông tin lớp học.");
 }
 
-// Lấy danh sách học viên hiện có trong lớp để hiển thị
+// Xử lý tìm kiếm
+$search_students = $_GET['search_students'] ?? '';
+
+// Lấy danh sách học viên
 $sql_students_in_class = "SELECT hv.id_hocvien, hv.ten_hocvien, hv.email, hv.so_dien_thoai
                           FROM dangkykhoahoc dk JOIN hocvien hv ON dk.id_hocvien = hv.id_hocvien
                           WHERE dk.id_lop = ?";
+$params = [$lop_id];
+$types = "s";
+
+if (!empty($search_students)) {
+    $sql_students_in_class .= " AND (hv.ten_hocvien LIKE ? OR hv.email LIKE ?)";
+    $search_param = "%" . $search_students . "%";
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $types .= "ss";
+}
 $stmt_students = $conn->prepare($sql_students_in_class);
-$stmt_students->bind_param('s', $lop_id);
+$stmt_students->bind_param($types, ...$params);
 $stmt_students->execute();
 $students_in_class = $stmt_students->get_result();
 ?>
@@ -17,9 +29,21 @@ $students_in_class = $stmt_students->get_result();
 <div class="card mt-4 animated-card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Danh sách học viên trong lớp</h5>
-        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addStudentToClassModal">
-            <i class="fa-solid fa-plus"></i> Thêm học viên vào lớp
-        </button>
+        <div class="d-flex">
+            <form method="GET" action="./admin.php" class="d-flex me-2">
+                <input type="hidden" name="nav" value="lichhoc">
+                <input type="hidden" name="lop_id" value="<?php echo htmlspecialchars($lop_id); ?>">
+                <input type="hidden" name="view" value="students">
+                <input type="text" name="search_students" class="form-control" placeholder="Tìm học viên..." value="<?php echo htmlspecialchars($search_students); ?>">
+                <button type="submit" class="btn btn-primary ms-2"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </form>
+            <a href="modules/lichhoc/export_students_in_class.php?lop_id=<?php echo htmlspecialchars($lop_id); ?>&search=<?php echo htmlspecialchars($search_students); ?>" class="btn btn-info text-white me-2">
+                <i class="fa-solid fa-file-excel"></i> Xuất Excel
+            </a>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addStudentToClassModal">
+                <i class="fa-solid fa-plus"></i> Thêm học viên
+            </button>
+        </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -44,7 +68,7 @@ $students_in_class = $stmt_students->get_result();
                             </td>
                         </tr>
                     <?php endwhile; else: ?>
-                        <tr><td colspan="5" class="text-center text-muted py-3">Chưa có học viên nào trong lớp này.</td></tr>
+                        <tr><td colspan="5" class="text-center text-muted py-3">Không tìm thấy học viên nào phù hợp.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>

@@ -1,5 +1,5 @@
 <?php
-include('../../config/config.php');
+include('../../../config/config.php');
 session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -27,6 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Chuyển hướng lại trang danh sách lịch sử thanh toán
-header("Location: ../admin.php?nav=thanhtoan");
+header("Location: ../../admin.php?nav=thanhtoan");
 exit();
 ?>

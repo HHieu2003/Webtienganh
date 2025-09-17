@@ -1,10 +1,15 @@
 <?php
 // session_start(); đã được gọi ở file admin.php
-// Lấy danh sách khóa học và lớp học cho form
-$courses = $conn->query("SELECT id_khoahoc, ten_khoahoc FROM khoahoc");
-$classes = $conn->query("SELECT id_lop, ten_lop FROM lop_hoc");
 
-// Lấy danh sách thông báo đã gửi (được nhóm lại)
+// --- LẤY DỮ LIỆU CHO BỘ LỌC VÀ FORM ---
+$courses_for_filter = $conn->query("SELECT id_khoahoc, ten_khoahoc FROM khoahoc ORDER BY ten_khoahoc");
+$classes_for_modal = $conn->query("SELECT id_lop, ten_lop FROM lop_hoc ORDER BY ten_lop");
+
+// --- XỬ LÝ LỌC VÀ TÌM KIẾM ---
+$search_term = $_GET['search'] ?? '';
+$filter_course = $_GET['filter_course'] ?? 'all';
+
+// Xây dựng câu lệnh SQL động
 $sql_notifications = "
     SELECT 
         thongbao.tieu_de, 
@@ -14,9 +19,45 @@ $sql_notifications = "
         thongbao.ngay_tao
     FROM thongbao
     LEFT JOIN khoahoc ON thongbao.id_khoahoc = khoahoc.id_khoahoc
-    GROUP BY thongbao.tieu_de, thongbao.noi_dung, thongbao.id_khoahoc, khoahoc.ten_khoahoc, thongbao.ngay_tao
-    ORDER BY thongbao.ngay_tao DESC";
-$result_notifications = $conn->query($sql_notifications);
+";
+
+$conditions = [];
+$params = [];
+$types = "";
+
+// Điều kiện tìm kiếm
+if (!empty($search_term)) {
+    $conditions[] = "(thongbao.tieu_de LIKE ? OR thongbao.noi_dung LIKE ?)";
+    $search_param = "%" . $search_term . "%";
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $types .= "ss";
+}
+
+// Điều kiện lọc
+if ($filter_course !== 'all') {
+    if ($filter_course === 'to_all_students') {
+        $conditions[] = "thongbao.id_khoahoc IS NULL";
+    } else {
+        $conditions[] = "thongbao.id_khoahoc = ?";
+        $params[] = (int)$filter_course;
+        $types .= "i";
+    }
+}
+
+if (!empty($conditions)) {
+    $sql_notifications .= " WHERE " . implode(" AND ", $conditions);
+}
+
+$sql_notifications .= " GROUP BY thongbao.tieu_de, thongbao.noi_dung, thongbao.id_khoahoc, khoahoc.ten_khoahoc, thongbao.ngay_tao
+                        ORDER BY thongbao.ngay_tao DESC";
+
+$stmt = $conn->prepare($sql_notifications);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$result_notifications = $stmt->get_result();
 ?>
 
 <div class="card animated-card">
@@ -38,6 +79,32 @@ $result_notifications = $conn->query($sql_notifications);
             unset($_SESSION['message']);
         }
         ?>
+
+        <form method="GET" action="./admin.php" class="mb-4">
+            <input type="hidden" name="nav" value="thongbao">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="search" class="form-label">Tìm theo tiêu đề / nội dung</label>
+                    <input type="text" name="search" id="search" class="form-control" value="<?php echo htmlspecialchars($search_term); ?>">
+                </div>
+                <div class="col-md-5">
+                    <label for="filter_course" class="form-label">Lọc theo đối tượng</label>
+                    <select name="filter_course" id="filter_course" class="form-select">
+                        <option value="all" <?php if($filter_course == 'all') echo 'selected'; ?>>-- Tất cả --</option>
+                        <option value="to_all_students" <?php if($filter_course == 'to_all_students') echo 'selected'; ?>>Gửi đến tất cả học viên</option>
+                        <?php while ($course = $courses_for_filter->fetch_assoc()): ?>
+                            <option value="<?php echo $course['id_khoahoc']; ?>" <?php if($filter_course == $course['id_khoahoc']) echo 'selected'; ?>>
+                                <?php echo htmlspecialchars($course['ten_khoahoc']); ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-filter"></i> Lọc</button>
+                </div>
+            </div>
+        </form>
+
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead class="table-dark">
@@ -53,7 +120,7 @@ $result_notifications = $conn->query($sql_notifications);
                     ?>
                         <tr class="animated-row" style="animation-delay: <?php echo $index++ * 50; ?>ms;">
                             <td><?php echo htmlspecialchars($row['tieu_de']); ?></td>
-                            <td><?php echo htmlspecialchars($row['noi_dung']); ?></td>
+                            <td><?php echo htmlspecialchars(substr($row['noi_dung'], 0, 150)) . (strlen($row['noi_dung']) > 150 ? '...' : ''); ?></td>
                             <td><span class="badge bg-info text-dark"><?php echo $target; ?></span></td>
                             <td class="text-center"><?php echo date("d/m/Y H:i", strtotime($row['ngay_tao'])); ?></td>
                             <td class="text-center">
@@ -66,7 +133,7 @@ $result_notifications = $conn->query($sql_notifications);
                             </td>
                         </tr>
                     <?php endwhile; else: ?>
-                        <tr><td colspan="5" class="text-center text-muted py-4">Chưa có thông báo nào được gửi.</td></tr>
+                        <tr><td colspan="5" class="text-center text-muted py-4">Không tìm thấy thông báo nào phù hợp.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -89,14 +156,14 @@ $result_notifications = $conn->query($sql_notifications);
                             <label class="form-label">Khóa học</label>
                             <select name="id_khoahoc" class="form-select">
                                 <option value="all">Tất cả học viên</option>
-                                <?php mysqli_data_seek($courses, 0); while ($row = $courses->fetch_assoc()) { echo "<option value='" . $row['id_khoahoc'] . "'>" . htmlspecialchars($row['ten_khoahoc']) . "</option>"; } ?>
+                                <?php mysqli_data_seek($courses_for_filter, 0); while ($row = $courses_for_filter->fetch_assoc()) { echo "<option value='" . $row['id_khoahoc'] . "'>" . htmlspecialchars($row['ten_khoahoc']) . "</option>"; } ?>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Lớp học (Ưu tiên cao hơn)</label>
                             <select name="id_lop" class="form-select">
                                 <option value="all">-- Chọn lớp cụ thể --</option>
-                                <?php mysqli_data_seek($classes, 0); while ($row = $classes->fetch_assoc()) { echo "<option value='" . $row['id_lop'] . "'>" . htmlspecialchars($row['ten_lop']) . "</option>"; } ?>
+                                <?php while ($row = $classes_for_modal->fetch_assoc()) { echo "<option value='" . $row['id_lop'] . "'>" . htmlspecialchars($row['ten_lop']) . "</option>"; } ?>
                             </select>
                         </div>
                     </div>
@@ -108,7 +175,6 @@ $result_notifications = $conn->query($sql_notifications);
     </div>
 </div>
 <script>
-    // Khởi tạo CKEditor cho textarea trong modal
     if (document.getElementById('noi_dung_editor')) {
         CKEDITOR.replace('noi_dung_editor');
     }

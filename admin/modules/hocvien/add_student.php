@@ -8,6 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $so_dien_thoai = mysqli_real_escape_string($conn, $_POST['so_dien_thoai']);
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $mat_khau = mysqli_real_escape_string($conn, $_POST['mat_khau']);
+    $hashedPassword = password_hash($mat_khau, PASSWORD_DEFAULT); // Thêm dòng này
 
     // Kiểm tra xem email có tồn tại trong cơ sở dữ liệu không
     $sql_check = "SELECT * FROM hocvien WHERE email = '$email'";
@@ -23,8 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Thực hiện thêm học viên vào cơ sở dữ liệu
         $sql = "INSERT INTO hocvien (ten_hocvien, so_dien_thoai, email, mat_khau) 
-                VALUES ('$ten_hocvien', '$so_dien_thoai', '$email', '$mat_khau')";
-
+        VALUES ('$ten_hocvien', '$so_dien_thoai', '$email', '$hashedPassword')";
         if (mysqli_query($conn, $sql)) {
             // Nếu thêm thành công, chuyển hướng về trang quản lý học viên
             echo "<script>
@@ -46,4 +46,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Đóng kết nối cơ sở dữ liệu
 mysqli_close($conn);
-?>
