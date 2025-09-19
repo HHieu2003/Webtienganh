@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-include('../../../config/config.php');
+include('../../../../config/config.php');
 
 $lop_id = $_GET['id'] ?? '';
 

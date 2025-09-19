@@ -481,12 +481,9 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
                 </button>
             </div> -->
                 <div class="">
-                    <form method="GET" action="index.php" style="display: flex;     justify-content: space-between;
-    padding: 6px 10px; ">
+                    <form method="GET" action="index.php" style="display: flex;     justify-content: space-between; padding: 6px 10px; ">
                         <input type="hidden" name="nav" value="khoahoc">
-
-                        <div class="" style="width: 70%; display: flex;
-    padding: 0;">
+                        <div class="" style="width: 70%; display: flex; padding: 0;">
                             <input type="text" class="" name="search" placeholder="Nhập từ khóa tìm kiếm" style="padding: 5px 5px; margin: auto 0px auto 0px;     width: 100%;border: none;  ">
                         </div>
 
@@ -563,12 +560,15 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
                                 data.forEach(notification => {
                                     const item = document.createElement('li');
                                     item.innerHTML = `
+                                    <a href="./user/dashboard.php?nav=thongbao"  style="color: black; text-decoration: none;" >
                                     <h6 style="font-size:15px; font-weight:bold; padding:4px 0px;">${notification.tieu_de}</h6>
                                     <p >${notification.noi_dung}</p>
                                     <small>${notification.ngay_tao}</small>
                                  <!--  <span style="color: ${notification.trang_thai === 'chưa đọc' ? 'red' : 'green'};"> (${notification.trang_thai}) -->
                                     </span>
-                                `;
+                                    
+                                    </a>
+                                    `;
                                     notificationList.appendChild(item);
                                 });
                             }

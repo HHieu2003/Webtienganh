@@ -1,6 +1,6 @@
 <?php
-// admin/modules/diemdanh/export_attendance.php
-include('../../../config/config.php');
+// File: admin/modules/lichhoc/diemdanh/export_attendance.php
+include('../../../../config/config.php');
 
 $lop_id = $_GET['lop_id'] ?? '';
 if (empty($lop_id)) {
@@ -35,11 +35,12 @@ $output .= "</tr></thead><tbody>";
 foreach ($hocVien as $hv) {
     $output .= "<tr><td>" . htmlspecialchars($hv['ten_hocvien']) . "</td>";
     foreach ($lichHoc as $lich) {
-        $status = $diemDanhData[$hv['id_hocvien']][$lich['id_lichhoc']] ?? 'Vắng';
-        if ($status === 'co mat') $status = 'Có mặt';
-        if ($status === 'vang') $status = 'Vắng';
-        if ($status === 'muon') $status = 'Muộn';
-        $output .= "<td>" . $status . "</td>";
+        $status = $diemDanhData[$hv['id_hocvien']][$lich['id_lichhoc']] ?? 'vang';
+        if ($status === 'co mat') $status_text = 'Có mặt';
+        elseif ($status === 'vang') $status_text = 'Vắng';
+        elseif ($status === 'muon') $status_text = 'Muộn';
+        else $status_text = 'Chưa điểm danh';
+        $output .= "<td>" . $status_text . "</td>";
     }
     $output .= "</tr>";
 }

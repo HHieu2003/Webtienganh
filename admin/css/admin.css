@@ -214,3 +214,51 @@ a {
     font-size: 36px;
     font-weight: 700;
 }
+
+/* === BỔ SUNG CSS CHO MENU MỚI === */
+.admin-nav .nav-link-collapse .collapse-arrow {
+    transition: transform 0.3s ease;
+}
+.admin-nav .nav-link-collapse:not(.collapsed) .collapse-arrow {
+    transform: rotate(180deg);
+}
+.admin-nav .collapse { 
+    margin: 5px 0 10px 15px;
+    border-left: 2px solid rgba(255, 255, 255, 0.1);
+}
+.admin-nav .collapse li a {
+    padding: 10px 15px 10px 20px;
+    font-size: 15px;
+    color: var(--sidebar-text);
+    opacity: 0.8;
+}
+.admin-nav .collapse li a:hover {
+    opacity: 1;
+    background-color: transparent;
+    border-left-color: transparent; /* Bỏ border xanh khi hover mục con */
+}
+.admin-nav .collapse li a.active {
+    opacity: 1;
+    font-weight: 600;
+    color: #fff;
+    background-color: transparent; /* Bỏ màu nền cho mục con active */
+    border-left-color: transparent; /* Bỏ border xanh cho mục con active */
+}
+/* ================================== */
+/* --- Thanh điều hướng bên trái (Sidebar) --- */
+.admin-sidebar {
+    width: 260px;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+
+    /* === BỔ SUNG CÁC DÒNG SAU ĐỂ GIỮ CỐ ĐỊNH MENU === */
+    position: -webkit-sticky; /* Dành cho trình duyệt Safari cũ */
+    position: sticky;       /* Thuộc tính chính để giữ cố định */
+    top: 0;                 /* Giữ menu ở cạnh trên cùng của màn hình */
+    height: 100vh;          /* Đảm bảo chiều cao của menu bằng chiều cao màn hình */
+    /* ============================================== */
+}

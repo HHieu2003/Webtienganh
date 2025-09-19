@@ -1,6 +1,6 @@
 <?php
-// admin/modules/lichhoc/export_classes.php
-include('../../../config/config.php');
+// File: admin/modules/lichhoc/lophoc/export_classes.php
+include('../../../../config/config.php');
 
 $search_term = $_GET['search'] ?? '';
 
@@ -13,7 +13,6 @@ $sql = "SELECT lh.id_lop, lh.ten_lop, lh.trang_thai, kh.ten_khoahoc, gv.ten_gian
         FROM lop_hoc lh 
         JOIN khoahoc kh ON lh.id_khoahoc = kh.id_khoahoc 
         LEFT JOIN giangvien gv ON lh.id_giangvien = gv.id_giangvien";
-
 $params = [];
 $types = "";
 if (!empty($search_term)) {
@@ -36,14 +35,9 @@ $output .= "<head><meta http-equiv=\"content-type\" content=\"application/vnd.ms
 $output .= "<body><table border='1'>";
 $output .= "<thead>
                 <tr>
-                    <th>ID Lớp</th>
-                    <th>Tên Lớp</th>
-                    <th>Khóa học</th>
-                    <th>Giảng viên</th>
-                    <th>Trạng thái</th>
+                    <th>ID Lớp</th><th>Tên Lớp</th><th>Khóa học</th><th>Giảng viên</th><th>Trạng thái</th>
                 </tr>
             </thead><tbody>";
-
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $output .= "<tr>

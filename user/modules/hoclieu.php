@@ -1,25 +1,19 @@
 <?php
-// Giả định $conn và session đã được khởi tạo từ file dashboard.php
+// File: user/modules/hoclieu.php
 if (!isset($_SESSION['id_hocvien'])) {
-    die("Session không hợp lệ. Vui lòng đăng nhập lại.");
+    die("Session không hợp lệ.");
 }
 
 $id_hocvien = $_SESSION['id_hocvien'];
 $selected_lop_id = $_GET['lop_id'] ?? null;
 
-// Lấy danh sách các lớp học mà học viên đang tham gia và có id_lop
+// Lấy danh sách lớp học của học viên
 $sql_classes = "
-    SELECT 
-        lh.id_lop, 
-        lh.ten_lop, 
-        kh.ten_khoahoc 
+    SELECT lh.id_lop, lh.ten_lop, kh.ten_khoahoc 
     FROM dangkykhoahoc dk
     JOIN lop_hoc lh ON dk.id_lop = lh.id_lop
     JOIN khoahoc kh ON lh.id_khoahoc = kh.id_khoahoc
-    WHERE 
-        dk.id_hocvien = ? 
-        AND dk.trang_thai = 'da xac nhan' 
-        AND dk.id_lop IS NOT NULL
+    WHERE dk.id_hocvien = ? AND dk.trang_thai = 'da xac nhan' AND dk.id_lop IS NOT NULL
     ORDER BY kh.ten_khoahoc, lh.ten_lop
 ";
 $stmt_classes = $conn->prepare($sql_classes);
@@ -30,11 +24,20 @@ $result_classes = $stmt_classes->get_result();
 // Lấy danh sách học liệu nếu một lớp đã được chọn
 $materials = [];
 if ($selected_lop_id) {
-    $sql_materials = "SELECT id_hoclieu, tieu_de, loai_file, duong_dan_file, ngay_dang FROM hoc_lieu WHERE id_lop = ? ORDER BY ngay_dang DESC";
+    $sql_materials = "
+        SELECT id_hoclieu, tieu_de, loai_file, duong_dan_file, ngay_dang, id_lop
+        FROM hoc_lieu 
+        WHERE id_lop = ? 
+        OR (id_khoahoc = (SELECT id_khoahoc FROM lop_hoc WHERE id_lop = ?) AND id_lop IS NULL)
+        ORDER BY ngay_dang DESC
+    ";
     $stmt_materials = $conn->prepare($sql_materials);
-    $stmt_materials->bind_param("s", $selected_lop_id);
+    $stmt_materials->bind_param("ss", $selected_lop_id, $selected_lop_id);
     $stmt_materials->execute();
-    $materials = $stmt_materials->get_result();
+    $result = $stmt_materials->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $materials[] = $row;
+    }
 }
 ?>
 
@@ -48,9 +51,7 @@ if ($selected_lop_id) {
                     <?php while($class = $result_classes->fetch_assoc()): ?>
                         <a href="./dashboard.php?nav=hoclieu&lop_id=<?php echo $class['id_lop']; ?>" 
                            class="list-group-item list-group-item-action <?php echo ($selected_lop_id == $class['id_lop']) ? 'active' : ''; ?>">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1"><?php echo htmlspecialchars($class['ten_lop']); ?></h6>
-                            </div>
+                            <div class="d-flex w-100 justify-content-between"><h6 class="mb-1"><?php echo htmlspecialchars($class['ten_lop']); ?></h6></div>
                             <small class="text-muted"><?php echo htmlspecialchars($class['ten_khoahoc']); ?></small>
                         </a>
                     <?php endwhile; ?>
@@ -59,13 +60,12 @@ if ($selected_lop_id) {
                 <div class="alert alert-secondary">Bạn chưa tham gia lớp học nào có học liệu.</div>
             <?php endif; ?>
         </div>
-
         <div class="col-md-8">
             <?php if ($selected_lop_id): ?>
                 <h5 class="mb-3">Danh sách tài liệu</h5>
-                <?php if ($materials->num_rows > 0): ?>
+                <?php if (!empty($materials)): ?>
                     <ul class="list-group">
-                        <?php while($material = $materials->fetch_assoc()): 
+                        <?php foreach ($materials as $material): 
                             $file_ext = strtolower($material['loai_file']);
                             $is_viewable = in_array($file_ext, ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'mp4', 'webm']);
                         ?>
@@ -73,6 +73,9 @@ if ($selected_lop_id) {
                                 <div>
                                     <strong class="d-block"><?php echo htmlspecialchars($material['tieu_de']); ?></strong>
                                     <small class="text-muted">
+                                        <?php if (is_null($material['id_lop'])) : ?>
+                                            <span class="badge bg-info text-dark">Tài liệu chung</span>
+                                        <?php endif; ?>
                                         Loại: <?php echo htmlspecialchars($material['loai_file']); ?> | Ngày đăng: <?php echo date("d/m/Y", strtotime($material['ngay_dang'])); ?>
                                     </small>
                                 </div>
@@ -83,19 +86,17 @@ if ($selected_lop_id) {
                                             <i class="fa-solid fa-eye"></i> Xem
                                         </button>
                                     <?php endif; ?>
-                                    <a href="../<?php echo htmlspecialchars($material['duong_dan_file']); ?>" class="btn btn-primary btn-sm" download>
-                                        <i class="fa-solid fa-download"></i> Tải về
-                                    </a>
+                                    <a href="../<?php echo htmlspecialchars($material['duong_dan_file']); ?>" class="btn btn-primary btn-sm" download><i class="fa-solid fa-download"></i> Tải về</a>
                                 </div>
                             </li>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </ul>
                 <?php else: ?>
-                    <div class="alert alert-info text-center">Lớp học này hiện chưa có tài liệu nào.</div>
+                    <div class="alert alert-info text-center">Chưa có tài liệu nào cho lớp/khóa học này.</div>
                 <?php endif; ?>
             <?php else: ?>
                 <div class="alert alert-light text-center d-flex align-items-center justify-content-center h-100">
-                    <p class="mb-0"><i class="fa-solid fa-arrow-left me-2"></i> Vui lòng chọn một lớp học từ danh sách bên trái để xem học liệu.</p>
+                    <p class="mb-0"><i class="fa-solid fa-arrow-left me-2"></i> Vui lòng chọn một lớp học từ danh sách bên trái.</p>
                 </div>
             <?php endif; ?>
         </div>

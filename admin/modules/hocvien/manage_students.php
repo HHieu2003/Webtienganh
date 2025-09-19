@@ -82,111 +82,286 @@ $result = $stmt->get_result();
 </div>
 
 <div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">Thêm Học Viên Mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-            <form action="modules/hocvien/add_student.php" method="POST">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa-solid fa-user-plus me-2"></i>Thêm Học Viên Mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addStudentForm">
                 <div class="modal-body">
-                    <div class="mb-3"><label class="form-label">Tên học viên</label><input type="text" class="form-control" name="ten_hocvien" required></div>
-                    <div class="mb-3"><label class="form-label">Số điện thoại</label><input type="text" class="form-control" name="so_dien_thoai" required></div>
-                    <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" name="email" required></div>
-                    <div class="mb-3"><label class="form-label">Mật khẩu</label><input type="password" class="form-control" name="mat_khau" required></div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="ten_hocvien" name="ten_hocvien" placeholder="Tên học viên" required>
+                            <label for="ten_hocvien">Tên học viên</label>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                        <div class="form-floating">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+                            <label for="email">Email</label>
+                        </div>
+                    </div>
+                     <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                        <div class="form-floating">
+                            <input type="tel" class="form-control" id="so_dien_thoai" name="so_dien_thoai" placeholder="Số điện thoại">
+                            <label for="so_dien_thoai">Số điện thoại</label>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="mat_khau" name="mat_khau" placeholder="Mật khẩu" required>
+                            <label for="mat_khau">Mật khẩu</label>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="submit" class="btn btn-primary">Thêm</button></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save me-2"></i>Lưu lại</button>
+                </div>
             </form>
         </div>
     </div>
 </div>
 
 <div class="modal fade" id="editStudentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">Chỉnh sửa Học Viên</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-            <form action="./modules/hocvien/edit_student.php" method="POST">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa-solid fa-user-pen me-2"></i>Chỉnh sửa Học Viên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editStudentForm">
                 <div class="modal-body">
                     <input type="hidden" id="editStudentId" name="id_hocvien" />
-                    <div class="mb-3"><label class="form-label">Tên học viên</label><input type="text" class="form-control" id="editStudentName" name="ten_hocvien" required></div>
-                    <div class="mb-3"><label class="form-label">Số điện thoại</label><input type="text" class="form-control" id="editStudentPhone" name="so_dien_thoai" required></div>
-                    <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" id="editStudentEmail" name="email" required></div>
-                    <div class="mb-3"><label class="form-label">Mật khẩu mới (để trống nếu không đổi)</label><input type="password" class="form-control" id="editStudentPassword" name="mat_khau"></div>
-                    <div class="mb-3 form-check"><input type="checkbox" class="form-check-input" id="editIsAdmin" name="is_admin" value="1"><label class="form-check-label" for="editIsAdmin">Là Quản trị viên</label></div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="editStudentName" name="ten_hocvien" placeholder="Tên học viên" required>
+                            <label for="editStudentName">Tên học viên</label>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                        <div class="form-floating">
+                            <input type="email" class="form-control" id="editStudentEmail" name="email" placeholder="Email" required>
+                            <label for="editStudentEmail">Email</label>
+                        </div>
+                    </div>
+                     <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                        <div class="form-floating">
+                            <input type="tel" class="form-control" id="editStudentPhone" name="so_dien_thoai" placeholder="Số điện thoại">
+                            <label for="editStudentPhone">Số điện thoại</label>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="editStudentPassword" name="mat_khau" placeholder="Mật khẩu mới">
+                            <label for="editStudentPassword">Mật khẩu mới (để trống nếu không đổi)</label>
+                        </div>
+                    </div>
+                    <div class="mb-3 form-check form-switch">
+                        <input type="checkbox" class="form-check-input" id="editIsAdmin" name="is_admin" value="1">
+                        <label class="form-check-label" for="editIsAdmin">Là Quản trị viên</label>
+                    </div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="submit" class="btn btn-primary">Lưu thay đổi</button></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save me-2"></i>Lưu thay đổi</button>
+                </div>
             </form>
         </div>
     </div>
 </div>
 
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color: #f8d7da; color: #721c24;">
+        <h5 class="modal-title" id="confirmDeleteModalLabel">
+            <i class="fa-solid fa-triangle-exclamation"></i> Xác nhận hành động
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Bạn có chắc chắn muốn xóa vĩnh viễn học viên này? Mọi dữ liệu liên quan sẽ bị xóa và **không thể khôi phục**.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+            <span id="delete-btn-text">Xác nhận xóa</span>
+            <span id="delete-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script>
-// Đảm bảo script chạy sau khi toàn bộ trang đã tải
-document.addEventListener("DOMContentLoaded", function() {
-    
-    // Khởi tạo đối tượng modal một lần duy nhất
-    const editModalElement = document.getElementById('editStudentModal');
-    if (editModalElement) {
-        // Biến toàn cục để dễ truy cập
-        window.editStudentModal = new bootstrap.Modal(editModalElement);
-    }
+// Biến toàn cục để khởi tạo các modal
+let addStudentModal, editStudentModal, confirmDeleteModal;
+let studentIdToDelete = null;
 
-});
-
-// Đưa hàm ra phạm vi toàn cục để onclick có thể gọi được
+// Hàm mở modal Sửa
 function openEditModal(studentId) {
-    console.log("Opening modal for student ID:", studentId);
-    
     fetch(`./modules/hocvien/get_student_info.php?id=${studentId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.error) {
-                alert(data.error);
+                Swal.fire('Lỗi!', data.error, 'error');
                 return;
             }
-            // Điền dữ liệu vào form
+            // Điền dữ liệu vào form sửa
             document.getElementById('editStudentId').value = data.id_hocvien;
             document.getElementById('editStudentName').value = data.ten_hocvien;
             document.getElementById('editStudentPhone').value = data.so_dien_thoai;
             document.getElementById('editStudentEmail').value = data.email;
             document.getElementById('editIsAdmin').checked = (data.is_admin == 1);
             document.getElementById('editStudentPassword').value = "";
-            
-            // Hiển thị modal
-            if (window.editStudentModal) {
-                window.editStudentModal.show();
-            }
+            editStudentModal.show();
         })
         .catch(error => {
             console.error('Lỗi khi lấy thông tin học viên:', error);
-            alert('Đã xảy ra lỗi. Vui lòng kiểm tra console (F12) để biết thêm chi tiết.');
+            Swal.fire('Lỗi!', 'Không thể lấy dữ liệu học viên.', 'error');
         });
 }
 
+// Hàm mở modal Xóa
 function deleteStudent(studentId) {
-    if (confirm("Bạn có chắc chắn muốn xóa học viên này?")) {
-        const row = document.getElementById(`student-row-${studentId}`);
-        row.style.transition = "opacity 0.5s ease-out";
-        row.style.opacity = '0';
+    studentIdToDelete = studentId;
+    confirmDeleteModal.show();
+}
 
-        setTimeout(() => {
+// Chạy mã sau khi toàn bộ trang đã tải
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // Khởi tạo tất cả các đối tượng modal
+    addStudentModal = new bootstrap.Modal(document.getElementById('addStudentModal'));
+    editStudentModal = new bootstrap.Modal(document.getElementById('editStudentModal'));
+    confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+
+    const addStudentForm = document.getElementById('addStudentForm');
+    const editStudentForm = document.getElementById('editStudentForm');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+    // Xử lý sự kiện submit form THÊM
+    addStudentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        fetch('./modules/hocvien/add_student.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                addStudentModal.hide();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: data.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    location.reload(); // Tải lại trang để cập nhật danh sách
+                });
+            } else {
+                Swal.fire('Lỗi!', data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ.', 'error');
+        });
+    });
+
+    // Xử lý sự kiện submit form SỬA
+    editStudentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        fetch('./modules/hocvien/edit_student.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                editStudentModal.hide();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: data.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire('Lỗi!', data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ.', 'error');
+        });
+    });
+    
+    // Xử lý sự kiện click nút "Xác nhận xóa"
+    confirmDeleteBtn.addEventListener('click', function() {
+        if (studentIdToDelete) {
+            const deleteBtnText = document.getElementById('delete-btn-text');
+            const deleteSpinner = document.getElementById('delete-spinner');
+            
+            // Hiển thị trạng thái đang xóa
+            deleteBtnText.textContent = 'Đang xóa...';
+            deleteSpinner.style.display = 'inline-block';
+            this.disabled = true;
+
             fetch(`./modules/hocvien/delete_student.php`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: `delete_id=${studentId}`
+                body: `delete_id=${studentIdToDelete}`
             })
             .then(response => response.text())
             .then(result => {
+                confirmDeleteModal.hide();
                 if (result.trim() === "Xóa thành công") {
-                    row.remove();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã xóa!',
+                        text: 'Học viên đã được xóa khỏi hệ thống.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload();
+                    });
                 } else {
-                    alert("Lỗi khi xóa: " + result);
-                    row.style.opacity = '1';
+                    Swal.fire('Lỗi!', result, 'error');
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ.', 'error');
+            })
+            .finally(() => {
+                // Khôi phục nút sau khi xử lý
+                setTimeout(() => {
+                    deleteBtnText.textContent = 'Xác nhận xóa';
+                    deleteSpinner.style.display = 'none';
+                    this.disabled = false;
+                    studentIdToDelete = null;
+                }, 500);
             });
-        }, 500);
-    }
-}
+        }
+    });
+});
 </script>

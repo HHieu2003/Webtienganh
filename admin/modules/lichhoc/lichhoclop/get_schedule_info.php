@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-include('../../../config/config.php');
+include('../../../../config/config.php');
 
 $id_lichhoc = $_GET['id'] ?? 0;
 
@@ -21,4 +21,5 @@ if ($id_lichhoc > 0) {
     http_response_code(400);
     echo json_encode(['error' => 'ID không hợp lệ.']);
 }
+$conn->close();
 ?>

@@ -2,57 +2,66 @@
 include('../../../config/config.php');
 session_start();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $tieu_de = $_POST['tieu_de'];
-    $noi_dung = $_POST['noi_dung'];
-    $id_khoahoc_form = $_POST['id_khoahoc'];
-    $id_lop = $_POST['id_lop'];
+header('Content-Type: application/json');
+$response = ['status' => 'error', 'message' => 'Yêu cầu không hợp lệ.'];
 
-    // Lấy thời gian hiện tại một lần duy nhất
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $tieu_de = $_POST['tieu_de'] ?? '';
+    $noi_dung = $_POST['noi_dung'] ?? '';
+    $id_khoahoc_form = $_POST['id_khoahoc'] ?? 'all';
+    $id_lop_form = $_POST['id_lop'] ?? 'all';
     $current_datetime = date('Y-m-d H:i:s');
+
+    if (empty($tieu_de) || empty($noi_dung)) {
+        $response['message'] = 'Tiêu đề và nội dung không được để trống.';
+        echo json_encode($response);
+        exit;
+    }
 
     $conn->begin_transaction();
     try {
-        if ($id_lop !== 'all') {
+        $id_khoahoc_db = ($id_khoahoc_form !== 'all') ? (int)$id_khoahoc_form : NULL;
+        $id_lop_db = ($id_lop_form !== 'all') ? $id_lop_form : NULL;
+
+        if ($id_lop_form !== 'all') {
             // Ưu tiên gửi cho một lớp cụ thể
-            $sql = "INSERT INTO thongbao (id_hocvien, tieu_de, noi_dung, ngay_tao, trang_thai)
-                    SELECT id_hocvien, ?, ?, ?, 'chưa đọc' 
+            $sql = "INSERT INTO thongbao (id_hocvien, id_lop, tieu_de, noi_dung, ngay_tao, trang_thai)
+                    SELECT id_hocvien, ?, ?, ?, ?, 'chưa đọc' 
                     FROM dangkykhoahoc 
                     WHERE id_lop = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sss", $tieu_de, $noi_dung, $current_datetime, $id_lop);
+            $stmt->bind_param("sssss", $id_lop_db, $tieu_de, $noi_dung, $current_datetime, $id_lop_db);
 
         } elseif ($id_khoahoc_form !== 'all') {
             // Gửi cho một khóa học cụ thể
-            $id_khoahoc = (int)$id_khoahoc_form;
             $sql = "INSERT INTO thongbao (id_hocvien, id_khoahoc, tieu_de, noi_dung, ngay_tao, trang_thai)
                     SELECT dk.id_hocvien, ?, ?, ?, ?, 'chưa đọc' 
                     FROM dangkykhoahoc dk 
-                    WHERE dk.id_khoahoc = ?";
+                    WHERE dk.id_khoahoc = ? AND dk.trang_thai = 'da xac nhan'";
             $stmt = $conn->prepare($sql);
-            // Sửa lại bind_param: id_khoahoc, tieu_de, noi_dung, ngay_tao, id_khoahoc (cho WHERE)
-            $stmt->bind_param("isssi", $id_khoahoc, $tieu_de, $noi_dung, $current_datetime, $id_khoahoc);
+            $stmt->bind_param("isssi", $id_khoahoc_db, $tieu_de, $noi_dung, $current_datetime, $id_khoahoc_db);
             
         } else {
             // Gửi cho tất cả học viên
             $sql = "INSERT INTO thongbao (id_hocvien, tieu_de, noi_dung, ngay_tao, trang_thai)
                     SELECT id_hocvien, ?, ?, ?, 'chưa đọc' 
-                    FROM hocvien";
+                    FROM hocvien WHERE is_admin = 0"; // Chỉ gửi cho học viên, không gửi cho admin
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("sss", $tieu_de, $noi_dung, $current_datetime);
         }
 
         $stmt->execute();
         $conn->commit();
-        $_SESSION['message'] = ['type' => 'success', 'text' => 'Đã gửi thông báo thành công!'];
+        $response['status'] = 'success';
+        $response['message'] = 'Đã gửi thông báo thành công!';
 
     } catch (Exception $e) {
         $conn->rollback();
-        // Ghi lại lỗi chi tiết hơn
-        $_SESSION['message'] = ['type' => 'danger', 'text' => 'Lỗi khi gửi thông báo: ' . $e->getMessage()];
+        $response['message'] = 'Lỗi khi gửi thông báo: ' . $e->getMessage();
     }
-
-    header('Location: ../../admin.php?nav=thongbao');
-    exit();
+    
 }
+
+echo json_encode($response);
+$conn->close();
 ?>

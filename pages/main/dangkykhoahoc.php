@@ -1,30 +1,24 @@
 <?php
 // File: dangkykhoahoc.php
-
-// Session và config đã được gọi từ file index.php cha.
-
-// Kiểm tra đăng nhập
 if (!isset($_SESSION['id_hocvien'])) {
     echo "<script>alert('Vui lòng đăng nhập để đăng ký khóa học!'); window.location.href='pages/login.php';</script>";
     exit();
 }
 
+// Lấy dữ liệu từ POST
 $id_hocvien = $_SESSION['id_hocvien'];
-$id_khoahoc = isset($_GET['id_khoahoc']) ? (int)$_GET['id_khoahoc'] : 0;
+$id_khoahoc = isset($_POST['id_khoahoc']) ? (int)$_POST['id_khoahoc'] : 0;
+$id_lop = isset($_POST['id_lop']) ? htmlspecialchars($_POST['id_lop']) : null;
+$ghi_chu = isset($_POST['ghi_chu']) ? trim($_POST['ghi_chu']) : null;
 
 if (!$id_khoahoc) {
     echo "Khóa học không hợp lệ!";
     exit;
 }
 
-// Lấy thông tin học viên và khóa học để hiển thị trên form
-$ten_hocvien = '';
-$email = '';
-$phone = '';
-$course_name = '';
-$course_fee = 0;
+// Lấy thông tin học viên và khóa học
+$ten_hocvien = ''; $email = ''; $phone = ''; $course_name = ''; $course_fee = 0;
 
-// Lấy thông tin học viên
 $sql_hocvien = "SELECT ten_hocvien, email, so_dien_thoai FROM hocvien WHERE id_hocvien = ?";
 $stmt_hv = $conn->prepare($sql_hocvien);
 $stmt_hv->bind_param("i", $id_hocvien);
@@ -33,7 +27,6 @@ $stmt_hv->bind_result($ten_hocvien, $email, $phone);
 $stmt_hv->fetch();
 $stmt_hv->close();
 
-// Lấy thông tin khóa học
 $sql_course = "SELECT ten_khoahoc, chi_phi FROM khoahoc WHERE id_khoahoc = ?";
 $stmt_kh = $conn->prepare($sql_course);
 $stmt_kh->bind_param("i", $id_khoahoc);
@@ -56,10 +49,10 @@ $stmt_kh->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xác nhận Đăng ký Khóa học</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/thanhtoan/css/style.css">
+    <link rel="stylesheet" href="pages/main/thanhtoan/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
 </head>
 <body>
 
@@ -77,184 +70,20 @@ $stmt_kh->close();
         <p><strong>Họ và tên:</strong> <?php echo htmlspecialchars($ten_hocvien); ?></p>
         <p><strong>Email:</strong> <?php echo htmlspecialchars($email); ?></p>
         <p><strong>Số điện thoại:</strong> <?php echo htmlspecialchars($phone); ?></p>
+        
+        <?php if ($ghi_chu): ?>
+            <p><strong>Ghi chú:</strong> <em class="text-primary"><?php echo nl2br(htmlspecialchars($ghi_chu)); ?></em></p>
+            <div class="alert alert-info mt-2 small">Cảm ơn bạn đã để lại nguyện vọng. Chúng tôi sẽ liên hệ để xếp lớp cho bạn trong thời gian sớm nhất!</div>
+        <?php endif; ?>
     </div>
 
-    <form method="POST" action="pages/main/thanhtoan/xuly_dangky.php">
-        <input type="hidden" name="id_khoahoc" value="<?php echo $id_khoahoc; ?>">
-        <button type="submit" class="btn-submit">Xác nhận và đến trang thanh toán</button>
-    </form>
+  <form method="POST" action="pages/main/thanhtoan/xuly_dangky.php">
+    <input type="hidden" name="id_khoahoc" value="<?php echo $id_khoahoc; ?>">
+    <input type="hidden" name="id_lop" value="<?php echo $id_lop; ?>">
+    <input type="hidden" name="ghi_chu" value="<?php echo htmlspecialchars($ghi_chu ?? ''); ?>">
+    <button type="submit" class="btn-submit">Xác nhận và đến trang thanh toán</button>
+</form>
 </div>
 
 </body>
 </html>
-<style>
-    /* --- Import Font từ Google --- */
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap');
-
-/* --- Biến màu và Style tổng thể --- */
-:root {
-    --primary-color: #007bff;
-    --success-color: #28a745;
-    --danger-color: #dc3545;
-    --light-gray: #f8f9fa;
-    --gray: #6c757d;
-    --dark: #343a40;
-    --white: #ffffff;
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    --border-radius: 12px;
-}
-
-body {
-    font-family: 'Be Vietnam Pro', sans-serif;
-    background-color: var(--light-gray);
-    color: var(--dark);
-}
-
-/* --- Hiệu ứng xuất hiện chung --- */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* --- Style cho trang dangkykhoahoc.php --- */
-.form-container {
-    max-width: 700px;
-    margin: 40px auto;
-    padding: 40px;
-    background: var(--white);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    animation: fadeIn 0.8s ease-out;
-}
-
-.form-container h2 {
-    text-align: center;
-    color: var(--dark);
-    margin-bottom: 30px;
-    font-weight: 700;
-}
-
-.info-section {
-    margin-bottom: 30px;
-    padding: 20px;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-}
-
-.info-section h3 {
-    font-size: 1.2em;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 15px;
-    border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 10px;
-}
-
-.info-section p {
-    margin-bottom: 10px;
-    font-size: 1em;
-    color: var(--gray);
-}
-
-.info-section p strong {
-    color: var(--dark);
-    min-width: 150px;
-    display: inline-block;
-}
-
-.btn-submit {
-    display: block;
-    width: 100%;
-    padding: 15px;
-    font-size: 1.1em;
-    font-weight: 700;
-    color: var(--white);
-    background: linear-gradient(45deg, #007bff, #0056b3);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
-}
-
-.btn-submit:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 7px 20px rgba(0, 123, 255, 0.3);
-}
-
-/* --- Style cho trang checkout.php --- */
-.payment-container {
-    animation: fadeIn 0.8s ease-out;
-}
-
-.countdown-box {
-    padding: 20px;
-    margin-bottom: 20px;
-    background-color: #fff3cd;
-    border: 1px solid #ffeeba;
-    border-radius: var(--border-radius);
-    text-align: center;
-}
-
-.countdown-box p {
-    margin: 0;
-    font-weight: 500;
-    color: #856404;
-}
-
-#countdown_timer {
-    font-size: 1.5em;
-    font-weight: 700;
-    color: var(--danger-color);
-    display: block;
-    margin-top: 5px;
-}
-
-.qr-box, .manual-box {
-    padding: 30px;
-    background: var(--white);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    height: 100%;
-}
-
-.qr-box img {
-    max-width: 250px;
-    margin: 0 auto;
-    display: block;
-}
-
-/* --- Style cho các hộp thông báo (Success, Expired) --- */
-.status-box {
-    padding: 40px;
-    border-radius: var(--border-radius);
-    text-align: center;
-    /* Hiệu ứng chuyển động */
-    opacity: 0;
-    transform: scale(0.95);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-    display: none; /* Ẩn ban đầu */
-}
-
-.status-box.visible {
-    display: block;
-    opacity: 1;
-    transform: scale(1);
-}
-
-.status-box.success {
-    background-color: #e9f7ef;
-    border: 1px solid #a6d9b8;
-}
-
-.status-box.expired {
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-}
-</style>

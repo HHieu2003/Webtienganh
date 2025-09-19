@@ -1,47 +1,35 @@
 <?php
-// admin/modules/delete_consultation.php
 include('../../../config/config.php');
 session_start();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_ids'])) {
-    $delete_ids = $_POST['delete_ids'];
+header('Content-Type: application/json');
+$response = ['status' => 'error', 'message' => 'Yêu cầu không hợp lệ.'];
 
-    // Đảm bảo delete_ids là một mảng
-    if (!is_array($delete_ids)) {
-        $_SESSION['message'] = ['type' => 'danger', 'text' => 'Lỗi: Dữ liệu không hợp lệ.'];
-        header("Location: ../admin.php?nav=dangkykhoahoc&view=consult");
-        exit();
-    }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $delete_ids = $data['delete_ids'] ?? [];
 
-    // Chuyển các ID thành một chuỗi các số nguyên an toàn
-    $ids_to_delete = array_map('intval', $delete_ids);
-    $placeholders = implode(',', array_fill(0, count($ids_to_delete), '?'));
-    
-    if (empty($ids_to_delete)) {
-        $_SESSION['message'] = ['type' => 'warning', 'text' => 'Chưa có mục nào được chọn để xóa.'];
-        header("Location: ../admin.php?nav=dangkykhoahoc&view=consult");
-        exit();
-    }
+    if (!empty($delete_ids) && is_array($delete_ids)) {
+        $ids_to_delete = array_map('intval', $delete_ids);
+        $placeholders = implode(',', array_fill(0, count($ids_to_delete), '?'));
+        $types = str_repeat('i', count($ids_to_delete));
 
-    $sql = "DELETE FROM tuvan WHERE id_tuvan IN ($placeholders)";
-    $stmt = $conn->prepare($sql);
-    
-    // Tạo chuỗi types (ví dụ: 'iii' cho 3 ID)
-    $types = str_repeat('i', count($ids_to_delete));
-    $stmt->bind_param($types, ...$ids_to_delete);
+        $sql = "DELETE FROM tuvan WHERE id_tuvan IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param($types, ...$ids_to_delete);
 
-    if ($stmt->execute()) {
-        $_SESSION['message'] = ['type' => 'success', 'text' => 'Đã xóa thành công các yêu cầu tư vấn đã chọn.'];
+        if ($stmt->execute()) {
+            $response['status'] = 'success';
+            $response['message'] = 'Đã xóa thành công ' . $stmt->affected_rows . ' yêu cầu.';
+        } else {
+            $response['message'] = 'Lỗi khi xóa yêu cầu tư vấn.';
+        }
+        $stmt->close();
     } else {
-        $_SESSION['message'] = ['type' => 'danger', 'text' => 'Lỗi khi xóa yêu cầu tư vấn.'];
+        $response['message'] = 'Không có mục nào được chọn để xóa.';
     }
-    
-    $stmt->close();
-} else {
-    $_SESSION['message'] = ['type' => 'danger', 'text' => 'Yêu cầu không hợp lệ.'];
 }
 
+echo json_encode($response);
 $conn->close();
-header("Location: ../../admin.php?nav=dangkykhoahoc&view=consult");
-exit();
 ?>

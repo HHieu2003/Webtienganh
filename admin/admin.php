@@ -12,6 +12,7 @@ $is_teacher = $_SESSION['is_teacher'] ?? false;
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,19 +22,20 @@ $is_teacher = $_SESSION['is_teacher'] ?? false;
     <link rel="stylesheet" href="css/admin.css">
 
     <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <style>
-    .cke_notifications_area{
+    .cke_notifications_area {
         top: 0px !important;
     }
 </style>
+
 <body>
     <div class="wrapper">
         <aside class="admin-sidebar">
-            <?php 
+            <?php
             if ($is_admin) {
-                include('modules/menu.php'); 
+                include('modules/menu.php');
             } else {
                 // Giả định bạn có file teacher_menu.php cho giảng viên
                 include('modules/teacher_menu.php');
@@ -47,7 +49,7 @@ $is_teacher = $_SESSION['is_teacher'] ?? false;
             </header>
 
             <section class="admin-content">
-                <?php 
+                <?php
                 if ($is_admin) {
                     include('modules/main.php');
                 } else {
@@ -64,6 +66,7 @@ $is_teacher = $_SESSION['is_teacher'] ?? false;
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    
-    </body>
+
+</body>
+
 </html>

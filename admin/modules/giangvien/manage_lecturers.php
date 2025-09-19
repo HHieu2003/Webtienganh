@@ -16,20 +16,9 @@ $result = $stmt->get_result();
 ?>
 
 <style>
-    .description-cell {
-        max-width: 350px; /* Giới hạn chiều rộng tối đa của cột mô tả */
-    }
-    .description-truncate {
-        display: -webkit-box;
-        -webkit-line-clamp: 4; /* Giới hạn 4 dòng */
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .actions-cell {
-        white-space: nowrap; /* Ngăn các nút xuống dòng */
-        min-width: 180px; /* Đặt chiều rộng tối thiểu để chứa các nút */
-    }
+    .description-cell { max-width: 350px; }
+    .description-truncate { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
+    .actions-cell { white-space: nowrap; min-width: 180px; }
 </style>
 
 <div class="card animated-card">
@@ -87,21 +76,21 @@ $result = $stmt->get_result();
 </div>
 
 <div class="modal fade" id="addLecturerModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">Thêm Giảng viên mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-            <form action="modules/giangvien/add_lecturer.php" method="POST" enctype="multipart/form-data">
+            <div class="modal-header"><h5 class="modal-title"><i class="fa-solid fa-user-plus me-2"></i>Thêm Giảng viên mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form id="addLecturerForm" enctype="multipart/form-data">
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-6 mb-3"><label class="form-label">Tên giảng viên <span class="text-danger">*</span></label><input type="text" class="form-control" name="ten_giangvien" required></div>
-                        <div class="col-md-6 mb-3"><label class="form-label">Email <span class="text-danger">*</span></label><input type="email" class="form-control" name="email" required></div>
+                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="text" class="form-control" name="ten_giangvien" placeholder="Tên giảng viên" required><label>Tên giảng viên *</label></div></div>
+                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="email" class="form-control" name="email" placeholder="Email" required><label>Email *</label></div></div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3"><label class="form-label">Số điện thoại</label><input type="tel" class="form-control" name="so_dien_thoai"></div>
-                        <div class="col-md-6 mb-3"><label class="form-label">Mật khẩu <span class="text-danger">*</span></label><input type="password" class="form-control" name="mat_khau" required></div>
+                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="tel" class="form-control" name="so_dien_thoai" placeholder="Số điện thoại"><label>Số điện thoại</label></div></div>
+                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="password" class="form-control" name="mat_khau" placeholder="Mật khẩu" required><label>Mật khẩu *</label></div></div>
                     </div>
-                    <div class="mb-3"><label class="form-label">Mô tả chuyên môn</label><textarea class="form-control" name="mo_ta" rows="3"></textarea></div>
-                    <div class="mb-3"><label class="form-label">Hình ảnh đại diện</label><input type="file" class="form-control" name="hinh_anh"></div>
+                    <div class="mb-3"><div class="form-floating"><textarea class="form-control" name="mo_ta" placeholder="Mô tả" style="height: 100px"></textarea><label>Mô tả chuyên môn</label></div></div>
+                    <div class="mb-3"><label class="form-label">Hình ảnh đại diện</label><input type="file" class="form-control" name="hinh_anh" accept="image/*"></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="submit" class="btn btn-primary">Thêm</button></div>
             </form>
@@ -110,23 +99,23 @@ $result = $stmt->get_result();
 </div>
 
 <div class="modal fade" id="editLecturerModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">Chỉnh sửa thông tin Giảng viên</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-            <form action="modules/giangvien/edit_lecturer.php" method="POST" enctype="multipart/form-data">
+            <div class="modal-header"><h5 class="modal-title"><i class="fa-solid fa-user-pen me-2"></i>Chỉnh sửa thông tin Giảng viên</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form id="editLecturerForm" enctype="multipart/form-data">
                 <input type="hidden" id="editLecturerId" name="id_giangvien">
                 <input type="hidden" id="editCurrentImage" name="hinh_anh_hien_tai">
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3"><label class="form-label">Tên giảng viên <span class="text-danger">*</span></label><input type="text" id="editTenGiangVien" class="form-control" name="ten_giangvien" required></div>
-                        <div class="col-md-6 mb-3"><label class="form-label">Email <span class="text-danger">*</span></label><input type="email" id="editEmail" class="form-control" name="email" required></div>
+                     <div class="row">
+                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="text" id="editTenGiangVien" class="form-control" name="ten_giangvien" placeholder="Tên giảng viên" required><label>Tên giảng viên *</label></div></div>
+                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="email" id="editEmail" class="form-control" name="email" placeholder="Email" required><label>Email *</label></div></div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3"><label class="form-label">Số điện thoại</label><input type="tel" id="editSoDienThoai" class="form-control" name="so_dien_thoai"></div>
-                        <div class="col-md-6 mb-3"><label class="form-label">Mật khẩu mới (để trống nếu không đổi)</label><input type="password" class="form-control" id="editLecturerPassword" name="mat_khau"></div>
+                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="tel" id="editSoDienThoai" class="form-control" name="so_dien_thoai" placeholder="Số điện thoại"><label>Số điện thoại</label></div></div>
+                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="password" class="form-control" name="mat_khau" placeholder="Mật khẩu mới"><label>Mật khẩu mới (để trống nếu không đổi)</label></div></div>
                     </div>
-                    <div class="mb-3"><label class="form-label">Mô tả chuyên môn</label><textarea id="editMoTa" class="form-control" name="mo_ta" rows="3"></textarea></div>
-                    <div class="mb-3"><label class="form-label">Tải ảnh đại diện mới</label><input type="file" class="form-control" name="hinh_anh"></div>
+                    <div class="mb-3"><div class="form-floating"><textarea id="editMoTa" class="form-control" name="mo_ta" placeholder="Mô tả" style="height: 100px"></textarea><label>Mô tả chuyên môn</label></div></div>
+                    <div class="mb-3"><label class="form-label">Tải ảnh đại diện mới</label><input type="file" class="form-control" name="hinh_anh" accept="image/*"></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="submit" class="btn btn-primary">Lưu thay đổi</button></div>
             </form>
@@ -134,61 +123,118 @@ $result = $stmt->get_result();
     </div>
 </div>
 
-<script>
-// JavaScript giữ nguyên không thay đổi
-document.addEventListener("DOMContentLoaded", function() {
-    const modalElement = document.getElementById('editLecturerModal');
-    if (modalElement) {
-        window.editLecturerModal = new bootstrap.Modal(modalElement);
-    }
-});
+<div class="modal fade" id="confirmDeleteLecturerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white"><h5 class="modal-title"><i class="fa-solid fa-triangle-exclamation"></i> Xác nhận xóa</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        Bạn có chắc chắn muốn xóa giảng viên này? Hành động này không thể khôi phục. Các khóa học và lớp học do giảng viên này phụ trách sẽ được cập nhật thành "Chưa phân công".
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteLecturerBtn">Xác nhận xóa</button>
+      </div>
+    </div>
+  </div>
+</div>
 
+<script>
+let addLecturerModal, editLecturerModal, confirmDeleteLecturerModal;
+let lecturerIdToDelete = null;
+
+// Hàm mở modal Sửa
 async function openEditModal(lecturerId) {
     try {
         const response = await fetch(`./modules/giangvien/get_lecturer_info.php?id=${lecturerId}`);
-        
-        if (!response.ok) {
-            throw new Error(`Lỗi Server: ${response.status} ${response.statusText}`);
-        }
-        
         const data = await response.json();
-
         if (data.error) {
-            alert(`Lỗi: ${data.error}`);
+            Swal.fire('Lỗi!', data.error, 'error');
             return;
         }
-
         document.getElementById('editLecturerId').value = data.id_giangvien;
         document.getElementById('editTenGiangVien').value = data.ten_giangvien;
         document.getElementById('editEmail').value = data.email;
         document.getElementById('editSoDienThoai').value = data.so_dien_thoai;
         document.getElementById('editMoTa').value = data.mo_ta;
         document.getElementById('editCurrentImage').value = data.hinh_anh;
-        document.getElementById('editLecturerPassword').value = '';
-
-        if (window.editLecturerModal) {
-            window.editLecturerModal.show();
-        }
-
+        editLecturerModal.show();
     } catch (error) {
-        console.error('Lỗi khi fetch thông tin giảng viên:', error);
-        alert('Đã xảy ra lỗi khi lấy dữ liệu. Vui lòng kiểm tra console (F12) để biết chi tiết.');
+        Swal.fire('Lỗi!', 'Không thể lấy dữ liệu giảng viên.', 'error');
     }
 }
 
+// Hàm mở modal Xóa
 function deleteLecturer(lecturerId) {
-    if (confirm("Bạn có chắc chắn muốn xóa giảng viên này?")) {
-        fetch(`./modules/giangvien/delete_lecturer.php`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: `delete_id=${lecturerId}`
-        })
-        .then(response => response.text())
-        .then(result => {
-            if (result.trim() === "Xóa thành công") {
-                document.getElementById(`lecturer-row-${lecturerId}`).remove();
-            } else { alert("Lỗi khi xóa: " + result); }
-        });
-    }
+    lecturerIdToDelete = lecturerId;
+    confirmDeleteLecturerModal.show();
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+    addLecturerModal = new bootstrap.Modal(document.getElementById('addLecturerModal'));
+    editLecturerModal = new bootstrap.Modal(document.getElementById('editLecturerModal'));
+    confirmDeleteLecturerModal = new bootstrap.Modal(document.getElementById('confirmDeleteLecturerModal'));
+
+    // Xử lý submit form THÊM
+    document.getElementById('addLecturerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch('./modules/giangvien/add_lecturer.php', { method: 'POST', body: formData })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                addLecturerModal.hide();
+                Swal.fire({ icon: 'success', title: 'Thành công!', text: data.message, timer: 1500, showConfirmButton: false })
+                .then(() => location.reload());
+            } else {
+                Swal.fire('Lỗi!', data.message, 'error');
+            }
+        });
+    });
+
+    // Xử lý submit form SỬA
+    document.getElementById('editLecturerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch('./modules/giangvien/edit_lecturer.php', { method: 'POST', body: formData })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                editLecturerModal.hide();
+                Swal.fire({ icon: 'success', title: 'Thành công!', text: data.message, timer: 1500, showConfirmButton: false })
+                .then(() => location.reload());
+            } else {
+                Swal.fire('Lỗi!', data.message, 'error');
+            }
+        });
+    });
+
+    // Xử lý nút xác nhận XÓA
+    document.getElementById('confirmDeleteLecturerBtn').addEventListener('click', function() {
+        if (lecturerIdToDelete) {
+            this.disabled = true;
+            this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Đang xóa...`;
+            
+            fetch(`./modules/giangvien/delete_lecturer.php`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `delete_id=${lecturerIdToDelete}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                confirmDeleteLecturerModal.hide();
+                if (data.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'Đã xóa!', text: data.message, timer: 1500, showConfirmButton: false })
+                    .then(() => location.reload());
+                } else {
+                    Swal.fire('Lỗi!', data.message, 'error');
+                }
+            })
+            .finally(() => {
+                this.disabled = false;
+                this.innerHTML = 'Xác nhận xóa';
+                lecturerIdToDelete = null;
+            });
+        }
+    });
+});
 </script>

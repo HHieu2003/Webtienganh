@@ -1,11 +1,32 @@
 <?php
 include('../../../config/config.php');
+
+header('Content-Type: application/json');
+$response = ['status' => 'error', 'message' => 'Yêu cầu không hợp lệ.'];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $ten_giangvien = $_POST['ten_giangvien'];
-    $email = $_POST['email'];
-    $so_dien_thoai = $_POST['so_dien_thoai'];
-    $mat_khau = $_POST['mat_khau'];
-    $mo_ta = $_POST['mo_ta'];
+    $ten_giangvien = $_POST['ten_giangvien'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $so_dien_thoai = $_POST['so_dien_thoai'] ?? '';
+    $mat_khau = $_POST['mat_khau'] ?? '';
+    $mo_ta = $_POST['mo_ta'] ?? '';
+
+    if (empty($ten_giangvien) || empty($email) || empty($mat_khau)) {
+        $response['message'] = 'Vui lòng điền đầy đủ các trường bắt buộc.';
+        echo json_encode($response);
+        exit;
+    }
+
+    // Kiểm tra email đã tồn tại
+    $checkEmail = $conn->prepare("SELECT id_giangvien FROM giangvien WHERE email = ?");
+    $checkEmail->bind_param("s", $email);
+    $checkEmail->execute();
+    if ($checkEmail->get_result()->num_rows > 0) {
+        $response['message'] = "Email này đã được sử dụng!";
+        echo json_encode($response);
+        exit;
+    }
+    $checkEmail->close();
 
     // Mã hóa mật khẩu
     $hashedPassword = password_hash($mat_khau, PASSWORD_DEFAULT);
@@ -27,11 +48,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param("ssssss", $ten_giangvien, $email, $so_dien_thoai, $hashedPassword, $mo_ta, $hinh_anh);
     
     if ($stmt->execute()) {
-        header('Location: ../../admin.php?nav=lecturers&status=add_success');
+        $response['status'] = 'success';
+        $response['message'] = 'Thêm giảng viên thành công!';
     } else {
-        header('Location: ../../admin.php?nav=lecturers&status=add_error');
+        $response['message'] = 'Lỗi CSDL khi thêm giảng viên.';
     }
     $stmt->close();
-    $conn->close();
 }
+
+$conn->close();
+echo json_encode($response);
 ?>

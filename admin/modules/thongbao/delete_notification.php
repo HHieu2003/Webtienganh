@@ -2,30 +2,52 @@
 include('../../../config/config.php');
 session_start();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $tieu_de = $_POST['tieu_de'] ?? '';
-    $id_khoahoc_str = $_POST['id_khoahoc'] ?? '';
-    $ngay_tao = $_POST['ngay_tao'] ?? '';
+header('Content-Type: application/json');
+$response = ['status' => 'error', 'message' => 'Yêu cầu không hợp lệ.'];
 
-    // Xóa tất cả các thông báo có cùng tiêu đề, khóa học và thời gian tạo chính xác
-    if ($id_khoahoc_str !== '') { // Gửi đến khóa học cụ thể
-        $id_khoahoc = (int)$id_khoahoc_str;
-        $sql = "DELETE FROM thongbao WHERE tieu_de = ? AND id_khoahoc = ? AND ngay_tao = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sis", $tieu_de, $id_khoahoc, $ngay_tao);
-    } else { // Gửi đến tất cả
-        $sql = "DELETE FROM thongbao WHERE tieu_de = ? AND id_khoahoc IS NULL AND ngay_tao = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ss", $tieu_de, $ngay_tao);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $tieu_de = $data['tieu_de'] ?? '';
+    $id_khoahoc = $data['id_khoahoc'] ?? null;
+    $id_lop = $data['id_lop'] ?? null;
+    $ngay_tao = $data['ngay_tao'] ?? '';
+
+    $conditions = [];
+    $params = [];
+    $types = "";
+
+    $conditions[] = "tieu_de = ?";
+    $params[] = $tieu_de;
+    $types .= "s";
+
+    $conditions[] = "ngay_tao = ?";
+    $params[] = $ngay_tao;
+    $types .= "s";
+
+    if ($id_lop) {
+        $conditions[] = "id_lop = ?";
+        $params[] = $id_lop;
+        $types .= "s";
+    } elseif ($id_khoahoc) {
+        $conditions[] = "id_khoahoc = ?";
+        $params[] = $id_khoahoc;
+        $types .= "i";
+    } else {
+        $conditions[] = "id_khoahoc IS NULL AND id_lop IS NULL";
     }
+
+    $sql = "DELETE FROM thongbao WHERE " . implode(" AND ", $conditions);
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param($types, ...$params);
 
     if ($stmt->execute()) {
-        $_SESSION['message'] = ['type' => 'success', 'text' => 'Đã xóa nhóm thông báo thành công!'];
+        $response['status'] = 'success';
+        $response['message'] = 'Đã xóa nhóm thông báo thành công!';
     } else {
-        $_SESSION['message'] = ['type' => 'danger', 'text' => 'Lỗi khi xóa thông báo.'];
+        $response['message'] = 'Lỗi khi xóa thông báo.';
     }
-
-    header('Location: ../../admin.php?nav=thongbao');
-    exit();
 }
+
+echo json_encode($response);
+$conn->close();
 ?>

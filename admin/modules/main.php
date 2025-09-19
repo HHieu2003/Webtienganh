@@ -36,7 +36,15 @@ if ($temp == 'courses') {
     include("modules/cauhoi/add_answer.php");
 } else if ($temp == 'lecturers') {
     include("modules/giangvien/manage_lecturers.php");
-} else {
+} else if ($temp == 'hoclieu') {
+    include("modules/hoclieu/manage_hoclieu.php");
+}
+ else if ($temp == 'thongke') {
+    include("modules/thongke/baocao.php");
+// ===================================
+
+} 
+else {
     include("modules/home.php");
 }
 ?>

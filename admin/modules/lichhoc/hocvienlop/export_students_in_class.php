@@ -1,6 +1,6 @@
 <?php
-// admin/modules/lichhoc/export_schedule_for_class.php
-include('../../../config/config.php');
+// File: admin/modules/lichhoc/hocvienlop/export_students_in_class.php
+include('../../../../config/config.php');
 
 $lop_id = $_GET['lop_id'] ?? '';
 $search_term = $_GET['search'] ?? '';
@@ -10,22 +10,24 @@ if (empty($lop_id)) {
 }
 
 header("Content-Type: application/vnd.ms-excel; charset=utf-8");
-header("Content-Disposition: attachment; filename=lich-hoc-lop-".$lop_id.".xls");
+header("Content-Disposition: attachment; filename=danh-sach-hoc-vien-lop-".$lop_id.".xls");
 header("Pragma: no-cache");
 header("Expires: 0");
 
-$sql = "SELECT * FROM lichhoc WHERE id_lop = ?";
+$sql = "SELECT hv.id_hocvien, hv.ten_hocvien, hv.email, hv.so_dien_thoai
+        FROM dangkykhoahoc dk 
+        JOIN hocvien hv ON dk.id_hocvien = hv.id_hocvien
+        WHERE dk.id_lop = ?";
 $params = [$lop_id];
 $types = "s";
 
 if (!empty($search_term)) {
-    $sql .= " AND (phong_hoc LIKE ? OR ghi_chu LIKE ?)";
+    $sql .= " AND (hv.ten_hocvien LIKE ? OR hv.email LIKE ?)";
     $search_param = "%" . $search_term . "%";
     $params[] = $search_param;
     $params[] = $search_param;
     $types .= "ss";
 }
-$sql .= " ORDER BY ngay_hoc ASC, gio_bat_dau ASC";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param($types, ...$params);
@@ -37,22 +39,20 @@ $output .= "<head><meta http-equiv=\"content-type\" content=\"application/vnd.ms
 $output .= "<body><table border='1'>";
 $output .= "<thead>
                 <tr>
-                    <th>Ngày học</th>
-                    <th>Giờ bắt đầu</th>
-                    <th>Giờ kết thúc</th>
-                    <th>Phòng học</th>
-                    <th>Ghi chú</th>
+                    <th>ID Học viên</th>
+                    <th>Tên Học viên</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
                 </tr>
             </thead><tbody>";
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $output .= "<tr>
-                        <td>" . htmlspecialchars($row['ngay_hoc']) . "</td>
-                        <td>" . htmlspecialchars($row['gio_bat_dau']) . "</td>
-                        <td>" . htmlspecialchars($row['gio_ket_thuc']) . "</td>
-                        <td>" . htmlspecialchars($row['phong_hoc']) . "</td>
-                        <td>" . htmlspecialchars($row['ghi_chu']) . "</td>
+                        <td>" . htmlspecialchars($row['id_hocvien']) . "</td>
+                        <td>" . htmlspecialchars($row['ten_hocvien']) . "</td>
+                        <td>" . htmlspecialchars($row['email']) . "</td>
+                        <td>'" . htmlspecialchars($row['so_dien_thoai']) . "</td>
                     </tr>";
     }
 }
