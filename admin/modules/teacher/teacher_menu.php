@@ -26,5 +26,18 @@ $current_page = $_GET['nav'] ?? '';
                 <span>Học liệu</span>
             </a>
         </li>
+
+          <li>
+            <a href="./admin.php?nav=question" class="<?php echo in_array($current_page, ['teacher_tests', 'ds_cauhoi_gv', 'kqhocvien_gv']) ? 'active' : ''; ?>">
+                <i class="fa-solid fa-circle-question"></i>
+                <span>Quản lý Bài test</span>
+            </a>
+        </li>
+         <li>
+            <a href="./admin.php?nav=teacher_notifications" class="<?php echo ($current_page == 'teacher_notifications') ? 'active' : ''; ?>">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Gửi Thông báo</span>
+            </a>
+        </li>
         </ul>
 </nav>

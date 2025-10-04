@@ -14,7 +14,7 @@ $result_courses = $conn->query($sql_courses);
 <div class="featured-courses-section">
     <div class="container">
         <div class="section-header" data-aos="fade-up">
-            <h2 class="introduce-title">CÁC KHÓA HỌC TIÊU BIỂU</h2>
+            <h2 class="introduce-title">Các khóa học tiêu biểu</h2>
             <p class="section-subtitle">Những cuộc phiêu lưu tri thức đang chờ bạn khám phá</p>
         </div>
 
@@ -62,7 +62,7 @@ $result_courses = $conn->query($sql_courses);
 
 <style>
     .featured-courses-section {
-        padding: 0px 0;
+        padding: 50px 0;
     }
 
     /* Tinh chỉnh lại tiêu đề chung */

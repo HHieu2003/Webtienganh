@@ -1,118 +1,232 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>headerDK (Responsive)</title>
+  <title>headerDK</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
   <style>
-    :root{
-      --brand:#0db33b;
-      --brand-2:#298f29;
-      --bg:#f3f7f8;
-      --text:#333;
-      --muted:#666;
-      --divider:#60d02f;
+    :root {
+      --brand: #0db33b;
+      --brand-2: #298f29;
+      --bg: #f3f7f8;
+      --text: #333;
+      --muted: #666;
+      --divider: #60d02f;
     }
 
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-
+    * {
+      box-sizing: border-box
+    }
     /* ===== Header ===== */
-    .header-top{
-      position:relative;
-      padding:10px 16px;
-      background:var(--bg);
-      border-bottom:2px solid var(--divider);
-      z-index:1000;
+    .header-top {
+      font-family: 'Times New Roman', Times, serif !important;
+
+      position: relative;
+      padding: 5px 16px;
+      background: var(--bg);
+      border-bottom: 2px solid var(--divider);
+      z-index: 1000;
     }
 
-    .header-inner{
-      max-width:1200px;
-      margin:0 auto;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
     }
 
     /* Logo */
-    .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-    .logo img{height:56px;width:auto;display:block;border-radius:6px;object-fit:cover}
-    .logo-text .logo-item{font-size:22px;color:var(--brand);font-weight:800;line-height:1.1}
-    .logo-text .logo-row{font-size:13px;color:var(--muted)}
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none
+    }
+
+    .logo img {
+      height: 50px;
+      width: auto;
+      display: block;
+      border-radius: 6px;
+      object-fit: cover
+    }
+
+    .logo-text .logo-item {
+      font-size: 20px;
+      color: var(--brand);
+      font-weight: 800;
+      line-height: 1.1
+    }
+
+    .logo-text .logo-row {
+      font-size: 13px;
+      color: var(--muted)
+    }
 
     /* Nav right (desktop) */
-    .right{
-      display:flex;align-items:center;gap:14px;
-      font-weight:700;flex-wrap:wrap;
+    .right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-weight: 600;
+      flex-wrap: wrap;
     }
-    .right a{
-      text-decoration:none;font-size:15px;color:var(--brand-2);position:relative
+
+    .right a {
+      text-decoration: none;
+      font-size: 15px;
+      color: var(--brand-2);
+      position: relative
     }
+
     /* vertical divider only on wide screens */
-    @media (min-width: 768px){
-      .right a + a{padding-left:14px}
-      .right a + a::before{
-        content:"|"; color:var(--brand-2);
-        position:absolute; left:4px; top:50%; translate:0 -50%; font-weight:900
+    @media (min-width: 768px) {
+      .right a+a {
+        padding-left: 14px
+      }
+
+      .right a+a::before {
+        content: "|";
+        color: var(--brand-2);
+        position: absolute;
+        left: 4px;
+        top: 50%;
+        translate: 0 -50%;
+        font-weight: 900
       }
     }
-    .right a:hover{text-decoration:underline}
+
+    .right a:hover {
+      text-decoration: underline
+    }
 
     /* ===== Hamburger (no JS) ===== */
-    .nav-toggle{display:none}
-    .burger{
-      display:none; cursor:pointer; border:1px solid #cfd8dc; border-radius:8px;
-      padding:8px 10px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.06);
+    .nav-toggle {
+      display: none
     }
-    .burger i{font-size:18px; color:#455a64}
+
+    .burger {
+      display: none;
+      cursor: pointer;
+      border: 1px solid #cfd8dc;
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+    }
+
+    .burger i {
+      font-size: 18px;
+      color: #455a64
+    }
 
     /* ===== Mobile layout ===== */
-    @media (max-width: 767.98px){
-      .logo img{height:44px}
-      .logo-text .logo-item{font-size:18px}
-      .logo-text .logo-row{font-size:12px}
+    @media (max-width: 767.98px) {
+      .logo img {
+        height: 44px
+      }
 
-      .burger{display:flex;align-items:center;justify-content:center}
+      .logo-text .logo-item {
+        font-size: 18px
+      }
+
+      .logo-text .logo-row {
+        font-size: 12px
+      }
+
+      .burger {
+        display: flex;
+        align-items: center;
+        justify-content: center
+      }
 
       /* Collapse menu */
-      .right{
-        position:absolute; left:0; right:0; top:100%;
-        background:#fff; border-bottom:2px solid var(--divider);
-        box-shadow:0 8px 20px rgba(0,0,0,.08);
-        display:none; flex-direction:column; align-items:stretch; gap:0;
-        padding:6px 12px;
+      .right {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 100%;
+        background: #fff;
+        border-bottom: 2px solid var(--divider);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 6px 12px;
       }
-      .right a{
-        padding:12px 6px; font-size:16px; color:var(--text);
+
+      .right a {
+        padding: 12px 6px;
+        font-size: 16px;
+        color: var(--text);
       }
-      .right a + a::before{content:none} /* bỏ dấu | trên mobile */
+
+      .right a+a::before {
+        content: none
+      }
+
+      /* bỏ dấu | trên mobile */
 
       /* Show when checked */
-      .nav-toggle:checked ~ .right{display:flex}
+      .nav-toggle:checked~.right {
+        display: flex
+      }
     }
 
     /* ===== Floating quick actions ===== */
-    .floating-icons{
-      position:fixed; right:18px; bottom:18px;
-      display:flex; flex-direction:column; gap:10px; z-index:999;
+    .floating-icons {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 999;
     }
-    .floating-icons a{
-      width:50px;height:50px;border-radius:50%;
-      display:flex;align-items:center;justify-content:center;
-      color:#fff;text-decoration:none;
-      box-shadow:0 4px 8px rgba(0,0,0,.2);
+
+    .floating-icons a {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      text-decoration: none;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, .2);
     }
-    .floating-icons a:hover{box-shadow:0 6px 14px rgba(0,0,0,.28)}
-    .messenger-icon{background:#f7b4f1;font-size:22px}
-    .phone-icon{background:#2bfc5f;font-size:22px}
+
+    .floating-icons a:hover {
+      box-shadow: 0 6px 14px rgba(0, 0, 0, .28)
+    }
+
+    .messenger-icon {
+      background: #f7b4f1;
+      font-size: 22px
+    }
+
+    .phone-icon {
+      background: #2bfc5f;
+      font-size: 22px
+    }
 
     /* tránh che nội dung trên màn rất nhỏ */
-    @media (max-width: 360px){
-      .floating-icons{right:12px;bottom:12px}
-      .floating-icons a{width:44px;height:44px}
+    @media (max-width: 360px) {
+      .floating-icons {
+        right: 12px;
+        bottom: 12px
+      }
+
+      .floating-icons a {
+        width: 44px;
+        height: 44px
+      }
     }
   </style>
 </head>
@@ -143,10 +257,9 @@
       </nav>
     </div>
   </header>
-
-  <!-- Floating quick actions -->
+  <!-- 
+ 
   <div class="floating-icons" aria-label="Liên hệ nhanh">
-    <!-- Messenger -->
     <a
       class="messenger-icon"
       href="https://www.facebook.com/profile.php?id=100091706867917&mibextid=LQQJ4d"
@@ -156,7 +269,6 @@
       <i class="fa-brands fa-facebook-messenger" style="color:#f448cf;"></i>
     </a>
 
-    <!-- Phone -->
     <a
       class="phone-icon"
       href="tel:+84123456789"
@@ -164,6 +276,9 @@
       aria-label="Gọi điện">
       <i class="fa-solid fa-phone"></i>
     </a>
-  </div>
+  </div> -->
+
+
 </body>
+
 </html>

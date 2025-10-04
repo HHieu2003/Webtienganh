@@ -38,7 +38,7 @@ $is_teacher = $_SESSION['is_teacher'] ?? false;
                 include('modules/menu.php');
             } else {
                 // Giả định bạn có file teacher_menu.php cho giảng viên
-                include('modules/teacher_menu.php');
+                include('modules/teacher/teacher_menu.php');
             }
             ?>
         </aside>
@@ -54,7 +54,7 @@ $is_teacher = $_SESSION['is_teacher'] ?? false;
                     include('modules/main.php');
                 } else {
                     // Giả định bạn có file teacher_main.php cho giảng viên
-                    include('modules/teacher_main.php');
+                    include('modules/teacher/teacher_main.php');
                 }
                 ?>
             </section>

@@ -20,67 +20,40 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
 
 
     <style>
-        /*------------Menu và hiệu ứng------------*/
-        .navbar-nav .nav-item .nav-link {
-            font-weight: 500;
-            position: relative;
-            padding-bottom: 8px;
-            transition: color 0.2s ease;
+        /* ==========================================================
+           PHẦN CSS CHUNG
+           ========================================================== */
+        .fixed-header-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1030;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        /* Tạo gạch chân ẩn */
-        .navbar-nav .nav-item .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: 0;
-            left: 50%;
-            background-color: #0db33b;
-            transition: all 0.2s ease-in-out;
-            transform: translateX(-50%);
-        }
-
-        /* Hiển thị gạch chân khi hover */
-        .navbar-nav .nav-item .nav-link:hover::after {
-            width: 80%;
-        }
-
-        .navbar-nav .nav-item .nav-link:hover {
-            color: #0db33b !important;
-        }
-
-        /*----------------header top-----------------*/
         .header-top {
             color: #fff;
-            padding: 10px 20px;
+            padding: 3px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 1000;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             background-color: #0db33b;
-            display: flex;
-        }
-
-        .header-top .left,
-        .header-top .right {
-            display: flex;
-            align-items: center;
         }
 
         .header-top .right a {
             text-decoration: none;
             margin-left: 15px;
-            font-size: 17px;
+            font-size: 15px;
             color: white;
         }
 
-        .header-top a:not(:last-child)::after {
-            content: " | ";
+        .header-top .right a+a::before {
+            content: "|";
             color: white;
-            padding-left: 10px;
-            font-weight: 900;
+            padding-right: 15px;
+            font-weight: 500;
         }
 
         .header-top .right a:hover {
@@ -93,60 +66,65 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
         }
 
         .logo img {
-            height: 60px;
+            height: 55px;
             margin-right: 10px;
         }
 
         .logo-item {
-            font-size: 24px;
+            font-size: 20px;
             color: #0db33b;
             font-weight: bold;
         }
 
         .logo-row {
-            font-size: 14px;
+            font-size: 13px;
             color: #666;
         }
 
         .navbar-container {
             width: 100%;
             display: flex;
-        }
-
-        /*----------menu---------*/
-        .menu {
-            margin-left: auto;
-            display: flex;
             align-items: center;
-            justify-content: flex-end !important;
         }
 
-        .menu>ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
+        /* ==========================================================
+           CSS CHO MENU TRÊN MÀN HÌNH LỚN (DESKTOP)
+           ========================================================== */
+        .desktop-nav {
+            margin-left: auto;
         }
 
-        .menu>ul>li {
+        .desktop-nav .navbar-nav .nav-item .nav-link {
+            font-weight: 500;
             position: relative;
-            padding: 0px 5px;
-        }
-
-        .menu>ul>li>a {
-            color: #333 !important;
-            text-decoration: none;
             padding: 10px 15px;
             font-size: 17px;
-            display: block;
+            color: #333;
+            transition: color 0.2s ease;
         }
 
-        .menu>ul>li>a:hover {
-            color: #0db33b;
+        .navbar-nav .nav-item .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: #498b5bff;
+            transition: all 0.2s ease-in-out;
+            transform: translateX(-50%);
         }
 
-        /*------------menu item------------*/
-        .menu-item {
+        .navbar-nav .nav-item .nav-link:hover::after {
+            width: 80%;
+        }
+
+        .desktop-nav .navbar-nav .nav-item .nav-link:hover {
+            color: #0db33b !important;
+        }
+
+        /* Dropdown Desktop */
+        .desktop-nav .navbar-nav .nav-item.dropdown .dropdown-menu {
             display: none;
             position: absolute;
             top: 100%;
@@ -154,38 +132,179 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
             background-color: #fff;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             z-index: 1000;
-            min-width: 150px;
+            min-width: 220px;
+            border-radius: 10px;
+            border: 1px solid #f0f0f0;
         }
 
-        .menu-item li {
-            width: 100%;
-        }
-
-        .menu-item li a {
-            padding: 10px 15px;
-            color: #333;
+        .desktop-nav .navbar-nav .nav-item.dropdown:hover .dropdown-menu {
             display: block;
-            text-decoration: none;
-            font-size: 14px;
         }
 
-        .menu-item li a:hover {
-            background-color: #f3f3f3;
+        .dropdown-item {
+            font-weight: 500;
+            padding: 10px 20px;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #e7f7ec;
             color: #0db33b;
         }
 
-        .menu>ul>li:hover .menu-item {
+        /* ==========================================================
+           BẮT ĐẦU: CSS CHO MENU RESPONSIVE (MOBILE)
+           ========================================================== */
+
+        /* 1. Nút Hamburger (chỉ hiện trên mobile) */
+        .mobile-menu-toggle {
+            display: none;
+            /* Mặc định ẩn trên desktop */
+            font-size: 24px;
+            color: #333;
+            cursor: pointer;
+            margin-left: auto;
+            /* Đẩy nút về phía bên phải */
+            padding: 5px 10px;
+        }
+
+        /* 2. Khung Menu trượt từ bên trái */
+        .mobile-nav-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            /* Độ rộng của menu */
+            height: 100%;
+            background-color: #fff;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+            z-index: 1040;
+            /* Nằm trên lớp phủ */
+            transform: translateX(-100%);
+            /* Ẩn đi về phía bên trái */
+            transition: transform 0.3s ease-in-out;
+            overflow-y: auto;
+            /* Cho phép cuộn nếu menu quá dài */
+        }
+
+        .mobile-nav-panel.show {
+            transform: translateX(0);
+            /* Hiện ra */
+        }
+
+        /* 3. Lớp phủ đen phía sau menu */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1035;
+            /* Nằm dưới menu, trên nội dung trang */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .mobile-nav-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 4. Tùy chỉnh nội dung bên trong menu mobile */
+        .mobile-nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .mobile-nav-header .logo-item {
+            font-size: 20px;
+        }
+
+        #close-mobile-nav {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .mobile-nav-links {
+            list-style: none;
+            padding: 15px 0;
+        }
+
+        .mobile-nav-links li a {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            font-weight: 500;
+            text-decoration: none;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .mobile-nav-links li a:hover {
+            background-color: #f8f9fa;
+        }
+
+        .mobile-nav-links .dropdown-toggle::after {
+            float: right;
+            margin-top: 8px;
+        }
+
+        .mobile-nav-links .dropdown-menu {
+            position: static;
+            display: none;
+            border: none;
+            box-shadow: none;
+            background-color: #f8f9fa;
+        }
+
+        .mobile-nav-links .dropdown-menu.show {
             display: block;
         }
 
-        .icon {
-            position: relative;
-            font-size: 20px;
-            color: #333;
-            margin-left: 20px;
+        .mobile-nav-links .dropdown-item {
+            padding-left: 35px;
         }
 
-        /* CSS cho phần bong bóng chat nổi */
+
+        /* Quy tắc Responsive: Áp dụng khi màn hình nhỏ hơn 992px */
+        @media (max-width: 991.98px) {
+            .desktop-nav {
+                display: none;
+            }
+
+            /* Ẩn menu desktop */
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            /* Hiện nút hamburger */
+            .header-top {
+                font-size: 14px;
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .header-top .right a {
+                font-size: 14px;
+            }
+
+            .logo img {
+                height: 50px;
+            }
+
+            .logo-item {
+                font-size: 20px;
+            }
+        }
+
+        /* ==========================================================
+           CSS CŨ KHÔNG THAY ĐỔI
+           ========================================================== */
         .floating-icons {
             position: fixed;
             bottom: 20px;
@@ -194,7 +313,6 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
             flex-direction: column;
             gap: 10px;
             z-index: 1000;
-            gap: 10px;
         }
 
         .floating-icons a {
@@ -214,8 +332,7 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
         }
 
         .messenger-icon {
-            background-color: #f7b4f1;
-            /* Màu của Messenger */
+            background-color: #f1e9e9ff;
             font-size: 24px;
         }
 
@@ -234,7 +351,6 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
             background-color: #dc3545;
             color: white;
             display: none;
-            /* Ẩn mặc định */
         }
 
         .notification-dropdown {
@@ -248,13 +364,6 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             z-index: 1000;
             display: none;
-        }
-
-        .notification-dropdown h6 {
-            font-size: 16px;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            margin: 0;
         }
 
         #notification-items p {
@@ -276,7 +385,7 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
 
         .notification-dropdown ul li {
             padding: 10px;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid #ddd;
         }
 
         .notification-dropdown ul li:last-child {
@@ -286,247 +395,215 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
         .notification-dropdown ul li:hover {
             background: #f8f9fa;
         }
-
-
-        /* ==================================================================
-           PHẦN CSS CHO RESPONSIVE MOBILE (THÊM MỚI)
-           ================================================================== */
-
-        /* Áp dụng cho màn hình có chiều rộng từ 991px trở xuống (máy tính bảng và điện thoại) */
-        @media (max-width: 500px) {
-
-            /* 1. Tùy chỉnh thanh Header Top */
-            .header-top {
-                flex-direction: column;
-                /* Xếp hotline và các link chồng lên nhau */
-                text-align: center;
-                gap: 10px;
-                /* Tạo khoảng cách giữa 2 dòng */
-                padding: 15px;
-            }
-
-            .header-top .right {
-                justify-content: center;
-                /* Căn giữa các link */
-            }
-
-            .header-top .right a {
-                font-size: 15px;
-                /* Giảm kích thước chữ cho gọn */
-                margin-left: 10px;
-                margin-right: 10px;
-            }
-
-            .header-top a:not(:last-child)::after {
-                padding-left: 10px;
-            }
-
-            .menu {
-                margin-left: auto !important;
-
-            }
-
-            /* 2. Tùy chỉnh Navbar chính */
-            .navbar-brand .logo img {
-                height: 50px;
-                /* Giảm kích thước logo */
-            }
-
-            .navbar-brand .logo-item {
-                font-size: 20px;
-                /* Giảm kích thước logo chữ */
-            }
-
-            .navbar .container-xxl {
-                margin-left: 15px !important;
-                margin-right: 15px !important;
-                display: flex;
-                align-items: center;
-                /* Căn giữa logo và menu theo chiều dọc */
-                justify-content: space-between;
-                /* Đẩy logo sang trái, menu sang phải */
-                flex-flow: wrap;
-            }
-
-            .navbar-collapse {
-                margin-top: 15px;
-                /* Tạo khoảng cách khi menu xổ xuống */
-                border-top: 1px solid #eee;
-                max-height: 70vh;
-                /* Giới hạn chiều cao menu */
-                overflow-y: auto;
-                /* Cho phép cuộn nếu menu quá dài */
-            }
-
-            .navbar-nav .nav-item {
-                text-align: left;
-                /* Căn lề trái các mục menu */
-                padding: 5px 0;
-            }
-
-            .navbar-nav .nav-item .nav-link:hover::after {
-                width: 0;
-                /* Bỏ hiệu ứng gạch chân trên mobile */
-            }
-
-            /* 3. Tùy chỉnh Dropdown Thông báo */
-            .notification-dropdown {
-                /* Cho nó chiếm gần hết chiều rộng và không bị tràn lề */
-                width: 90vw;
-                left: 50%;
-                transform: translateX(-50%);
-                right: auto;
-            }
-        }
     </style>
 </head>
 
 <body>
-    <div class="header-top  ">
-        <div class="left">
-            Hotline: 0962.501.832 - 0336.123.130
-        </div>
-        <div class="right fs-5">
-            <?php if ($isLoggedIn) : ?>
-                <!-- Liên kết đến Dashboard nếu học viên đã đăng nhập -->
-                <?php if ($isAdmin) : ?>
-                    <!-- Liên kết đến trang Admin Dashboard nếu là admin -->
-                    <a class="" href="./admin/admin.php" style=" font-weight: bold;">Trang Admin</a>
+    <div class="fixed-header-container">
+        <div class="header-top">
+            <div class="left">
+                Hotline: 0962.501.832 - 0336.123.130
+            </div>
+            <div class="right fs-5">
+                <?php if ($isLoggedIn) : ?>
+                    <?php if ($isAdmin) : ?>
+                        <a href="./admin/admin.php" style="font-weight: bold;">Trang Admin</a>
+                    <?php endif; ?>
+                    <a href="./user/dashboard.php"> <?php echo htmlspecialchars($_SESSION['user']);  ?> </a>
+                    <a href="./user/dashboard.php">Thông tin cá nhân</a>
+                    <a href="./pages/logout.php">Đăng Xuất</a>
+                <?php else : ?>
+                    <a href="./pages/login.php">Đăng Nhập</a>
+                    <a href="./pages/register.php">Đăng Ký</a>
                 <?php endif; ?>
-
-                <a class="" href="./user/dashboard.php"> <?php echo $_SESSION['user'];  ?> </a>
-
-                <a class="" href="./user/dashboard.php">Thông tin cá nhân</a>
-                <a class="" href="./pages/login.php">Đăng Xuất</a>
-
-            <?php else : ?>
-                <!-- Hiển thị nút Đăng nhập và Đăng ký nếu học viên chưa đăng nhập -->
-
-                <a class="" href="./pages/login.php">Đăng Nhập</a>
-
-                <a class="" href="./pages/register.php">Đăng Ký</a>
-
-            <?php endif; ?>
-
-        </div>
-    </div>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top p-0 fs-5">
-
-        <div class="container-xxl p-0 my-1 mx-5 navbar-container">
-            <a class="navbar-brand" href="./index.php">
-                <div class="logo">
-                    <img src="./images/logo2.jpg" alt="Logo">
-                    <div>
-                        <div class="logo-item">Tiếng Anh Fighter!</div>
-                        <div class="logo-row">Learning is an adventure!!!</div>
-                    </div>
-                </div>
-            </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="menu  collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="./index.php">Trang chủ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="./index.php?nav=khoahoc">Khóa Học</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="./index.php?nav=question">Trắc Nghiệm</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="./index.php?nav=about">Giới thiệu</a>
-
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="./index.php?nav=huongdandangky">Hướng dẫn đăng ký</a>
-                    </li>
-
-                    <li class="nav-item position-relative" id="notification-icon">
-                        <a class="nav-link" href="javascript:void(0);" onclick="toggleNotificationList()">
-                            <i class="fa-solid fa-bell"></i>
-                            <span id="notification-badge" class="badge"></span>
-                        </a>
-                        <div id="notification-list" class="notification-dropdown">
-                            <!-- <h6>Thông báo</h6> -->
-                            <ul id="notification-items"></ul>
-                        </div>
-                    </li>
-
-                    <!-- Search Icon -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" data-toggle="modal" data-target="#searchModal">
-                            <i class="fa-solid fa-search"></i>
-                        </a>
-                    </li>
-
-                </ul>
             </div>
         </div>
-    </nav>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light p-0 fs-5">
+            <div class="container-xxl p-0 my-1 mx-5 navbar-container">
+                <a class="navbar-brand" href="./index.php">
+                    <div class="logo">
+                        <img src="./images/logo2.jpg" alt="Logo">
+                        <div>
+                            <div class="logo-item">Tiếng Anh Fighter!</div>
+                            <div class="logo-row">Learning is an adventure!!!</div>
+                        </div>
+                    </div>
+                </a>
 
-    <!-- Search Modal -->
+                <div class="desktop-nav d-none d-lg-block">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="./index.php">Trang chủ</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link" href="#">Về Fighter &nbsp<i class="fas fa-caret-down "></i> </a>
+                            
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="./index.php?nav=about">Giới thiệu</a>
+                                <a class="dropdown-item" href="./index.php?nav=lecturers">Đội ngũ giảng viên</a>
+                                <a class="dropdown-item" href="./index.php?nav=stories">Câu chuyện thành công</a>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="./index.php?nav=khoahoc">Khóa Học</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link" href="#">Học liệu & Thi thử &nbsp<i class="fas fa-caret-down"></i></a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="./index.php?nav=question">Trắc nghiệm Online</a>
+                                <a class="dropdown-item" href="./index.php?nav=blog">Blog kiến thức</a>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="./index.php?nav=events">Sự kiện</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="./index.php?nav=contact">Liên hệ</a>
+                        </li>
+                        <li class="nav-item position-relative" id="notification-icon-desktop">
+                            <a class="nav-link" href="javascript:void(0);" onclick="toggleNotificationList()">
+                                <i class="fa-solid fa-bell"></i>
+                                <span id="notification-badge" class="badge"></span>
+                            </a>
+                            <div id="notification-list" class="notification-dropdown">
+                                <ul id="notification-items"></ul>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-toggle="modal" data-target="#searchModal">
+                                <i class="fa-solid fa-search"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="mobile-menu-toggle d-lg-none" id="open-mobile-nav">
+                    <i class="fa-solid fa-bars"></i>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <div class="mobile-nav-panel" id="mobile-nav-panel">
+        <div class="mobile-nav-header">
+            <span class="logo-item">Menu</span>
+            <i class="fa-solid fa-times" id="close-mobile-nav"></i>
+        </div>
+        <ul class="mobile-nav-links">
+            <li><a href="./index.php">Trang chủ</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="collapse" data-target="#about-submenu">Về Fighter   </a>
+          
+                <div id="about-submenu" class="collapse dropdown-menu">
+                    <a class="dropdown-item" href="./index.php?nav=about">Giới thiệu</a>
+                    <a class="dropdown-item" href="./index.php?nav=lecturers">Đội ngũ giảng viên</a>
+                    <a class="dropdown-item" href="./index.php?nav=stories">Câu chuyện thành công</a>
+                </div>
+            </li>
+            <li><a href="./index.php?nav=khoahoc">Khóa Học</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="collapse" data-target="#materials-submenu">Học liệu & Thi thử</a>
+                <div id="materials-submenu" class="collapse dropdown-menu">
+                    <a class="dropdown-item" href="./index.php?nav=question">Trắc nghiệm Online</a>
+                    <a class="dropdown-item" href="./index.php?nav=blog">Blog kiến thức</a>
+                </div>
+            </li>
+            <li><a href="./index.php?nav=events">Sự kiện</a></li>
+            <li><a href="./index.php?nav=contact">Liên hệ</a></li>
+        </ul>
+    </div>
+    <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+
+
     <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <!-- <div class="modal-header">
-                <h5 class="modal-title" id="searchModalLabel">Tìm kiếm</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div> -->
-                <div class="">
-                    <form method="GET" action="index.php" style="display: flex;     justify-content: space-between; padding: 6px 10px; ">
-                        <input type="hidden" name="nav" value="khoahoc">
-                        <div class="" style="width: 70%; display: flex; padding: 0;">
-                            <input type="text" class="" name="search" placeholder="Nhập từ khóa tìm kiếm" style="padding: 5px 5px; margin: auto 0px auto 0px;     width: 100%;border: none;  ">
-                        </div>
-
-                        <button type="submit" class="btn " style="background-color: #28a745; color: white">
-                            Tìm kiếm
-
-                        </button>
-                    </form>
-                </div>
+                <form method="GET" action="index.php" style="display: flex; justify-content: space-between; padding: 6px 10px;">
+                    <input type="hidden" name="nav" value="khoahoc">
+                    <div style="width: 70%; display: flex; padding: 0;">
+                        <input type="text" class="form-control" name="search" placeholder="Nhập từ khóa tìm kiếm" style="border: none; box-shadow: none;">
+                    </div>
+                    <button type="submit" class="btn" style="background-color: #28a745; color: white">
+                        Tìm kiếm
+                    </button>
+                </form>
             </div>
         </div>
     </div>
-
     <div class="floating-icons">
-        <a href="https://www.facebook.com/profile.php?id=100091706867917&mibextid=LQQJ4d"
-            target="_blank"
-            class="messenger-icon"
-            title="Chat với chúng tôi qua Messenger">
+        <a href="https://www.facebook.com/profile.php?id=100091706867917&mibextid=LQQJ4d" target="_blank" class="messenger-icon" title="Chat với chúng tôi qua Messenger">
             <i class="fa-brands fa-facebook-messenger" style="color:#f448cf;"></i>
         </a>
-
-
         <a href="tel:+84123456789" class="phone-icon" title="Gọi điện cho chúng tôi">
             <i class="fa-solid fa-phone fa-shake"></i>
         </a>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 
     <script>
+        AOS.init({
+            duration: 1000,
+            once: true,
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // ==========================================================
+            // SCRIPT ĐỂ FIX LỖI HEADER CHE MẤT NỘI DUNG
+            // ==========================================================
+            function setBodyPadding() {
+                const header = document.querySelector('.fixed-header-container');
+                if (header) {
+                    document.body.style.paddingTop = header.offsetHeight + 'px';
+                }
+            }
+            setBodyPadding();
+            window.addEventListener('resize', setBodyPadding);
+
+            // ==========================================================
+            // BẮT ĐẦU: SCRIPT CHO MENU MOBILE
+            // ==========================================================
+            const openNavBtn = document.getElementById('open-mobile-nav');
+            const closeNavBtn = document.getElementById('close-mobile-nav');
+            const mobileNavPanel = document.getElementById('mobile-nav-panel');
+            const overlay = document.getElementById('mobile-nav-overlay');
+
+            function openMobileNav() {
+                mobileNavPanel.classList.add('show');
+                overlay.classList.add('show');
+            }
+
+            function closeMobileNav() {
+                mobileNavPanel.classList.remove('show');
+                overlay.classList.remove('show');
+            }
+
+            openNavBtn.addEventListener('click', openMobileNav);
+            closeNavBtn.addEventListener('click', closeMobileNav);
+            overlay.addEventListener('click', closeMobileNav);
+
+            // ==========================================================
+            // SCRIPT CHO THÔNG BÁO
+            // ==========================================================
+            checkNotifications();
+        });
+
         const idHocVien = <?php echo isset($_SESSION['id_hocvien']) ? $_SESSION['id_hocvien'] : 'null'; ?>;
 
         // Kiểm tra thông báo chưa đọc
         function checkNotifications() {
             if (!idHocVien) return;
-
             fetch(`user/get_unread_notifications.php?id_hocvien=${idHocVien}`)
                 .then(response => response.json())
                 .then(data => {
                     const badge = document.getElementById('notification-badge');
                     if (data.error || data.length === 0) {
-                        badge.style.display = 'none'; // Không có thông báo chưa đọc
+                        badge.style.display = 'none';
                     } else {
-                        badge.style.display = 'inline-block'; // Hiển thị chấm đỏ
+                        badge.style.display = 'inline-block';
                         badge.textContent = data.length;
                     }
                 })
@@ -536,8 +613,6 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
         // Lấy tất cả thông báo và đánh dấu đã đọc
         function loadAndMarkNotifications() {
             if (!idHocVien) return;
-
-            // Đánh dấu thông báo là đã đọc
             fetch('user/mark_notifications_read.php', {
                     method: 'POST',
                     headers: {
@@ -546,34 +621,27 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
                     body: `id_hocvien=${idHocVien}`
                 })
                 .then(() => {
-                    // Tải tất cả thông báo
                     fetch(`user/get_all_notifications.php?id_hocvien=${idHocVien}`)
                         .then(response => response.json())
                         .then(data => {
                             const notificationList = document.getElementById('notification-items');
                             const dropdown = document.getElementById('notification-list');
-
                             notificationList.innerHTML = '';
                             if (data.error || data.length === 0) {
-                                notificationList.innerHTML = '<li>Không có thông báo nào.</li>';
+                                notificationList.innerHTML = '<li><div class="p-2 text-center text-muted">Không có thông báo nào.</div></li>';
                             } else {
                                 data.forEach(notification => {
                                     const item = document.createElement('li');
                                     item.innerHTML = `
-                                    <a href="./user/dashboard.php?nav=thongbao"  style="color: black; text-decoration: none;" >
-                                    <h6 style="font-size:15px; font-weight:bold; padding:4px 0px;">${notification.tieu_de}</h6>
-                                    <p >${notification.noi_dung}</p>
-                                    <small>${notification.ngay_tao}</small>
-                                 <!--  <span style="color: ${notification.trang_thai === 'chưa đọc' ? 'red' : 'green'};"> (${notification.trang_thai}) -->
-                                    </span>
-                                    
-                                    </a>
-                                    `;
+                                    <a href="./user/dashboard.php?nav=thongbao"  style="color: black; text-decoration: none;" class="d-block p-2">
+                                        <h6 style="font-size:15px; font-weight:bold; margin-bottom: 4px;">${notification.tieu_de}</h6>
+                                        <p style="font-size: 14px; margin-bottom: 4px;">${notification.noi_dung}</p>
+                                        <small class="text-muted">${notification.ngay_tao}</small>
+                                    </a>`;
                                     notificationList.appendChild(item);
                                 });
                             }
-
-                            dropdown.style.display = 'block'; // Hiển thị danh sách
+                            dropdown.style.display = 'block';
                         })
                         .catch(error => console.error('Lỗi khi tải thông báo:', error));
                 })
@@ -586,10 +654,10 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
             if (dropdown.style.display === 'block') {
                 dropdown.style.display = 'none';
             } else {
-                loadAndMarkNotifications(); // Tải thông báo và đánh dấu là đã đọc
+                loadAndMarkNotifications();
             }
         }
-
-        // Kiểm tra thông báo chưa đọc khi trang tải
-        document.addEventListener('DOMContentLoaded', checkNotifications);
     </script>
+</body>
+
+</html>

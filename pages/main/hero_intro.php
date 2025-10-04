@@ -48,6 +48,7 @@
         /* THAY ĐỔI 1: Đổi màu nền sang xanh nhạt của dự án */
         background-color: #d1f8e2;
         overflow: hidden;
+        padding: 50px 0;
     }
 
     .intro-content {

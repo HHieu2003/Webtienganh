@@ -36,6 +36,21 @@ $stmt_confirmed->execute();
 $result_confirmed = $stmt_confirmed->get_result();
 
 ?>
+  <div class="summary-cards">
+                        <a href="./dashboard.php?nav=khoahoc" class="summary-card">
+                            <div class="card-icon icon-courses"><i class="fa-solid fa-book-open"></i></div>
+                            <div class="info"><h3>Khóa học</h3><p><?php echo htmlspecialchars($total_courses); ?></p></div>
+                        </a>
+                        <a href="./dashboard.php?nav=lichsuthanhtoan" class="summary-card">
+                             <div class="card-icon icon-payment"><i class="fa-solid fa-wallet"></i></div>
+                            <div class="info"><h3>Giao dịch</h3><p><?php echo htmlspecialchars($total_transactions); ?></p></div>
+                        </a>
+                        <a href="./dashboard.php?nav=ketquakiemtra" class="summary-card">
+                             <div class="card-icon icon-tests"><i class="fa-solid fa-pen-to-square"></i></div>
+                            <div class="info"><h3>Bài test đã làm</h3><p><?php echo htmlspecialchars($total_tests); ?></p></div>
+                        </a>
+                    </div>
+
 
 <div class="content-pane">
     <?php if ($result_pending->num_rows > 0): ?>

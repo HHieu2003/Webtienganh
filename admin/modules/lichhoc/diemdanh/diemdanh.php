@@ -67,9 +67,10 @@ while ($row = $diemDanhResult->fetch_assoc()) {
                                         $is_present = ($status === 'co mat');
                                     ?>
                                         <td>
-                                            <div class="form-check form-switch d-flex justify-content-center">
+                                            <div class="form-check d-flex justify-content-center">
                                                 <input type="hidden" name="diemdanh[<?php echo $hv['id_hocvien']; ?>][<?php echo $lich['id_lichhoc']; ?>]" value="vang">
                                                 <input type="checkbox" class="form-check-input attendance-check"
+                                                    style="width: 1.5em; height: 1.5em; cursor: pointer;"
                                                     name="diemdanh[<?php echo $hv['id_hocvien']; ?>][<?php echo $lich['id_lichhoc']; ?>]"
                                                     value="co mat"
                                                     data-col="<?php echo $lich['id_lichhoc']; ?>"

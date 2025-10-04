@@ -1,6 +1,6 @@
 <div class="differentiators-section">
     <div class="container">
-        <div class="section-header text-center" data-aos="fade-up" style="margin-bottom: 0px;">
+        <div class="section-header text-center" data-aos="fade-up" >
             <h2 class="introduce-title">Giá Trị Khác Biệt Để Bứt Phá</h2>
             <p class="section-subtitle">Phương pháp học đúng, tài liệu chuẩn và công nghệ hiện đại là ba yếu tố chính giúp bạn tự tin chinh phục mục tiêu.</p>
         </div>
@@ -52,10 +52,12 @@
 
 <style>
     .differentiators-section {
-        padding: 0px 0;
+        padding: 50px 0;
         background-color: #fff;
     }
-
+    .section-header{
+        margin-bottom: 10px;
+    }
     .feature-row {
         margin-bottom: 40px;
     }

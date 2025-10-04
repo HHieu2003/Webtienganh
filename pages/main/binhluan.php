@@ -7,9 +7,9 @@
         background-color: #f9f9f9;
     }
 
-    .container {
-       
-        margin: 20px auto;
+    .container-comment {
+       padding: 50px 0;
+        margin: 0px auto;
         text-align: center;
     }
 
@@ -89,7 +89,7 @@
     }
 </style>
 
-<div class="container" style=" width: 85%;">
+<div class="container-comment" style=" width: 85%;">
     <h2 class="introduce-title">MỌI NGƯỜI NÓI VỀ TIẾNG ANH FIGHTER</h2>
     <div class="slider">
         <div class="slider-track">

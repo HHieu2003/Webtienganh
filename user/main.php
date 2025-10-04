@@ -16,6 +16,9 @@ switch ($nav) {
         include("modules/thongtintaikhoan.php");
         break;
 
+         case 'bangdiem':
+        include("modules/bangdiem.php");
+        break;
     case 'baomat':
         include("modules/baomattk.php");
         break;

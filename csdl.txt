@@ -113,6 +113,8 @@ CREATE TABLE `diem_so` (
   FOREIGN KEY (`id_hocvien`) REFERENCES `hocvien`(`id_hocvien`) ON DELETE CASCADE,
   FOREIGN KEY (`id_lop`) REFERENCES `lop_hoc`(`id_lop`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+ALTER TABLE `diem_so` ADD UNIQUE `unique_grade` (`id_hocvien`, `id_lop`, `loai_diem`);
+
 
 CREATE TABLE `baitest` (
   `id_baitest` INT PRIMARY KEY AUTO_INCREMENT,

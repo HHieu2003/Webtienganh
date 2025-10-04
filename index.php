@@ -51,6 +51,17 @@ if (!isset($_SESSION['has_counted'])) {
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./pages/main.css">
 </head>
+<style>
+    
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Times New Roman', Times, serif !important;
+
+
+
+}
+</style>
 
 <body>
 
@@ -58,7 +69,7 @@ if (!isset($_SESSION['has_counted'])) {
         <header>
             <?php include('./pages/header.php'); ?>
         </header>
-
+        
         <section>
             <?php include('./pages/main.php'); ?>
         </section>

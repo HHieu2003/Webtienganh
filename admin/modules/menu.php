@@ -67,6 +67,13 @@ $is_operations_active = in_array($current_page, $operations_pages);
                 <li><a href="./admin.php?nav=thanhtoan" class="<?php echo ($current_page == 'thanhtoan') ? 'active' : ''; ?>">Lịch sử thanh toán</a></li>
                 <li><a href="./admin.php?nav=thongbao" class="<?php echo ($current_page == 'thongbao') ? 'active' : ''; ?>">Thông báo</a></li>
             </ul>
+
+             <hr style="background-color: rgba(255,255,255,0.2);">
+        <li>
+            <a href="../index.php" target="_blank">
+                <i class="fa-solid fa-globe"></i><span>Về Trang Chủ</span>
+            </a>
+        </li>
         </li>
     </ul>
 </nav>

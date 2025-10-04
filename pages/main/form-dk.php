@@ -116,7 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_consult'])) {
 
 <style>
     .consult-section {
-        padding: 80px 0;
+        padding: 50px 0;
         background: #fff;
     }
 

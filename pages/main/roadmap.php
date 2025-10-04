@@ -226,7 +226,7 @@
 
         */
     .roadmap-section {
-        padding: 0px 0;
+        padding: 30px 0;
         background-color: #d1f8e2;
     }
 

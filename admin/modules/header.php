@@ -1,5 +1,5 @@
 <div class="header-right">
-    <a href="../index.php">
+    <a href="modules/logout.php">
         <i class="fa-solid fa-right-from-bracket"></i>
         <span>Đăng xuất</span>
     </a>

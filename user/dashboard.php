@@ -96,6 +96,8 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
                                     <li><a href="./dashboard.php?nav=tiendo" class="<?php echo ($nav == 'tiendo') ? 'active' : ''; ?>">Tiến độ học tập</a></li>
                                     <li><a href="./dashboard.php?nav=hoclieu" class="<?php echo ($nav == 'hoclieu') ? 'active' : ''; ?>">Học liệu</a></li>
                                     <li><a href="./dashboard.php?nav=ketquakiemtra" class="<?php echo ($nav == 'ketquakiemtra') ? 'active' : ''; ?>">Kết quả bài test</a></li>
+
+                                    <li><a href="./dashboard.php?nav=bangdiem" class="<?php echo ($nav == 'bangdiem') ? 'active' : ''; ?>">Bảng điểm & Nhận xét</a></li>
                                 </ul>
                             </li>
                         </ul>
@@ -103,21 +105,7 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
                 </aside>
 
                 <div class="account-right">
-                    <div class="summary-cards">
-                        <a href="./dashboard.php?nav=khoahoc" class="summary-card">
-                            <div class="card-icon icon-courses"><i class="fa-solid fa-book-open"></i></div>
-                            <div class="info"><h3>Khóa học</h3><p><?php echo htmlspecialchars($total_courses); ?></p></div>
-                        </a>
-                        <a href="./dashboard.php?nav=lichsuthanhtoan" class="summary-card">
-                             <div class="card-icon icon-payment"><i class="fa-solid fa-wallet"></i></div>
-                            <div class="info"><h3>Giao dịch</h3><p><?php echo htmlspecialchars($total_transactions); ?></p></div>
-                        </a>
-                        <a href="./dashboard.php?nav=ketquakiemtra" class="summary-card">
-                             <div class="card-icon icon-tests"><i class="fa-solid fa-pen-to-square"></i></div>
-                            <div class="info"><h3>Bài test đã làm</h3><p><?php echo htmlspecialchars($total_tests); ?></p></div>
-                        </a>
-                    </div>
-
+                  
                     <div class="list">
                         <?php include('main.php'); ?>
                     </div>

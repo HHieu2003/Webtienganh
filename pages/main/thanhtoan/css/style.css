@@ -1,109 +1,122 @@
-/* --- Import Font từ Google --- */
+/* --- Import Font & Biến màu --- */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap');
 
-/* --- Biến màu và Style tổng thể --- */
 :root {
-    --primary-color: #007bff;
-    --success-color: #28a745;
+    --primary-color: #0db33b;
+    --success-color: #198754;
     --danger-color: #dc3545;
     --light-gray: #f8f9fa;
-    --gray: #6c757d;
-    --dark: #343a40;
+    --border-color: #dee2e6;
+    --dark-text: #212529;
+    --gray-text: #6c757d;
     --white: #ffffff;
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    --border-radius: 12px;
+    --shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    --border-radius: 16px;
 }
 
 body {
     font-family: 'Be Vietnam Pro', sans-serif;
     background-color: var(--light-gray);
-    color: var(--dark);
+    color: var(--dark-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
 }
 
-/* --- Hiệu ứng xuất hiện chung --- */
+/* --- Keyframes cho hiệu ứng --- */
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- Style cho trang dangkykhoahoc.php --- */
+/* =======================================================
+   STYLE MỚI CHO TRANG XÁC NHẬN (dangkykhoahoc.php)
+   ======================================================= */
 .form-container {
-    max-width: 700px;
+    width: 100%;
+    max-width: 900px;
     margin: 40px auto;
-    padding: 40px;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.container-inner {
+    display: flex;
     background: var(--white);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
-    animation: fadeIn 0.8s ease-out;
+    overflow: hidden;
 }
 
-.form-container h2 {
-    text-align: center;
-    color: var(--dark);
+.info-side {
+    flex: 1;
+    padding: 40px;
+}
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-decoration: none;
+    color: var(--dark-text);
     margin-bottom: 30px;
-    font-weight: 700;
 }
-
-.info-section {
-    margin-bottom: 30px;
-    padding: 20px;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-}
-
-.info-section h3 {
-    font-size: 1.2em;
-    font-weight: 700;
+.logo { height: 50px; border-radius: 8px;}
+.info-side h2 { font-weight: 700; margin-bottom: 10px; font-size: 28px; }
+.info-side .subtitle { color: var(--gray-text); margin-bottom: 30px; }
+.info-group { margin-bottom: 25px; }
+.group-title {
+    font-size: 18px;
+    font-weight: 600;
     color: var(--primary-color);
     margin-bottom: 15px;
-    border-bottom: 2px solid var(--primary-color);
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 10px;
 }
+.group-title i { margin-right: 10px; }
+.info-group p { margin-bottom: 8px; }
 
-.info-section p {
-    margin-bottom: 10px;
-    font-size: 1em;
-    color: var(--gray);
+.action-side {
+    flex: 0 0 320px;
+    background-color: #f3f7f8;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
-
-.info-section p strong {
-    color: var(--dark);
-    min-width: 150px;
-    display: inline-block;
+.summary-card {
+    background: var(--white);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
 }
+.summary-card h4 { font-weight: 600; text-align: center; margin-bottom: 20px; }
+.summary-item { display: flex; justify-content: space-between; margin-bottom: 10px; color: var(--gray-text); align-items: center;}
+.item-value { font-weight: 500; color: var(--dark-text); text-align: right; }
+.summary-item.total { font-weight: bold; font-size: 1.1rem; color: var(--dark-text); }
+.total-price { color: var(--primary-color); font-size: 1.5rem; }
 
 .btn-submit {
-    display: block;
-    width: 100%;
-    padding: 15px;
-    font-size: 1.1em;
-    font-weight: 700;
-    color: var(--white);
-    background: linear-gradient(45deg, #007bff, #0056b3);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+    display: block; width: 100%; padding: 15px; font-size: 1.1em; font-weight: 700;
+    color: var(--white); background: var(--primary-color); border: none;
+    border-radius: 8px; cursor: pointer; transition: all 0.3s ease;
 }
+.btn-submit:hover { background: #0a8a2c; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(13, 179, 59, 0.3); }
+.btn-submit i { margin-left: 10px; transition: transform 0.3s ease; }
+.btn-submit:hover i { transform: translateX(5px); }
+.back-link { text-decoration: none; color: var(--gray-text); font-weight: 500; }
+.back-link:hover { color: var(--dark-text); }
 
-.btn-submit:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 7px 20px rgba(0, 123, 255, 0.3);
-}
 
-/* --- Style cho trang checkout.php --- */
+/* ===================================================
+   STYLE CŨ CHO TRANG THANH TOÁN (checkout.php)
+   =================================================== */
+
+/* --- Dùng .payment-container để style riêng cho trang checkout --- */
 .payment-container {
     animation: fadeIn 0.8s ease-out;
 }
-
-.countdown-box {
+.payment-container .countdown-box {
     padding: 20px;
     margin-bottom: 20px;
     background-color: #fff3cd;
@@ -111,59 +124,64 @@ body {
     border-radius: var(--border-radius);
     text-align: center;
 }
-
-.countdown-box p {
+.payment-container .countdown-box p {
     margin: 0;
     font-weight: 500;
     color: #856404;
 }
-
-#countdown_timer {
+.payment-container #countdown_timer {
     font-size: 1.5em;
     font-weight: 700;
     color: var(--danger-color);
     display: block;
     margin-top: 5px;
 }
-
-.qr-box, .manual-box {
+.payment-container .qr-box, .payment-container .manual-box {
     padding: 30px;
     background: var(--white);
     border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.07);
     height: 100%;
 }
-
-.qr-box img {
+.payment-container .qr-box img {
     max-width: 250px;
     margin: 0 auto;
     display: block;
 }
-
-/* --- Style cho các hộp thông báo (Success, Expired) --- */
-.status-box {
-    padding: 40px;
+.payment-container .payment-wrapper, .payment-container .status-box {
+    padding: 20px;
     border-radius: var(--border-radius);
     text-align: center;
-    /* Hiệu ứng chuyển động */
     opacity: 0;
     transform: scale(0.95);
     transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-    display: none; /* Ẩn ban đầu */
+    display: none;
+    position: absolute;
+    width: calc(100% - 1.5rem);
+    left: 0.75rem;
 }
-
-.status-box.visible {
+.payment-container .payment-wrapper.visible, .payment-container .status-box.visible {
     display: block;
     opacity: 1;
     transform: scale(1);
+    position: relative;
+    width: 100%;
+    left: 0;
+    padding: 0; /* Reset padding vì đã có ở các box con */
 }
-
-.status-box.success {
+.payment-container .status-box.success {
     background-color: #e9f7ef;
     border: 1px solid #a6d9b8;
+    padding: 40px;
 }
-
-.status-box.expired {
+.payment-container .status-box.expired {
     background-color: #f8d7da;
     border: 1px solid #f5c6cb;
+    padding: 40px;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .container-inner { flex-direction: column; }
+    .action-side { flex: 0 0 auto; }
 }

@@ -29,19 +29,42 @@ switch ($nav) {
         break;
 
     case 'course_detail':
-        // Sửa lại đường dẫn cho chính xác
         include("main/course_detail.php");
         break;
 
     case 'huongdandangky':
-        // Sửa lại đường dẫn cho chính xác
         include("main/huongdandangky.php");
         break;
 
     case 'dangkykhoahoc':
-        // Sửa lại đường dẫn cho chính xác
         include("main/dangkykhoahoc.php");
         break;
+    
+    // --- BẮT ĐẦU THÊM CÁC TRANG MỚI ---
+    case 'lecturers':
+        include("main/lecturers.php");
+        break;
+
+    case 'stories':
+        include("main/stories.php");
+        break;
+
+    case 'blog':
+        include("main/blog.php");
+        break;
+    
+    case 'blog_single':
+        include("main/blog_single.php");
+        break;
+
+    case 'events':
+        include("main/events.php");
+        break;
+
+    case 'contact':
+        include("main/contact.php");
+        break;
+    // --- KẾT THÚC THÊM CÁC TRANG MỚI ---
 
     case 'home':
     default: // Nếu 'nav' không khớp với bất kỳ case nào, sẽ chạy default
