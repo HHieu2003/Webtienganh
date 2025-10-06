@@ -3,10 +3,8 @@
 if (isset($_GET['course_id'])) {
     $course_id = (int)$_GET['course_id'];
 
-    $sql_course = "SELECT kh.*, gv.ten_giangvien 
-                   FROM khoahoc kh
-                   LEFT JOIN giangvien gv ON kh.id_giangvien = gv.id_giangvien
-                   WHERE kh.id_khoahoc = ?";
+    // Câu truy vấn đã được cập nhật: Không còn lấy thông tin giảng viên ở đây
+    $sql_course = "SELECT * FROM khoahoc WHERE id_khoahoc = ?";
     $stmt = $conn->prepare($sql_course);
     $stmt->bind_param("i", $course_id);
     $stmt->execute();
@@ -19,6 +17,7 @@ if (isset($_GET['course_id'])) {
         exit;
     }
 
+    // Lấy thông tin đánh giá (giữ nguyên)
     $sql_avg_rating = "SELECT AVG(diem_danhgia) AS avg_rating, COUNT(*) as total_reviews FROM danhgiakhoahoc WHERE id_khoahoc = ?";
     $stmt_avg = $conn->prepare($sql_avg_rating);
     $stmt_avg->bind_param("i", $course_id);
@@ -27,6 +26,7 @@ if (isset($_GET['course_id'])) {
     $avg_rating = $result_avg_rating['avg_rating'] ? round($result_avg_rating['avg_rating'], 1) : 0;
     $total_reviews = $result_avg_rating['total_reviews'];
 
+    // Lấy bình luận (giữ nguyên)
     $sql_get_comments = "SELECT dg.nhan_xet, dg.diem_danhgia, hv.ten_hocvien 
                          FROM danhgiakhoahoc dg 
                          JOIN hocvien hv ON dg.id_hocvien = hv.id_hocvien 
@@ -40,7 +40,7 @@ if (isset($_GET['course_id'])) {
     exit;
 }
 
-// --- XỬ LÝ GỬI ĐÁNH GIÁ ---
+// --- XỬ LÝ GỬI ĐÁNH GIÁ (giữ nguyên logic) ---
 $review_message = '';
 $review_message_type = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_rating'])) {
@@ -97,12 +97,11 @@ if (isset($_SESSION['review_message'])) {
             <div class="col-lg-8" data-aos="fade-right">
                 <h1 class="course-main-title"><?php echo htmlspecialchars($course['ten_khoahoc']); ?></h1>
                 <div class="course-meta-info">
-                    <span><i class="fas fa-chalkboard-teacher"></i> Giảng viên: <strong><?php echo htmlspecialchars($course['ten_giangvien'] ?? 'Đang cập nhật'); ?></strong></span>
                     <span><i class="fas fa-star"></i><strong><?php echo $avg_rating; ?></strong> (<?php echo $total_reviews; ?> đánh giá)</span>
+                    <span><i class="fas fa-clock"></i> Thời lượng: <strong><?php echo htmlspecialchars($course['thoi_gian']); ?> buổi</strong></span>
                 </div>
             </div>
             <div class="col-lg-4">
-
                 <div class="course-main-image" data-aos="fade-up"><img src="<?php echo htmlspecialchars($course['hinh_anh']); ?>" alt="<?php echo htmlspecialchars($course['ten_khoahoc']); ?>"></div>
             </div>
         </div>
@@ -120,7 +119,6 @@ if (isset($_SESSION['review_message'])) {
                     <div class="tab-content" id="courseTabContent">
                         <div class="tab-pane fade show active" id="description" role="tabpanel">
                             <div class="course-description-content">
-                              
                                 <?php echo !empty($course['mo_ta']) ? $course['mo_ta'] : '<p>Nội dung đang được cập nhật...</p>'; ?>
                             </div>
                         </div>
@@ -164,7 +162,6 @@ if (isset($_SESSION['review_message'])) {
                         <h4 class="card-title">Thông tin khóa học</h4>
                         <ul class="summary-list">
                             <li><i class="fas fa-tag"></i><strong>Giá:</strong> <span><?php echo number_format($course['chi_phi'], 0, ',', '.'); ?> VNĐ</span></li>
-                            <li><i class="fas fa-user-tie"></i><strong>Giảng viên:</strong> <span><?php echo htmlspecialchars($course['ten_giangvien'] ?? 'N/A'); ?></span></li>
                             <li><i class="fas fa-calendar-alt"></i><strong>Thời lượng:</strong> <span><?php echo htmlspecialchars($course['thoi_gian']); ?> buổi</span></li>
                         </ul>
                         <button class="btn-enroll" data-bs-toggle="modal" data-bs-target="#classSelectionModal">Đăng Ký Ngay <i class="fas fa-arrow-right"></i></button>
@@ -185,335 +182,124 @@ if (isset($_SESSION['review_message'])) {
         </div>
     </div>
 </div>
+
 <style>
-    /* ... (GIỮ NGUYÊN CSS CŨ CỦA BẠN) ... */
     .course-hero-section {
         padding: 0px 0;
-        
-    background: linear-gradient(135deg, #8a9b8f, #0b8126);
-        color: #fff
+        background: linear-gradient(135deg, #8a9b8f, #0b8126);
+        color: #fff;
     }
-
     .course-main-title {
-        padding-top: 20PX;
+        padding-top: 20px;
         font-size: 42px;
         font-weight: 700;
-        margin-bottom: 15px
+        margin-bottom: 15px;
     }
-
     .course-meta-info {
         display: flex;
         gap: 25px;
         font-size: 16px;
-        opacity: .9
+        opacity: .9;
     }
-
     .course-meta-info i {
-        margin-right: 8px
+        margin-right: 8px;
     }
-
     .course-detail-container {
-        margin: 40px auto
+        margin: 40px auto;
     }
-
-    .course-main-image {
-        margin-bottom: 30px;
-        position: relative
-    }
-
     .course-main-image img {
         width: 100%;
         max-width: 300px;
         height: auto;
         border-radius: 15px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, .1);
-        transition: transform .3s ease
+        transition: transform .3s ease;
     }
-
     .course-main-image:hover img {
-        transform: scale(1.03)
+        transform: scale(1.03);
     }
-
     .course-tabs .nav-tabs {
-        border-bottom: 2px solid #eee
+        border-bottom: 2px solid #eee;
     }
-
     .course-tabs .nav-link {
-        border: none;
-        padding: 15px 25px;
-        font-size: 18px;
-        font-weight: 600;
-        color: #666;
-        border-bottom: 3px solid transparent;
-        transition: all .3s ease
+        border: none; padding: 15px 25px; font-size: 18px; font-weight: 600;
+        color: #666; border-bottom: 3px solid transparent; transition: all .3s ease;
     }
-
     .course-tabs .nav-link.active {
-        color: #0db33b;
-        border-bottom-color: #0db33b;
-        background-color: transparent
+        color: #0db33b; border-bottom-color: #0db33b; background-color: transparent;
     }
-
     .tab-content {
-        padding: 30px;
-        border: 1px solid #eee;
-        border-top: none;
-        border-radius: 0 0 15px 15px
+        padding: 30px; border: 1px solid #eee; border-top: none;
+        border-radius: 0 0 15px 15px;
     }
-
     .course-description-content {
-        font-size: 16px;
-        line-height: 1.8;
-        color: #555
+        font-size: 16px; line-height: 1.8; color: #555;
     }
-
-    .reviews-section h4 {
-        font-weight: 600;
-        margin-bottom: 20px
-    }
-
+    .reviews-section h4 { font-weight: 600; margin-bottom: 20px; }
     .review-item {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 25px;
-        padding-bottom: 25px;
-        border-bottom: 1px solid #f0f0f0
-    }
-
-    .review-item:last-child {
-        border-bottom: none
-    }
-
-    .review-item img {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%
-    }
-
-    .review-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-    .review-stars i {
-        color: #ccc
-    }
-
-    .review-stars i.filled {
-        color: #ffc107
-    }
-
-    .review-content p {
-        margin: 5px 0 0 0;
-        color: #555
-    }
-
-    .submit-review-form h5 {
-        font-weight: 600;
-        margin-bottom: 15px
-    }
-
-    .submit-review-form .form-control,
-    .submit-review-form .form-select {
-        border-radius: 8px
-    }
-
-    .submit-review-form .btn {
-        border-radius: 8px;
-        font-weight: 600
-    }
-
-    .sidebar-sticky {
-        position: -webkit-sticky;
-        position: sticky;
-        top: 100px
-    }
-
-    .course-summary-card {
-        background-color: #fff;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 8px 35px rgba(0, 0, 0, .08);
-        border: 1px solid #eee
-    }
-
-    .card-title {
-        font-size: 22px;
-        font-weight: 600;
-        margin-bottom: 20px;
-        text-align: center
-    }
-
-    .summary-list {
-        list-style: none;
-        padding: 0;
-        margin-bottom: 25px
-    }
-
-    .summary-list li {
-        display: flex;
-        justify-content: space-between;
-        padding: 12px 0;
-        border-bottom: 1px dashed #eee
-    }
-
-    .summary-list li i {
-        color: #0db33b;
-        margin-right: 10px
-    }
-
-    .summary-list li span {
-        color: #555
-    }
-
-    .btn-enroll {
-        display: block;
-        width: 100%;
-        text-align: center;
-        color: #fff;
-        padding: 14px;
-        border-radius: 8px;
-        font-size: 18px;
-        font-weight: bold;
-        text-decoration: none;
-        background: linear-gradient(45deg, #ff416c, #ff4b2b);
-        transition: all .3s ease;
-        border: none;
-    }
-
-    .btn-enroll:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(255, 65, 108, .4);
-        color: #fff
-    }
-
-    .btn-enroll i {
-        margin-left: 5px;
-        transition: transform .3s ease
-    }
-
-    .btn-enroll:hover i {
-        transform: translateX(5px)
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0
-        }
-
-        to {
-            opacity: 1
-        }
-    }
-
-    @keyframes slideInUp {
-        from {
-            transform: translateY(20px);
-            opacity: 0
-        }
-
-        to {
-            transform: translateY(0);
-            opacity: 1
-        }
-    }
-
-    .modal-content {
-        border: none;
-        border-radius: 15px
-    }
-
-    .modal-header {
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #dee2e6
-    }
-
-    .modal-title {
-        font-weight: 600;
-        color: #333
-    }
-
-    .modal-body {
-        background-color: #f8f9fa;
-        padding: 25px
-    }
-
-    .class-item {
-        background-color: #fff;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 15px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, .05);
-        border: 1px solid #e9ecef;
-        animation: slideInUp .5s ease-out forwards;
-        opacity: 0
-    }
-
-    .class-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 10px
-    }
-
-    .class-header h6 {
-        font-size: 18px;
-        font-weight: 600;
-        color: #0db33b;
-        margin: 0
-    }
-
-    .class-meta {
-        display: flex;
-        gap: 20px;
-        font-size: 14px;
-        color: #6c757d
-    }
-
-    .class-actions .btn {
-        font-size: 14px;
-        font-weight: 500
-    }
-
-    .schedule-accordion .accordion-button {
-        background-color: #f8f9fa;
-        color: #333;
-        font-weight: 500
-    }
-
-    .schedule-accordion .accordion-button:not(.collapsed) {
-        background-color: #e7f7ec;
-        color: #0a8a2c;
-        box-shadow: none
-    }
-
-    .schedule-accordion .accordion-body {
-        padding: 0
-    }
-
-    .schedule-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        max-height: 200px;
-        overflow-y: auto
-    }
-
-    .schedule-list li {
-        padding: 10px 15px;
+        display: flex; gap: 15px; margin-bottom: 25px; padding-bottom: 25px;
         border-bottom: 1px solid #f0f0f0;
-        font-size: 14px;
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 10px;
     }
-
-    .schedule-list li:last-child {
-        border-bottom: none
+    .review-item:last-child { border-bottom: none; }
+    .review-item img { width: 50px; height: 50px; border-radius: 50%; }
+    .review-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+    .review-stars i { color: #ccc; }
+    .review-stars i.filled { color: #ffc107; }
+    .review-content p { margin: 5px 0 0 0; color: #555; }
+    .submit-review-form h5 { font-weight: 600; margin-bottom: 15px; }
+    .submit-review-form .form-control, .submit-review-form .form-select { border-radius: 8px; }
+    .submit-review-form .btn { border-radius: 8px; font-weight: 600; }
+    .sidebar-sticky { position: -webkit-sticky; position: sticky; top: 100px; }
+    .course-summary-card {
+        background-color: #fff; padding: 30px; border-radius: 15px;
+        box-shadow: 0 8px 35px rgba(0, 0, 0, .08); border: 1px solid #eee;
+    }
+    .card-title { font-size: 22px; font-weight: 600; margin-bottom: 20px; text-align: center; }
+    .summary-list { list-style: none; padding: 0; margin-bottom: 25px; }
+    .summary-list li {
+        display: flex; justify-content: space-between; padding: 12px 0;
+        border-bottom: 1px dashed #eee;
+    }
+    .summary-list li i { color: #0db33b; margin-right: 10px; }
+    .summary-list li span { color: #555; }
+    .btn-enroll {
+        display: block; width: 100%; text-align: center; color: #fff; padding: 14px;
+        border-radius: 8px; font-size: 18px; font-weight: bold; text-decoration: none;
+        background: linear-gradient(45deg, #ff416c, #ff4b2b); transition: all .3s ease; border: none;
+    }
+    .btn-enroll:hover {
+        transform: translateY(-3px); box-shadow: 0 5px 15px rgba(255, 65, 108, .4); color: #fff;
+    }
+    .btn-enroll i { margin-left: 5px; transition: transform .3s ease; }
+    .btn-enroll:hover i { transform: translateX(5px); }
+    .modal-content { border: none; border-radius: 15px; }
+    .modal-header { background-color: #f8f9fa; border-bottom: 1px solid #dee2e6; }
+    .modal-title { font-weight: 600; color: #333; }
+    .modal-body { background-color: #f8f9fa; padding: 25px; }
+    .class-item {
+        background-color: #fff; border-radius: 12px; padding: 20px;
+        margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0, 0, 0, .05);
+        border: 1px solid #e9ecef; animation: slideInUp .5s ease-out forwards;
+        opacity: 0;
+    }
+    .class-header {
+        display: flex; justify-content: space-between; align-items: center;
+        flex-wrap: wrap; gap: 10px;
+    }
+    .class-header h6 { font-size: 18px; font-weight: 600; color: #0db33b; margin: 0; }
+    .class-meta { display: flex; gap: 20px; font-size: 14px; color: #6c757d; }
+    .class-actions .btn { font-size: 14px; font-weight: 500; }
+    
+    .schedule-list { list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto; }
+    .schedule-list li {
+        padding: 10px 15px; border-bottom: 1px solid #f0f0f0; font-size: 14px;
+        display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    .schedule-list li:last-child { border-bottom: none; }
+    
+    @keyframes slideInUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
     }
 </style>
 
@@ -575,7 +361,6 @@ if (isset($_SESSION['review_message'])) {
                     modalTitle.textContent = 'Đăng ký trước và để lại nguyện vọng';
                 }
 
-                // --- LUÔN HIỂN THỊ PHẦN GHI CHÚ ---
                 const noteFormHtml = `
                 <div class="mt-3">
                     <h5>${classes.length > 0 ? 'Hoặc không tìm thấy lớp phù hợp?' : ''} Đăng ký và để lại nguyện vọng</h5>

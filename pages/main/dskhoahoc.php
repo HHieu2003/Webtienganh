@@ -1,13 +1,7 @@
 <?php
 // File này được include từ file index.php, vì vậy biến $conn đã có sẵn
-// Chúng ta không cần tạo kết nối mới.
-
-// Lấy 8 khóa học ngẫu nhiên, kết nối với bảng `giangvien` để lấy tên giảng viên
-$sql_courses = "SELECT kh.*, gv.ten_giangvien 
-                FROM khoahoc kh
-                LEFT JOIN giangvien gv ON kh.id_giangvien = gv.id_giangvien
-                ORDER BY RAND() 
-                LIMIT 8";
+// Đã loại bỏ JOIN với bảng giangvien
+$sql_courses = "SELECT * FROM khoahoc ORDER BY RAND() LIMIT 8";
 $result_courses = $conn->query($sql_courses);
 ?>
 
@@ -39,7 +33,6 @@ $result_courses = $conn->query($sql_courses);
                                     <?php echo htmlspecialchars($row['ten_khoahoc']); ?>
                                 </a>
                             </h3>
-                           
                         </div>
                         <div class="course-footer">
                              <span class="price"><?php echo $chiphi; ?> VNĐ</span>
@@ -50,7 +43,7 @@ $result_courses = $conn->query($sql_courses);
                     </div>
                 </div>
             <?php
-                    $delay += 100; // Tăng độ trễ cho thẻ tiếp theo
+                    $delay += 100;
                 }
             } else {
                 echo '<p class="text-center col-12">Hiện chưa có khóa học tiêu biểu.</p>';
@@ -64,132 +57,40 @@ $result_courses = $conn->query($sql_courses);
     .featured-courses-section {
         padding: 50px 0;
     }
-
-    /* Tinh chỉnh lại tiêu đề chung */
-    .section-header {
-        text-align: center;
-        margin-bottom: 50px;
-    }
-    .introduce-title {
-        font-size: 36px;
-        font-weight: 700;
-        color: #222;
-        margin-bottom: 10px;
-    }
-    .section-subtitle {
-        font-size: 18px;
-        color: #666;
-    }
-
-    /* Thiết kế thẻ khóa học nổi bật */
+    .section-header { text-align: center; margin-bottom: 50px; }
+    .introduce-title { font-size: 36px; font-weight: 700; color: #222; margin-bottom: 10px; }
+    .section-subtitle { font-size: 18px; color: #666; }
     .course-card-featured {
-        background-color: #fff;
-        border-radius: 15px;
-        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng mượt mà */
+        background-color: #fff; border-radius: 15px; box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
+        display: flex; flex-direction: column; height: 100%;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-
-    /* Hiệu ứng HOVER nổi bật */
     .course-card-featured:hover {
-        transform: translateY(-10px); /* Nâng thẻ lên */
-        box-shadow: 0 12px 35px rgba(13, 179, 59, 0.15); /* Đổ bóng màu xanh lá */
+        transform: translateY(-10px);
+        box-shadow: 0 12px 35px rgba(13, 179, 59, 0.15);
     }
-
-    .course-image-container {
-        position: relative;
-        overflow: hidden;
-        border-top-left-radius: 15px;
-        border-top-right-radius: 15px;
-    }
-    .course-image {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-        transition: transform 0.4s ease;
-    }
-    .course-card-featured:hover .course-image {
-        transform: scale(1.1); /* Phóng to ảnh khi hover */
-    }
+    .course-image-container { position: relative; overflow: hidden; border-top-left-radius: 15px; border-top-right-radius: 15px; }
+    .course-image { width: 100%; height: 180px; object-fit: cover; transition: transform 0.4s ease; }
+    .course-card-featured:hover .course-image { transform: scale(1.1); }
     .badge-popular {
-        position: absolute;
-        top: 15px;
-        left: 15px;
-        padding: 5px 12px;
-        color: #fff;
-        font-size: 13px;
-        font-weight: 500;
-        border-radius: 50px;
-        background: linear-gradient(45deg, #ff416c, #ff4b2b);
-        z-index: 2;
+        position: absolute; top: 15px; left: 15px; padding: 5px 12px; color: #fff;
+        font-size: 13px; font-weight: 500; border-radius: 50px;
+        background: linear-gradient(45deg, #ff416c, #ff4b2b); z-index: 2;
     }
-
-    .course-details {
-        padding: 20px;
-        flex-grow: 1; /* Đẩy footer xuống dưới cùng */
-    }
-
+    .course-details { padding: 20px; flex-grow: 1; }
     .course-title {
-        font-size: 18px;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 10px;
-        line-height: 1.4;
-        min-height: 50px;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
+        font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px; line-height: 1.4;
+        min-height: 50px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         overflow: hidden;
     }
-    .course-title a {
-        color: inherit;
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
-    .course-card-featured:hover .course-title a {
-        color: #0db33b; /* Đổi màu tiêu đề khi hover */
-    }
-
-    .course-instructor {
-        font-size: 14px;
-        color: #555;
-    }
-    .course-instructor i {
-        margin-right: 8px;
-        color: #0db33b;
-    }
-
-    /* Phần chân thẻ */
+    .course-title a { color: inherit; text-decoration: none; transition: color 0.3s ease; }
+    .course-card-featured:hover .course-title a { color: #0db33b; }
     .course-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 20px 20px 20px;
-        border-top: 1px solid #f0f0f0;
-        margin: 15px 20px 0 20px;
+        display: flex; justify-content: space-between; align-items: center; padding: 0 20px 20px 20px;
+        border-top: 1px solid #f0f0f0; margin: 15px 20px 0 20px;
     }
-    .price {
-        color: #0db33b;
-        font-weight: bold;
-        font-size: 20px;
-    }
-    
-    .btn-view-detail {
-        color: #0db33b;
-        font-weight: 600;
-        text-decoration: none;
-        position: relative;
-    }
-    .btn-view-detail i {
-        opacity: 0; /* Ẩn mũi tên đi */
-        transform: translateX(-10px);
-        transition: all 0.3s ease;
-    }
-    /* Khi hover vào thẻ cha, nút sẽ có hiệu ứng */
-    .course-card-featured:hover .btn-view-detail i {
-        opacity: 1; /* Hiện mũi tên */
-        transform: translateX(0);
-    }
+    .price { color: #0db33b; font-weight: bold; font-size: 20px; }
+    .btn-view-detail { color: #0db33b; font-weight: 600; text-decoration: none; position: relative; }
+    .btn-view-detail i { opacity: 0; transform: translateX(-10px); transition: all 0.3s ease; }
+    .course-card-featured:hover .btn-view-detail i { opacity: 1; transform: translateX(0); }
 </style>

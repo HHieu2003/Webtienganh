@@ -1,5 +1,5 @@
 <?php
-// Kết nối CSDL đã được include từ dashboard.php
+// user/modules/khoahoc.php
 
 if (!isset($_SESSION['id_hocvien'])) {
     die("Session không hợp lệ.");
@@ -7,7 +7,7 @@ if (!isset($_SESSION['id_hocvien'])) {
 $id_hocvien = $_SESSION['id_hocvien'];
 
 // --- Xử lý bộ lọc ---
-$filter = $_GET['filter'] ?? 'all'; // Mặc định là 'all'
+$filter = $_GET['filter'] ?? 'all';
 $where_clause = '';
 switch ($filter) {
     case 'active':
@@ -21,7 +21,8 @@ switch ($filter) {
         break;
 }
 
-// --- Truy vấn danh sách khóa học đã đăng ký ---
+// --- CẬP NHẬT CÂU TRUY VẤN ---
+// Lấy tên giảng viên từ bảng lop_hoc -> giangvien thay vì từ khoahoc
 $sql = "
     SELECT 
         dk.id_dangky, 
@@ -34,7 +35,8 @@ $sql = "
         dk.id_lop
     FROM dangkykhoahoc dk
     JOIN khoahoc kh ON dk.id_khoahoc = kh.id_khoahoc
-    LEFT JOIN giangvien gv ON kh.id_giangvien = gv.id_giangvien
+    LEFT JOIN lop_hoc lh ON dk.id_lop = lh.id_lop
+    LEFT JOIN giangvien gv ON lh.id_giangvien = gv.id_giangvien
     WHERE dk.id_hocvien = ? 
     $where_clause
     ORDER BY dk.ngay_dangky DESC
@@ -68,7 +70,7 @@ function get_status_badge($status) {
             <a href="?nav=khoahoc&filter=all" class="btn btn-sm <?php echo ($filter == 'all') ? 'btn-primary' : 'btn-outline-primary'; ?>">Tất cả</a>
             <a href="?nav=khoahoc&filter=active" class="btn btn-sm <?php echo ($filter == 'active') ? 'btn-success' : 'btn-outline-success'; ?>">Đang học</a>
             <a href="?nav=khoahoc&filter=pending" class="btn btn-sm <?php echo ($filter == 'pending') ? 'btn-warning' : 'btn-outline-warning'; ?>">Chờ thanh toán</a>
-            <a href="?nav=khoahoc&filter=cancelled" class="btn btn-sm <?php echo ($filter == 'cancelled') ? 'btn-secondary' : 'btn-outline-secondary'; ?>">Đã hủy</a>
+            <a href="?nav=khoahoc&filter=cancelled" class="btn btn-sm <?php echo ($filter == 'cancelled') ? 'btn-outline-secondary' : 'btn-outline-secondary'; ?>">Đã hủy</a>
         </div>
     </div>
 
@@ -76,7 +78,7 @@ function get_status_badge($status) {
         <?php if ($result->num_rows > 0): ?>
             <div class="row g-4">
                 <?php 
-                $index = 0; // Biến cho animation delay
+                $index = 0;
                 while ($row = $result->fetch_assoc()): 
                 ?>
                     <div class="col-md-6 col-lg-4">
@@ -89,7 +91,7 @@ function get_status_badge($status) {
                             </div>
                             <div class="card-content">
                                 <h3><?php echo htmlspecialchars($row['ten_khoahoc']); ?></h3>
-                                <p class="instructor"><i class="fa-solid fa-chalkboard-user"></i> <?php echo htmlspecialchars($row['ten_giangvien'] ?? 'Đang cập nhật'); ?></p>
+                                <p class="instructor"><i class="fa-solid fa-chalkboard-user"></i> <?php echo htmlspecialchars($row['ten_giangvien'] ?? 'Chưa xếp lớp'); ?></p>
                                 <p class="date"><i class="fa-solid fa-calendar-day"></i> Ngày đăng ký: <?php echo date("d/m/Y", strtotime($row['ngay_dangky'])); ?></p>
                             </div>
                             <div class="card-actions">
@@ -100,7 +102,7 @@ function get_status_badge($status) {
                                 <?php elseif ($row['trang_thai'] === 'cho xac nhan'): ?>
                                     <a href="../pages/main/thanhtoan/checkout.php?dangky_id=<?php echo $row['id_dangky']; ?>" class="btn btn-success w-100 mb-2">Thanh toán ngay</a>
                                     <a href="modules/cancel_registration.php?id=<?php echo $row['id_dangky']; ?>" class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('Bạn có chắc chắn muốn hủy đăng ký này?');">Hủy đăng ký</a>
-                                <?php elseif ($row['trang_thai'] === 'da huy' || $row['trang_thai'] === 'bi tu choi'): ?>
+                                <?php else: ?>
                                     <a href="../index.php?nav=course_detail&course_id=<?php echo $row['id_khoahoc']; ?>" class="btn btn-secondary w-100">Đăng ký lại</a>
                                 <?php endif; ?>
                             </div>
@@ -118,24 +120,12 @@ function get_status_badge($status) {
 </div>
 
 <style>
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+    /* CSS được giữ nguyên */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     .filter-buttons .btn { margin-left: 5px; font-weight: 500; }
-    .my-course-card {
-        background-color: #fff;
-        border-radius: var(--border-radius);
-        box-shadow: var(--shadow);
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        opacity: 0;
-        animation: fadeInUp 0.5s ease-out forwards;
-    }
+    .my-course-card { background-color: #fff; border-radius: var(--border-radius); box-shadow: var(--shadow); display: flex; flex-direction: column; height: 100%; transition: transform 0.3s ease, box-shadow 0.3s ease; opacity: 0; animation: fadeInUp 0.5s ease-out forwards; }
     .my-course-card:hover { transform: translateY(-5px); }
-    .my-course-card.cancelled { opacity: 0.7; animation: none; /* Hủy animation cho card đã hủy */}
+    .my-course-card.cancelled { opacity: 0.7; animation: none; }
     .my-course-card.cancelled:hover { opacity: 1; }
     .card-image { position: relative; }
     .card-image img { width: 100%; height: 180px; object-fit: cover; border-top-left-radius: var(--border-radius); border-top-right-radius: var(--border-radius); }

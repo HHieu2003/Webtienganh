@@ -3,11 +3,13 @@
 if (!isset($lop_id)) die("Lỗi: Không tìm thấy thông tin lớp học.");
 $search_students = $_GET['search_students'] ?? '';
 $sql_students_in_class = "SELECT hv.id_hocvien, hv.ten_hocvien, hv.email, hv.so_dien_thoai FROM dangkykhoahoc dk JOIN hocvien hv ON dk.id_hocvien = hv.id_hocvien WHERE dk.id_lop = ?";
-$params = [$lop_id]; $types = "s";
+$params = [$lop_id];
+$types = "s";
 if (!empty($search_students)) {
     $sql_students_in_class .= " AND (hv.ten_hocvien LIKE ? OR hv.email LIKE ?)";
     $search_param = "%" . $search_students . "%";
-    array_push($params, $search_param, $search_param); $types .= "ss";
+    array_push($params, $search_param, $search_param);
+    $types .= "ss";
 }
 $stmt_students = $conn->prepare($sql_students_in_class);
 $stmt_students->bind_param($types, ...$params);
@@ -28,18 +30,29 @@ $students_in_class = $stmt_students->get_result();
 </div>
 <div class="table-responsive">
     <table class="table table-hover align-middle">
-        <thead class="table-light"><tr><th>ID</th><th>Tên Học Viên</th><th>Email</th><th>Số điện thoại</th><th class="text-center">Hành động</th></tr></thead>
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Tên Học Viên</th>
+                <th>Email</th>
+                <th>Số điện thoại</th>
+                <th class="text-center">Hành động</th>
+            </tr>
+        </thead>
         <tbody>
             <?php if ($students_in_class->num_rows > 0): while ($student = $students_in_class->fetch_assoc()): ?>
-            <tr id="student-row-<?php echo $student['id_hocvien']; ?>">
-                <td><?php echo $student['id_hocvien']; ?></td>
-                <td><?php echo htmlspecialchars($student['ten_hocvien']); ?></td>
-                <td><?php echo htmlspecialchars($student['email']); ?></td>
-                <td><?php echo htmlspecialchars($student['so_dien_thoai']); ?></td>
-                <td class="text-center"><button onclick="removeStudent(<?php echo $student['id_hocvien']; ?>, '<?php echo $lop_id; ?>', '<?php echo htmlspecialchars(addslashes($student['ten_hocvien'])); ?>')" class="btn btn-danger btn-sm" title="Xóa học viên khỏi lớp"><i class="fa-solid fa-user-minus"></i></button></td>
-            </tr>
-            <?php endwhile; else: ?>
-            <tr><td colspan="5" class="text-center text-muted py-3">Chưa có học viên nào trong lớp.</td></tr>
+                    <tr id="student-row-<?php echo $student['id_hocvien']; ?>">
+                        <td><?php echo $student['id_hocvien']; ?></td>
+                        <td><?php echo htmlspecialchars($student['ten_hocvien']); ?></td>
+                        <td><?php echo htmlspecialchars($student['email']); ?></td>
+                        <td><?php echo htmlspecialchars($student['so_dien_thoai']); ?></td>
+                        <td class="text-center"><button onclick="removeStudent(<?php echo $student['id_hocvien']; ?>, '<?php echo $lop_id; ?>', '<?php echo htmlspecialchars(addslashes($student['ten_hocvien'])); ?>')" class="btn btn-danger btn-sm" title="Xóa học viên khỏi lớp"><i class="fa-solid fa-user-minus"></i></button></td>
+                    </tr>
+                <?php endwhile;
+            else: ?>
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-3">Chưa có học viên nào trong lớp.</td>
+                </tr>
             <?php endif; ?>
         </tbody>
     </table>

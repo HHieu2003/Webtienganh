@@ -1,5 +1,5 @@
 <?php
-// Kết nối CSDL đã được include từ file dashboard.php
+// user/modules/home.php
 
 if (!isset($_SESSION['id_hocvien'])) {
     die("Session không hợp lệ.");
@@ -20,12 +20,14 @@ $stmt_pending->execute();
 $result_pending = $stmt_pending->get_result();
 
 
-// --- Lấy 3 khóa học gần nhất đã được xác nhận (đang học) ---
+// --- CẬP NHẬT CÂU TRUY VẤN: Lấy 3 khóa học gần nhất đã được xác nhận ---
+// Lấy tên giảng viên từ bảng lop_hoc -> giangvien
 $sql_confirmed = "
     SELECT dk.id_khoahoc, kh.ten_khoahoc, kh.hinh_anh, gv.ten_giangvien
     FROM dangkykhoahoc dk
     JOIN khoahoc kh ON dk.id_khoahoc = kh.id_khoahoc
-    LEFT JOIN giangvien gv ON kh.id_giangvien = gv.id_giangvien
+    LEFT JOIN lop_hoc lh ON dk.id_lop = lh.id_lop
+    LEFT JOIN giangvien gv ON lh.id_giangvien = gv.id_giangvien
     WHERE dk.id_hocvien = ? AND dk.trang_thai = 'da xac nhan'
     ORDER BY dk.ngay_dangky DESC
     LIMIT 3
@@ -36,21 +38,20 @@ $stmt_confirmed->execute();
 $result_confirmed = $stmt_confirmed->get_result();
 
 ?>
-  <div class="summary-cards">
-                        <a href="./dashboard.php?nav=khoahoc" class="summary-card">
-                            <div class="card-icon icon-courses"><i class="fa-solid fa-book-open"></i></div>
-                            <div class="info"><h3>Khóa học</h3><p><?php echo htmlspecialchars($total_courses); ?></p></div>
-                        </a>
-                        <a href="./dashboard.php?nav=lichsuthanhtoan" class="summary-card">
-                             <div class="card-icon icon-payment"><i class="fa-solid fa-wallet"></i></div>
-                            <div class="info"><h3>Giao dịch</h3><p><?php echo htmlspecialchars($total_transactions); ?></p></div>
-                        </a>
-                        <a href="./dashboard.php?nav=ketquakiemtra" class="summary-card">
-                             <div class="card-icon icon-tests"><i class="fa-solid fa-pen-to-square"></i></div>
-                            <div class="info"><h3>Bài test đã làm</h3><p><?php echo htmlspecialchars($total_tests); ?></p></div>
-                        </a>
-                    </div>
-
+<div class="summary-cards">
+    <a href="./dashboard.php?nav=khoahoc" class="summary-card">
+        <div class="card-icon icon-courses"><i class="fa-solid fa-book-open"></i></div>
+        <div class="info"><h3>Khóa học</h3><p><?php echo htmlspecialchars($total_courses); ?></p></div>
+    </a>
+    <a href="./dashboard.php?nav=lichsuthanhtoan" class="summary-card">
+            <div class="card-icon icon-payment"><i class="fa-solid fa-wallet"></i></div>
+        <div class="info"><h3>Giao dịch</h3><p><?php echo htmlspecialchars($total_transactions); ?></p></div>
+    </a>
+    <a href="./dashboard.php?nav=ketquakiemtra" class="summary-card">
+            <div class="card-icon icon-tests"><i class="fa-solid fa-pen-to-square"></i></div>
+        <div class="info"><h3>Bài test đã làm</h3><p><?php echo htmlspecialchars($total_tests); ?></p></div>
+    </a>
+</div>
 
 <div class="content-pane">
     <?php if ($result_pending->num_rows > 0): ?>
@@ -85,7 +86,7 @@ $result_confirmed = $stmt_confirmed->get_result();
                     </div>
                     <div class="course-content">
                         <h5><?php echo htmlspecialchars($row['ten_khoahoc']); ?></h5>
-                        <p><i class="fa-solid fa-chalkboard-user"></i> <?php echo htmlspecialchars($row['ten_giangvien'] ?? 'Đang cập nhật'); ?></p>
+                        <p><i class="fa-solid fa-chalkboard-user"></i> <?php echo htmlspecialchars($row['ten_giangvien'] ?? 'Chưa xếp lớp'); ?></p>
                         <a href="dashboard.php?nav=lichhoc&id_khoahoc=<?php echo $row['id_khoahoc']; ?>" class="btn btn-primary-custom">Xem lịch học</a>
                     </div>
                 </div>
@@ -100,96 +101,22 @@ $result_confirmed = $stmt_confirmed->get_result();
 </div>
 
 <style>
-    /* --- Card chờ thanh toán --- */
-    .pending-registrations {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-    .pending-card {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        background-color: #fff3cd;
-        border: 1px solid #ffeeba;
-        padding: 15px 20px;
-        border-radius: 10px;
-    }
-    .pending-icon i {
-        font-size: 24px;
-        color: #856404;
-    }
-    .pending-info {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-    }
-    .pending-info strong {
-        font-size: 16px;
-        color: #333;
-    }
-    .pending-info span {
-        font-size: 14px;
-        color: #6c757d;
-    }
-    .pending-actions {
-        display: flex;
-        gap: 10px;
-    }
-
-    /* --- Card khóa học đang hoạt động --- */
-    .active-courses-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
-    }
-    .course-card-active {
-        background: #fff;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.07);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .course-card-active:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
-    .course-card-active .course-image img {
-        width: 100%;
-        height: 160px;
-        object-fit: cover;
-    }
-    .course-card-active .course-content {
-        padding: 20px;
-    }
-    .course-card-active h5 {
-        font-size: 17px;
-        font-weight: 600;
-        margin-bottom: 10px;
-        min-height: 48px; /* Giữ chỗ 2 dòng */
-    }
-    .course-card-active p {
-        font-size: 14px;
-        color: #6c757d;
-        margin-bottom: 15px;
-    }
-    .btn-primary-custom {
-        background-color: var(--primary-color);
-        color: #fff;
-        padding: 8px 15px;
-        border-radius: 8px;
-        font-weight: 500;
-        text-decoration: none;
-        display: inline-block;
-        transition: background-color 0.3s ease;
-    }
-    .btn-primary-custom:hover {
-        background-color: var(--primary-color-dark);
-        color: #fff;
-    }
-    .view-all-link {
-        font-weight: 600;
-        color: var(--primary-color);
-        text-decoration: none;
-    }
+    /* CSS được giữ nguyên */
+    .pending-registrations { display: flex; flex-direction: column; gap: 15px; }
+    .pending-card { display: flex; align-items: center; gap: 20px; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 15px 20px; border-radius: 10px; }
+    .pending-icon i { font-size: 24px; color: #856404; }
+    .pending-info { flex-grow: 1; display: flex; flex-direction: column; }
+    .pending-info strong { font-size: 16px; color: #333; }
+    .pending-info span { font-size: 14px; color: #6c757d; }
+    .pending-actions { display: flex; gap: 10px; }
+    .active-courses-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .course-card-active { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.07); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .course-card-active:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .course-card-active .course-image img { width: 100%; height: 160px; object-fit: cover; }
+    .course-card-active .course-content { padding: 20px; }
+    .course-card-active h5 { font-size: 17px; font-weight: 600; margin-bottom: 10px; min-height: 48px; }
+    .course-card-active p { font-size: 14px; color: #6c757d; margin-bottom: 15px; }
+    .btn-primary-custom { background-color: var(--primary-color); color: #fff; padding: 8px 15px; border-radius: 8px; font-weight: 500; text-decoration: none; display: inline-block; transition: background-color 0.3s ease; }
+    .btn-primary-custom:hover { background-color: var(--primary-color-dark); color: #fff; }
+    .view-all-link { font-weight: 600; color: var(--primary-color); text-decoration: none; }
 </style>

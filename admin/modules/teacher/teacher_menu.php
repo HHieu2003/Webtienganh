@@ -28,7 +28,7 @@ $current_page = $_GET['nav'] ?? '';
         </li>
 
           <li>
-            <a href="./admin.php?nav=question" class="<?php echo in_array($current_page, ['teacher_tests', 'ds_cauhoi_gv', 'kqhocvien_gv']) ? 'active' : ''; ?>">
+            <a href="./admin.php?nav=question" class="<?php echo in_array($current_page, ['question', 'ds_cauhoi_gv', 'kqhocvien_gv']) ? 'active' : ''; ?>">
                 <i class="fa-solid fa-circle-question"></i>
                 <span>Quản lý Bài test</span>
             </a>

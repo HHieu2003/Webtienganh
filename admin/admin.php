@@ -27,6 +27,7 @@ $is_teacher = $_SESSION['is_teacher'] ?? false;
 <style>
     .cke_notifications_area {
         top: 0px !important;
+        display: none !important;
     }
 </style>
 

@@ -58,17 +58,18 @@
     .hero-description {
         font-weight: 400;
         text-align: justify;
-        color: #3a424a;
+        color: #333;
+        font-size: 17px;
+        margin-bottom: 10px;
     }
 
     .hero-title {
         text-align: left;
-
         font-size: 42px;
         line-height: 1.3;
         color: #333;
         font-weight: 700;
-        margin-bottom: 30px;
+        margin-bottom: 25px;
     }
 
     .hero-title .brand-name {
@@ -88,9 +89,9 @@
     .feature-item {
         display: flex;
         align-items: center;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
         font-size: 17px;
-        color: #505460;
+        color: #333;
     }
 
     .feature-icon {

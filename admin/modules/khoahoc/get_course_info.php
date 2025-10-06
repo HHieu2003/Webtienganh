@@ -6,7 +6,7 @@ $response = ['error' => 'ID không hợp lệ.'];
 $courseId = $_GET['id'] ?? 0;
 
 if ($courseId > 0) {
-    $sql = "SELECT id_khoahoc, ten_khoahoc, mo_ta, id_giangvien, thoi_gian, chi_phi, hinh_anh FROM khoahoc WHERE id_khoahoc = ?";
+    $sql = "SELECT id_khoahoc, ten_khoahoc, mo_ta, thoi_gian, chi_phi, hinh_anh FROM khoahoc WHERE id_khoahoc = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $courseId);
     $stmt->execute();

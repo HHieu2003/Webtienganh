@@ -8,7 +8,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_khoahoc = (int)($_POST['id_khoahoc'] ?? 0);
     $ten_khoahoc = $_POST['ten_khoahoc'] ?? '';
     $mo_ta = $_POST['mo_ta'] ?? '';
-    $id_giangvien = !empty($_POST['id_giangvien']) ? (int)$_POST['id_giangvien'] : NULL;
     $thoi_gian = !empty($_POST['thoi_gian']) ? (int)$_POST['thoi_gian'] : NULL;
     $chi_phi = (int)($_POST['chi_phi'] ?? 0);
     $hinh_anh_hien_tai = $_POST['hinh_anh_hien_tai'] ?? '';
@@ -28,9 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    $sql_update = "UPDATE khoahoc SET ten_khoahoc=?, mo_ta=?, id_giangvien=?, thoi_gian=?, chi_phi=?, hinh_anh=? WHERE id_khoahoc=?";
+    $sql_update = "UPDATE khoahoc SET ten_khoahoc=?, mo_ta=?, thoi_gian=?, chi_phi=?, hinh_anh=? WHERE id_khoahoc=?";
     $stmt = $conn->prepare($sql_update);
-    $stmt->bind_param('ssiissi', $ten_khoahoc, $mo_ta, $id_giangvien, $thoi_gian, $chi_phi, $hinh_anh_moi, $id_khoahoc);
+    $stmt->bind_param('ssiisi', $ten_khoahoc, $mo_ta, $thoi_gian, $chi_phi, $hinh_anh_moi, $id_khoahoc);
     
     if($stmt->execute()){
         $response['status'] = 'success';

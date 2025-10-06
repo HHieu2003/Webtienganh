@@ -46,14 +46,14 @@ CREATE TABLE `khoahoc` (
   `id_khoahoc` INT PRIMARY KEY AUTO_INCREMENT,
   `ten_khoahoc` VARCHAR(100),
   `mo_ta` TEXT,
-  `id_giangvien` INT NULL COMMENT 'Giảng viên chính của khóa học',
   `thoi_gian` DATE,
   `chi_phi` INT,
   `hinh_anh` VARCHAR(255),
-  `danh_gia_tb` DECIMAL(3, 2),
-  FOREIGN KEY (`id_giangvien`) REFERENCES `giangvien`(`id_giangvien`) ON DELETE SET NULL
+  `danh_gia_tb` DECIMAL(3, 2)
 ) ENGINE=InnoDB;
 ALTER TABLE `khoahoc` CHANGE `thoi_gian` `thoi_gian` INT(11) NULL DEFAULT NULL COMMENT 'Thời lượng khóa học (tính bằng số buổi)';
+
+
 CREATE TABLE `lop_hoc` (
   `id_lop` VARCHAR(50) PRIMARY KEY,
   `id_khoahoc` INT NOT NULL,
@@ -205,6 +205,10 @@ CREATE TABLE `tien_do_hoc_tap` (
   FOREIGN KEY (`id_hocvien`) REFERENCES `hocvien`(`id_hocvien`),
   FOREIGN KEY (`id_khoahoc`) REFERENCES `khoahoc`(`id_khoahoc`)
 ) ENGINE=InnoDB;
+ALTER TABLE `tien_do_hoc_tap` 
+ADD `id_lop` VARCHAR(50) NOT NULL AFTER `id_khoahoc`,
+ADD FOREIGN KEY (`id_lop`) REFERENCES `lop_hoc`(`id_lop`) ON DELETE CASCADE;
+
 
 CREATE TABLE `diem_danh` (
   `id_diemdanh` INT PRIMARY KEY AUTO_INCREMENT,
@@ -378,52 +382,57 @@ BEGIN
 END$$
 DELIMITER ;
 
+-- Thay đổi ký tự kết thúc lệnh tạm thời
 DELIMITER $$
+
+-- Xóa trigger cũ nếu nó tồn tại
+DROP TRIGGER IF EXISTS `after_dangkykhoahoc_update_final`$$
+
+-- Tạo lại trigger với logic đã được sửa đổi và bổ sung
 CREATE TRIGGER `after_dangkykhoahoc_update_final`
 AFTER UPDATE ON `dangkykhoahoc`
 FOR EACH ROW
 BEGIN
-    -- Kịch bản 1: Học viên được xác nhận sau khi thanh toán (hoặc được admin xác nhận thủ công)
-    -- và được xếp vào một lớp.
+    -- Kịch bản 1: Học viên được xác nhận VÀ xếp vào một lớp CÙNG LÚC.
     IF OLD.trang_thai != 'da xac nhan' AND NEW.trang_thai = 'da xac nhan' AND NEW.id_lop IS NOT NULL THEN
-        -- Tăng sĩ số lớp học
         UPDATE lop_hoc SET so_luong_hoc_vien = so_luong_hoc_vien + 1 WHERE id_lop = NEW.id_lop;
-        
-        -- Lấy tổng số buổi học của lớp mới
         SET @total_sessions = (SELECT COUNT(*) FROM lichhoc WHERE id_lop = NEW.id_lop);
-        
-        -- Thêm bản ghi tiến độ học tập cho học viên
-        INSERT INTO tien_do_hoc_tap (id_hocvien, id_khoahoc, tong_so_buoi, so_buoi_da_tham_gia, tien_do)
-        VALUES (NEW.id_hocvien, NEW.id_khoahoc, @total_sessions, 0, 0);
+        INSERT INTO tien_do_hoc_tap (id_hocvien, id_khoahoc, id_lop, tong_so_buoi, so_buoi_da_tham_gia, tien_do)
+        VALUES (NEW.id_hocvien, NEW.id_khoahoc, NEW.id_lop, @total_sessions, 0, 0);
     END IF;
 
-    -- Kịch bản 2: Admin quản lý học viên ĐÃ ĐƯỢC XÁC NHẬN
+    -- Kịch bản 2: Admin quản lý học viên ĐÃ ĐƯỢC XÁC NHẬN từ trước.
     IF OLD.trang_thai = 'da xac nhan' AND NEW.trang_thai = 'da xac nhan' THEN
         
-        -- A. Admin xóa học viên khỏi lớp (id_lop chuyển về NULL)
+        -- A. Admin THÊM học viên đang chờ vào một lớp (LOGIC MỚI ĐƯỢC BỔ SUNG).
+        IF OLD.id_lop IS NULL AND NEW.id_lop IS NOT NULL THEN
+            UPDATE lop_hoc SET so_luong_hoc_vien = so_luong_hoc_vien + 1 WHERE id_lop = NEW.id_lop;
+            SET @total_sessions = (SELECT COUNT(*) FROM lichhoc WHERE id_lop = NEW.id_lop);
+            INSERT INTO tien_do_hoc_tap (id_hocvien, id_khoahoc, id_lop, tong_so_buoi, so_buoi_da_tham_gia, tien_do)
+            VALUES (NEW.id_hocvien, NEW.id_khoahoc, NEW.id_lop, @total_sessions, 0, 0);
+        END IF;
+
+        -- B. Admin XÓA học viên khỏi lớp (id_lop chuyển về NULL).
         IF OLD.id_lop IS NOT NULL AND NEW.id_lop IS NULL THEN
             UPDATE lop_hoc SET so_luong_hoc_vien = so_luong_hoc_vien - 1 WHERE id_lop = OLD.id_lop;
-            DELETE FROM tien_do_hoc_tap WHERE id_hocvien = OLD.id_hocvien AND id_khoahoc = OLD.id_khoahoc;
+            DELETE FROM tien_do_hoc_tap WHERE id_hocvien = OLD.id_hocvien AND id_lop = OLD.id_lop;
         END IF;
         
-        -- B. Admin chuyển học viên từ lớp A sang lớp B
+        -- C. Admin CHUYỂN học viên từ lớp A sang lớp B.
         IF OLD.id_lop IS NOT NULL AND NEW.id_lop IS NOT NULL AND OLD.id_lop != NEW.id_lop THEN
-            -- Giảm sĩ số lớp cũ, tăng sĩ số lớp mới
             UPDATE lop_hoc SET so_luong_hoc_vien = so_luong_hoc_vien - 1 WHERE id_lop = OLD.id_lop;
             UPDATE lop_hoc SET so_luong_hoc_vien = so_luong_hoc_vien + 1 WHERE id_lop = NEW.id_lop;
-            
-            -- Cập nhật lại tiến độ cho lớp mới (reset về 0)
+            DELETE FROM tien_do_hoc_tap WHERE id_hocvien = OLD.id_hocvien AND id_lop = OLD.id_lop;
             SET @new_total_sessions = (SELECT COUNT(*) FROM lichhoc WHERE id_lop = NEW.id_lop);
-            UPDATE tien_do_hoc_tap 
-            SET tong_so_buoi = @new_total_sessions, so_buoi_da_tham_gia = 0, tien_do = 0 
-            WHERE id_hocvien = NEW.id_hocvien AND id_khoahoc = NEW.id_khoahoc;
+            INSERT INTO tien_do_hoc_tap (id_hocvien, id_khoahoc, id_lop, tong_so_buoi, so_buoi_da_tham_gia, tien_do)
+            VALUES (NEW.id_hocvien, NEW.id_khoahoc, NEW.id_lop, @new_total_sessions, 0, 0);
         END IF;
 
     END IF;
 END$$
 
+-- Trả ký tự kết thúc lệnh về mặc định
 DELIMITER ;
-
 
 ALTER TABLE `thongbao` 
 ADD `id_lop` VARCHAR(50) NULL DEFAULT NULL AFTER `id_khoahoc`,

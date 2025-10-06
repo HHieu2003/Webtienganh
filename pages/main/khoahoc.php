@@ -9,19 +9,19 @@
         // File này được include từ index.php nên biến $conn đã có sẵn.
         $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-        $sql = "SELECT kh.*, gv.ten_giangvien 
-                FROM khoahoc kh
-                LEFT JOIN giangvien gv ON kh.id_giangvien = gv.id_giangvien";
+        // Đã loại bỏ JOIN với bảng giangvien
+        $sql = "SELECT * FROM khoahoc";
         
         if (!empty($search)) {
-            $sql .= " WHERE kh.ten_khoahoc LIKE ? OR gv.ten_giangvien LIKE ?";
+            // Chỉ tìm kiếm theo tên khóa học
+            $sql .= " WHERE ten_khoahoc LIKE ?";
         }
-        $sql .= " ORDER BY kh.id_khoahoc DESC";
+        $sql .= " ORDER BY id_khoahoc DESC";
 
         $stmt = $conn->prepare($sql);
         if (!empty($search)) {
             $like_search = '%' . $search . '%';
-            $stmt->bind_param("ss", $like_search, $like_search);
+            $stmt->bind_param("s", $like_search);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -41,10 +41,6 @@
                             <h3 class="course-title">
                                 <a href="./index.php?nav=course_detail&course_id=' . $row["id_khoahoc"] . '">' . htmlspecialchars($row["ten_khoahoc"]) . '</a>
                             </h3>
-                            <div class="course-instructor">
-                                <i class="fas fa-chalkboard-teacher"></i> 
-                                ' . ($row["ten_giangvien"] ? htmlspecialchars($row["ten_giangvien"]) : 'Đang cập nhật') . '
-                            </div>
                             <div class="course-info">
                                 <span class="price">' . $chiphi . ' VNĐ</span>
                                 <span class="rating">
@@ -60,7 +56,7 @@
                             <a class="btn-view-detail" href="./index.php?nav=course_detail&course_id=' . $row["id_khoahoc"] . '">Xem Chi Tiết</a>
                         </div>  
                    </div>';
-                $delay += 50; // Giảm delay để hiệu ứng nhanh hơn với nhiều thẻ
+                $delay += 50; 
             }
         } else {
             echo '<p class="text-center col-12">Không tìm thấy khóa học nào phù hợp.</p>';
@@ -75,7 +71,7 @@
         max-width: 1200px;
         margin: 0px auto;
         padding: 20px;
-            min-height: 418px;
+        min-height: 418px;
     }
     
     .section-header {
@@ -97,12 +93,11 @@
     .course-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 20px; /* Giảm gap một chút để vừa 4 thẻ */
+        gap: 20px; 
     }
 
     .course-card {
-        /* THAY ĐỔI 1: TÍNH TOÁN LẠI ĐỘ RỘNG ĐỂ HIỂN THỊ 4 THẺ MỖI HÀNG */
-        width: calc(25% - 15px); /* (100% / 4) - gap */
+        width: calc(25% - 15px);
         background-color: #fff;
         border-radius: 15px;
         box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
@@ -127,7 +122,7 @@
 
     .course-image {
         width: 100%;
-        height: 180px; /* Giảm chiều cao ảnh một chút */
+        height: 180px; 
         object-fit: cover;
         transition: transform 0.4s ease, filter 0.4s ease;
     }
@@ -144,26 +139,23 @@
     }
 
     .course-details {
-        padding: 15px; /* Giảm padding */
+        padding: 15px; 
         flex-grow: 1;
     }
 
     .course-title {
-        font-size: 16px; /* Giảm kích thước chữ */
+        font-size: 16px; 
         font-weight: 600; color: #333; margin-bottom: 10px;
-        line-height: 1.4; min-height: 45px; /* Giữ chỗ cho 2 dòng */
+        line-height: 1.4; min-height: 45px; 
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         overflow: hidden;
     }
     .course-title a { color: inherit; text-decoration: none; transition: color 0.3s ease; }
     .course-card:hover .course-title a { color: #0db33b; }
 
-    .course-instructor { font-size: 14px; color: #555; margin-bottom: 10px; }
-    .course-instructor i { margin-right: 8px; color: #0db33b; }
-
     .course-info {
         display: flex; justify-content: space-between; align-items: center;
-        padding-top: 10px; border-top: 1px solid #f0f0f0;
+        padding-top: 10px; border-top: 1px solid #f0f0f0; margin-top: 10px;
     }
 
     .price { color: #0db33b; font-weight: bold; font-size: 18px; }
@@ -171,22 +163,18 @@
     
     .course-card-footer { padding: 0 15px 15px 15px; }
 
-    /* ==========================================================
-       THAY ĐỔI 2: HIỆU ỨNG MÀU CHẠY TỪ GÓC
-       ========================================================== */
     .btn-view-detail {
         display: block; width: 100%; text-align: center;
         color: #fff;
         padding: 12px; border: none; border-radius: 8px;
         font-size: 16px; font-weight: bold; cursor: pointer;
         text-decoration: none;
-        position: relative; /* Thêm position relative */
+        position: relative; 
         z-index: 1;
-        overflow: hidden; /* Ẩn phần màu thừa */
-        transition: color 0.4s ease; /* Thêm hiệu ứng đổi màu chữ */
+        overflow: hidden; 
+        transition: color 0.4s ease;
     }
 
-    /* Lớp giả ::before để tạo lớp màu nền động */
     .btn-view-detail::before {
         content: '';
         position: absolute;
@@ -194,41 +182,28 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, #28a745, #0db33b, #84fab0); /* Gradient 3 màu */
+        background: linear-gradient(135deg, #28a745, #0db33b, #84fab0);
         z-index: -1;
-        transition: transform 0.4s ease; /* Hiệu ứng chạy mượt */
-        transform-origin: top left; /* Bắt đầu từ góc trên bên trái */
-        transform: scaleX(0); /* Ban đầu ẩn đi */
+        transition: transform 0.4s ease;
+        transform-origin: top left;
+        transform: scaleX(0);
     }
 
     .btn-view-detail {
-        background-color: #f0f0f0; /* Màu nền mặc định */
-        color: #333; /* Màu chữ mặc định */
+        background-color: #f0f0f0; 
+        color: #333;
     }
 
-    /* Khi hover, lớp màu sẽ bung ra từ góc */
     .btn-view-detail:hover::before {
         transform: scaleX(1);
     }
     
     .btn-view-detail:hover {
-        color: #fff; /* Chữ đổi thành màu trắng khi hover */
+        color: #fff;
     }
 
     /* Responsive */
-    @media (max-width: 1200px) {
-        .course-card {
-            width: calc(33.333% - 14px); /* 3 thẻ mỗi hàng */
-        }
-    }
-    @media (max-width: 768px) {
-        .course-card {
-            width: calc(50% - 10px); /* 2 thẻ mỗi hàng */
-        }
-    }
-    @media (max-width: 576px) {
-        .course-card {
-            width: 100%; /* 1 thẻ mỗi hàng */
-        }
-    }
+    @media (max-width: 1200px) { .course-card { width: calc(33.333% - 14px); } }
+    @media (max-width: 768px) { .course-card { width: calc(50% - 10px); } }
+    @media (max-width: 576px) { .course-card { width: 100%; } }
 </style>

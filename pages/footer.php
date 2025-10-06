@@ -90,7 +90,6 @@
     .footer-wrapper-light {
         background-color: var(--background-light-gray);
         color: var(--text-color-light);
-        font-family: 'Arial', sans-serif;
         padding-top: 50px;
         border-top: 1px solid var(--border-color-light);
     }

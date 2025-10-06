@@ -45,7 +45,7 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
         .header-top .right a {
             text-decoration: none;
             margin-left: 15px;
-            font-size: 15px;
+            font-size: 16px;
             color: white;
         }
 
@@ -98,7 +98,7 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
             font-weight: 500;
             position: relative;
             padding: 10px 15px;
-            font-size: 17px;
+            font-size: 18px;
             color: #333;
             transition: color 0.2s ease;
         }
@@ -288,11 +288,6 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
                 gap: 10px;
                 padding: 10px;
             }
-
-            .header-top .right a {
-                font-size: 14px;
-            }
-
             .logo img {
                 height: 50px;
             }

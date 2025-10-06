@@ -1,11 +1,24 @@
-/* --- Cài đặt biến và Global --- */
+/* ==================================================================
+   CSS MỚI CHO TRANG QUẢN TRỊ - GIAO DIỆN SÁNG & HIỆN ĐẠI
+================================================================== */
+
+/* --- Cài đặt biến màu và Global --- */
 :root {
-    --primary-color: #0db33b;
-    --primary-color-dark: #0a8a2c;
-    --sidebar-bg: #2c3e50;
-    --sidebar-text: #ecf0f1;
+    --brand-color: #0db33b;
+    --brand-color-dark: #0a8a2c;
+    --brand-color-light: #e7f7ec;
+
+    /* Bảng màu mới cho Sidebar */
+    --sidebar-bg: #ffffff;
+    --sidebar-header-bg: #f8f9fa;
+    --sidebar-text: #34495e;
+    /* Màu chữ xám xanh đậm */
     --sidebar-text-hover: #ffffff;
-    --sidebar-active-bg: #22303f;
+    --sidebar-icon-color: #7f8c8d;
+    /* Màu icon xám nhạt */
+    --sidebar-active-bg: var(--brand-color);
+    --sidebar-hover-bg: #f1f1f1;
+
     --content-bg: #f4f7f6;
     --white-bg: #ffffff;
     --border-color: #dee2e6;
@@ -27,7 +40,7 @@ a {
     min-height: 100vh;
 }
 
-/* --- Thanh điều hướng bên trái (Sidebar) --- */
+/* --- Thanh điều hướng bên trái (Sidebar) - ĐÃ THIẾT KẾ LẠI --- */
 .admin-sidebar {
     width: 260px;
     background-color: var(--sidebar-bg);
@@ -36,6 +49,10 @@ a {
     flex-direction: column;
     flex-shrink: 0;
     transition: width 0.3s ease;
+    border-right: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    height: 100vh;
 }
 
 .sidebar-header {
@@ -43,7 +60,9 @@ a {
     text-align: center;
     font-size: 24px;
     font-weight: 700;
-    background-color: rgba(0,0,0,0.2);
+    background-color: var(--sidebar-header-bg);
+    color: var(--brand-color);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .admin-nav {
@@ -54,54 +73,97 @@ a {
 .admin-nav ul {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 0 10px;
 }
 
 .admin-nav ul li a {
     display: flex;
     align-items: center;
     gap: 15px;
-    padding: 15px 20px;
+    padding: 14px 20px;
     color: var(--sidebar-text);
     font-size: 16px;
-    transition: all 0.3s ease;
-    border-left: 4px solid transparent;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    border-radius: 8px;
+    margin-bottom: 5px;
 }
 
 .admin-nav ul li a .fa-solid {
     font-size: 18px;
     width: 20px;
     text-align: center;
+    color: var(--sidebar-icon-color);
+    transition: color 0.2s ease-in-out;
 }
 
 .admin-nav ul li a:hover {
-    background-color: var(--sidebar-active-bg);
-    color: var(--sidebar-text-hover);
-    border-left: 4px solid var(--primary-color);
+    background-color: var(--sidebar-hover-bg);
+    color: var(--brand-color);
+
+}
+
+.admin-nav ul li a:hover .fa-solid {
+    color: var(--brand-color);
 }
 
 .admin-nav ul li a.active {
     background-color: var(--sidebar-active-bg);
-    color: #fff;
+    color: var(--sidebar-text-hover);
     font-weight: 600;
-    border-left: 4px solid var(--primary-color);
+    box-shadow: 0 4px 12px rgba(13, 179, 59, 0.3);
 }
 
-/* --- Khối nội dung chính --- */
+.admin-nav ul li a.active .fa-solid {
+    color: var(--sidebar-text-hover);
+}
+
+/* Menu con */
+.admin-nav .nav-link-collapse .collapse-arrow {
+    transition: transform 0.3s ease;
+}
+
+.admin-nav .nav-link-collapse:not(.collapsed) .collapse-arrow {
+    transform: rotate(180deg);
+}
+
+.admin-nav .collapse {
+    margin: 0 0 5px 15px;
+    padding-left: 15px;
+    border-left: 2px solid var(--border-color-light);
+}
+
+.admin-nav .collapse li a {
+    padding: 10px 15px;
+    font-size: 15px;
+    color: var(--sidebar-text);
+}
+
+.admin-nav .collapse li a.active {
+    background: none;
+    color: var(--brand-color);
+    font-weight: 600;
+    box-shadow: none;
+}
+
+.admin-nav .collapse li a.active .fa-solid {
+    color: var(--brand-color);
+}
+
+/* --- Các phần còn lại giữ nguyên style --- */
 .admin-main {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
 }
 
-/* --- Header của nội dung chính --- */
 .admin-header {
     background-color: var(--white-bg);
     padding: 15px 30px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -118,14 +180,21 @@ a {
     color: var(--primary-color);
 }
 
-/* --- Vùng nội dung (Content Area) --- */
 .admin-content {
     flex-grow: 1;
     padding: 30px;
-    overflow-y: auto; /* Cho phép cuộn khi nội dung dài */
+    overflow-y: auto;
 }
 
-/* --- Tiêu đề chung trong nội dung --- */
+.admin-footer {
+    text-align: center;
+    padding: 15px;
+    background-color: var(--white-bg);
+    border-top: 1px solid var(--border-color);
+    color: #6c757d;
+    font-size: 14px;
+}
+
 .title-color {
     color: #333;
     text-align: left;
@@ -140,7 +209,7 @@ a {
 .title-color:after {
     content: "";
     background: var(--primary-color);
-    bottom: -1px; /* Nằm đè lên border */
+    bottom: -1px;
     display: block;
     height: 3px;
     left: 0;
@@ -148,38 +217,24 @@ a {
     width: 80px;
 }
 
-/* --- Footer --- */
-.admin-footer {
-    text-align: center;
-    padding: 15px;
-    background-color: var(--white-bg);
-    border-top: 1px solid var(--border-color);
-    color: var(--gray-text);
-    font-size: 14px;
-}
-
-
-/* === BỔ SUNG CSS CHO HIỆU ỨNG ANIMATION === */
-
-/* Keyframes cho hiệu ứng trượt lên và mờ dần */
 @keyframes fadeInUp {
     from {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-/* Áp dụng animation cho các thẻ và dòng trong bảng */
-.animated-card, .animated-row {
-    opacity: 0; /* Bắt đầu ẩn */
+.animated-card,
+.animated-row {
+    opacity: 0;
     animation: fadeInUp 0.5s ease-out forwards;
 }
 
-/* Cải thiện giao diện cho các thẻ thống kê */
 .stat-card {
     border: none;
     border-radius: 12px;
@@ -189,7 +244,7 @@ a {
 
 .stat-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 .stat-card .card-body {
@@ -214,52 +269,3 @@ a {
     font-size: 36px;
     font-weight: 700;
 }
-
-/* === BỔ SUNG CSS CHO MENU MỚI === */
-.admin-nav .nav-link-collapse .collapse-arrow {
-    transition: transform 0.3s ease;
-}
-.admin-nav .nav-link-collapse:not(.collapsed) .collapse-arrow {
-    transform: rotate(180deg);
-}
-.admin-nav .collapse { 
-    margin: 5px 0 10px 15px;
-    border-left: 2px solid rgba(255, 255, 255, 0.1);
-}
-.admin-nav .collapse li a {
-    padding: 10px 15px 10px 20px;
-    font-size: 15px;
-    color: var(--sidebar-text);
-    opacity: 0.8;
-}
-.admin-nav .collapse li a:hover {
-    opacity: 1;
-    background-color: transparent;
-    border-left-color: transparent; /* Bỏ border xanh khi hover mục con */
-}
-.admin-nav .collapse li a.active {
-    opacity: 1;
-    font-weight: 600;
-    color: #fff;
-    background-color: transparent; /* Bỏ màu nền cho mục con active */
-    border-left-color: transparent; /* Bỏ border xanh cho mục con active */
-}
-/* ================================== */
-/* --- Thanh điều hướng bên trái (Sidebar) --- */
-.admin-sidebar {
-    width: 260px;
-    background-color: var(--sidebar-bg);
-    color: var(--sidebar-text);
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    transition: width 0.3s ease;
-
-    /* === BỔ SUNG CÁC DÒNG SAU ĐỂ GIỮ CỐ ĐỊNH MENU === */
-    position: -webkit-sticky; /* Dành cho trình duyệt Safari cũ */
-    position: sticky;       /* Thuộc tính chính để giữ cố định */
-    top: 0;                 /* Giữ menu ở cạnh trên cùng của màn hình */
-    height: 100vh;          /* Đảm bảo chiều cao của menu bằng chiều cao màn hình */
-    /* ============================================== */
-}
-

@@ -44,7 +44,7 @@ $my_classes = $stmt_classes->get_result();
 <style>
     .welcome-banner {
         background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark));
-        color: white;
+   
         border-radius: 12px;
         padding: 30px;
         display: flex;
