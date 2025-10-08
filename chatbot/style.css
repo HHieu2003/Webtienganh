@@ -1,0 +1,322 @@
+/* Google Fonts - Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Biến màu đồng bộ với website */
+:root {
+    --brand-color: #0db33b;
+    --brand-color-dark: #0a8a2c;
+    --brand-color-light: #e7f7ec;
+    --text-color: #333;
+    --background-light: #f8f9fa;
+    --border-color: #dee2e6;
+}
+
+
+/* Nút mở Chatbot */
+#chatbot-toggler {
+    position: fixed;
+    bottom: 10px;
+    right: 35px;
+    border: none;
+    height: 55px;
+    width: 55px;
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--brand-color);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    z-index: 100000 ;
+}
+
+#chatbot-toggler:hover {
+    background: var(--brand-color-dark);
+    transform: scale(1.1);
+}
+
+body.show-chatbot #chatbot-toggler {
+    transform: rotate(45deg);
+}
+
+#chatbot-toggler span {
+    color: #fff;
+    position: absolute;
+    font-size: 1.8rem;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+#chatbot-toggler span:last-child,
+body.show-chatbot #chatbot-toggler span:first-child {
+    opacity: 0;
+    transform: rotate(-45deg);
+}
+
+body.show-chatbot #chatbot-toggler span:last-child {
+    opacity: 1;
+    transform: rotate(0);
+}
+
+/* Khung Chatbot Popup */
+.chatbot-popup {
+    position: fixed;
+    right: 35px;
+    bottom: 30px;
+    width: 400px;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 15px;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.5);
+    transform-origin: bottom right;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
+    z-index: 100000;
+}
+
+body.show-chatbot .chatbot-popup {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+}
+
+/* Header của Chatbot */
+.chat-header {
+    display: flex;
+    align-items: center;
+    padding: 7px 20px;
+    background: var(--brand-color);
+    justify-content: space-between;
+    border-bottom: 1px solid var(--brand-color-dark);
+}
+
+.chat-header .header-info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.header-info .chatbot-logo {
+    font-size: 1.5rem;
+    color: var(--brand-color);
+    background: #fff;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-info .logo-text {
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.chat-header #close-chatbot {
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.chat-header #close-chatbot:hover {
+    opacity: 1;
+}
+
+/* Khung nội dung chat */
+.chat-body {
+    padding: 20px;
+    gap: 15px;
+    display: flex;
+    height: 400px;
+    overflow-y: auto;
+    flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+}
+
+/* Tin nhắn */
+.chat-body .message {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-body .message .bot-avatar {
+    font-size: 1.2rem;
+    color: #fff;
+    height: 35px;
+    width: 35px;
+    flex-shrink: 0;
+    align-self: flex-end;
+    border-radius: 50%;
+    background: var(--brand-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-body .message .message-text {
+    padding: 10px 15px;
+    max-width: 75%;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+.chat-body .bot-message .message-text {
+    background: var(--brand-color-light);
+    color: var(--text-color);
+    border-radius: 15px 15px 15px 4px;
+}
+
+.chat-body .user-message {
+    justify-content: flex-end;
+}
+
+.chat-body .user-message .message-text {
+    color: #fff;
+    background: var(--brand-color);
+    border-radius: 15px 15px 4px 15px;
+}
+
+/* Hiệu ứng "đang gõ" */
+.chat-body .bot-message.thinking .message-text {
+    padding: 10px 15px;
+}
+
+.chat-body .bot-message .thinking-indicator {
+    display: flex;
+    gap: 5px;
+    padding: 5px 0;
+}
+
+.chat-body .bot-message .thinking-indicator .dot {
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    background: #aaa;
+    animation: dotPulse 1.5s ease-in-out infinite;
+}
+
+.chat-body .bot-message .thinking-indicator .dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.chat-body .bot-message .thinking-indicator .dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes dotPulse {
+
+    0%,
+    60%,
+    100% {
+        transform: scale(0.5);
+        opacity: 0.5;
+    }
+
+    30% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Footer (khung nhập liệu) */
+.chat-footer {
+    width: 100%;
+    background: #fff;
+    padding: 7px 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.chat-footer .chat-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    position: relative;
+}
+
+.chat-form .message-input {
+    width: 100%;
+    min-height: 45px;
+    max-height: 120px;
+    outline: none;
+    resize: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    padding: 6px 15px;
+    border: 1px solid var(--border-color);
+    transition: border-color 0.2s ease;
+    scrollbar-width: none;
+    /* Ẩn thanh cuộn cho Firefox */
+}
+
+.chat-form .message-input::-webkit-scrollbar {
+    display: none;
+}
+
+/* Ẩn cho Chrome, Safari */
+
+.chat-form .message-input:focus {
+    border-color: var(--brand-color);
+}
+
+.chat-form .chat-controls button {
+    height: 45px;
+    width: 45px;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 1.4rem;
+    background: none;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.chat-form #send-message {
+    background: var(--brand-color);
+    color: #fff;
+}
+
+.chat-form #send-message:hover {
+    background: var(--brand-color-dark);
+}
+
+/* Responsive */
+@media (max-width: 490px) {
+    #chatbot-toggler {
+        right: 20px;
+        bottom: 20px;
+    }
+
+    .chatbot-popup {
+        right: 0;
+        bottom: 0;
+        height: 100%;
+        border-radius: 0;
+        width: 100%;
+    }
+
+    .chat-body {
+        height: calc(100% - 130px);
+    }
+}

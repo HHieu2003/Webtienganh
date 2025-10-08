@@ -51,8 +51,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_consult'])) {
         <div class="row align-items-center g-5">
             <div class="col-lg-6" data-aos="fade-right">
                 <div class="offers-container">
-                    <h2 class="offers-title">Đăng Ký Hôm Nay, Nhận Ngay Ưu Đãi!</h2>
-                    <p class="offers-subtitle">30 suất đặc biệt dành cho những bạn đăng ký sớm nhất trong tháng này.</p>
+                    <h2 class="offers-title text-center">Đăng Ký Hôm Nay, Nhận Ngay Ưu Đãi!</h2>
+                    <p class="offers-subtitle">30 suất đặc biệt dành cho những bạn đăng ký sớm nhất trong tháng!</p>
                     <div class="offer-card">
                         <div class="offer-icon">💰</div>
                         <div class="offer-text">

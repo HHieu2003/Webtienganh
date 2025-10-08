@@ -301,6 +301,8 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
            CSS CŨ KHÔNG THAY ĐỔI
            ========================================================== */
         .floating-icons {
+            
+            display: none !important;
             position: fixed;
             bottom: 20px;
             right: 20px;
