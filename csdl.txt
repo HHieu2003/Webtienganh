@@ -223,6 +223,19 @@ CREATE TABLE `diem_danh` (
   FOREIGN KEY (`id_lichhoc`) REFERENCES `lichhoc`(`id_lichhoc`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 ALTER TABLE `diem_danh` ADD UNIQUE `unique_attendance` (`id_hocvien`, `id_lop`, `id_lichhoc`);
+
+
+CREATE TABLE `dapan_hocvien` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_ketqua` int(11) NOT NULL,
+  `id_cauhoi` int(11) NOT NULL,
+  `id_dapan_chon` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_ketqua` (`id_ketqua`),
+  KEY `id_cauhoi` (`id_cauhoi`),
+  CONSTRAINT `dapan_hocvien_ibfk_1` FOREIGN KEY (`id_ketqua`) REFERENCES `ketquabaitest` (`id_ketqua`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- --------------------------------------------------------
 -- CÁC TRIGGER
 -- --------------------------------------------------------

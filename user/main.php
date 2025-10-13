@@ -16,9 +16,10 @@ switch ($nav) {
         include("modules/thongtintaikhoan.php");
         break;
 
-         case 'bangdiem':
+    case 'bangdiem':
         include("modules/bangdiem.php");
         break;
+
     case 'baomat':
         include("modules/baomattk.php");
         break;
@@ -34,19 +35,31 @@ switch ($nav) {
     case 'hoclieu':
         include("modules/hoclieu.php");
         break;
+
     case 'lichsuthanhtoan':
         include("modules/lichsuthanhtoan.php");
         break;
- case 'diemdanh':
+
+    case 'diemdanh':
         include("modules/diemdanh.php");
         break;
+
     case 'ketquakiemtra':
         include("modules/ketquakiemtra.php");
         break;
-case 'thongbao':
+        
+    // --- THÊM DÒNG NÀY VÀO ---
+    case 'view_submission':
+        include("modules/view_test_submission.php");
+        break;
+    // -------------------------
+
+    case 'thongbao':
         include("modules/thongbao.php");
         break;
+        
     default: // Nếu 'nav' không khớp hoặc rỗng, sẽ chạy trang chủ của dashboard
         include("modules/home.php");
         break;
 }
+?>
