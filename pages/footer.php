@@ -71,7 +71,6 @@
 
 <button id="chatbot-toggler">
     <span class="fa-solid fa-comment-dots"></span>
-    <span class="fa-solid fa-times"></span>
 </button>
 <div class="chatbot-popup">
     <div class="chat-header">

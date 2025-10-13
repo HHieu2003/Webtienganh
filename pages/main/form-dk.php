@@ -51,8 +51,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_consult'])) {
         <div class="row align-items-center g-5">
             <div class="col-lg-6" data-aos="fade-right">
                 <div class="offers-container">
-                    <h2 class="offers-title text-center">Đăng Ký Hôm Nay, Nhận Ngay Ưu Đãi!</h2>
-                    <p class="offers-subtitle">30 suất đặc biệt dành cho những bạn đăng ký sớm nhất trong tháng!</p>
+                    <h2 class="introduce-title text-center">Đăng Ký Hôm Nay, Nhận Ngay Ưu Đãi!</h2>
+                    <p class="section-subtitle text-center ">30 suất đặc biệt cho những bạn đăng ký sớm nhất trong tháng!</p>
                     <div class="offer-card">
                         <div class="offer-icon">💰</div>
                         <div class="offer-text">
@@ -79,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_consult'])) {
 
             <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
                 <div class="form-wrapper">
-                    <h3 class="form-title">Đăng Ký Nhận Tư Vấn Miễn Phí</h3>
+                    <h3 class="form-title introduce-title">Đăng Ký Nhận Tư Vấn Miễn Phí</h3>
                     <form action="<?php echo htmlspecialchars($_SERVER["REQUEST_URI"]); ?>#consult-form" method="post" id="consult-form">
                         
                         <?php if (!empty($form_message)) : ?>
@@ -116,7 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_consult'])) {
 
 <style>
     .consult-section {
-        padding: 50px 0;
+        padding: 30px 0;
         background: #fff;
     }
 
@@ -124,18 +124,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_consult'])) {
     .offers-container {
         padding-right: 20px;
     }
-    .offers-title {
-        font-size: 38px;
-        font-weight: 700;
-        color: #222;
-        line-height: 1.3;
-    }
-    .offers-subtitle {
-        font-size: 18px;
-        color: #666;
-        margin-top: 15px;
-        margin-bottom: 30px;
-    }
+  
     .offer-card {
         display: flex;
         align-items: flex-start;

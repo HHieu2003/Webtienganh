@@ -47,7 +47,78 @@ body.show-chatbot #chatbot-toggler {
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
+
 #chatbot-toggler span:last-child,
+
+/* Writing Assessment Form */
+.writing-assessment-form {
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.writing-assessment-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    resize: vertical;
+}
+
+.writing-assessment-form textarea:focus {
+    outline: none;
+    border-color: var(--brand-color);
+}
+
+.writing-assessment-form label {
+    display: block;
+    margin-top: 10px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+#assess-writing {
+    background: var(--brand-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+#assess-writing:hover {
+    background: var(--brand-color-dark);
+}
+
+.assessment-result {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.score-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.total-score {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--brand-color);
+    margin: 10px 0;
+}
+
+/* Writing Assessment Form */
 body.show-chatbot #chatbot-toggler span:first-child {
     opacity: 0;
     transform: rotate(-45deg);

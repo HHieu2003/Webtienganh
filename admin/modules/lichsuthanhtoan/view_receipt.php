@@ -18,7 +18,7 @@ $sql = "SELECT
         JOIN hocvien hv ON lt.id_hocvien = hv.id_hocvien
         JOIN khoahoc kh ON lt.id_khoahoc = kh.id_khoahoc
         WHERE lt.id_thanhtoan = ?";
-        
+
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id_thanhtoan);
 $stmt->execute();
@@ -31,7 +31,7 @@ if (!$receipt) {
 
 // === PHẦN BẢO MẬT: Đảm bảo chỉ admin hoặc chủ biên lai được xem ===
 $is_admin = $_SESSION['is_admin'] ?? false;
-$current_user_id = $_SESSION['id_hocvien'] ?? 0; 
+$current_user_id = $_SESSION['id_hocvien'] ?? 0;
 $is_owner = ($current_user_id == $receipt['id_hocvien']);
 
 if (!$is_admin && !$is_owner) {
@@ -40,6 +40,7 @@ if (!$is_admin && !$is_owner) {
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Biên lai #<?php echo htmlspecialchars($receipt['id_thanhtoan']); ?> - Tiếng Anh Fighter</title>
@@ -50,13 +51,50 @@ if (!$is_admin && !$is_owner) {
             --primary-color: #0db33b;
             --light-gray-bg: #f8f9fa;
         }
-        body { background-color: var(--light-gray-bg); font-family: Arial, sans-serif; }
-        .receipt-wrapper { max-width: 800px; margin: 30px auto; }
-        .receipt-actions { text-align: center; margin-bottom: 20px; }
-        .receipt-container { background: #fff; border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); padding: 40px; position: relative; }
-        .receipt-header { border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px; }
-        .receipt-header img { max-height: 70px; }
-        .receipt-title { font-size: 2.5rem; font-weight: bold; color: #ccc; position: absolute; top: 40px; right: 40px; letter-spacing: 2px; }
+
+        body {
+            background-color: var(--light-gray-bg);
+            font-family: Arial, sans-serif;
+        }
+
+        .receipt-wrapper {
+            max-width: 800px;
+            margin: 30px auto;
+        }
+
+        .receipt-actions {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .receipt-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            position: relative;
+        }
+
+        .receipt-header {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .receipt-header img {
+            max-height: 70px;
+        }
+
+        .receipt-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ccc;
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            letter-spacing: 2px;
+        }
+
         .receipt-paid-stamp {
             position: absolute;
             top: 100px;
@@ -70,26 +108,65 @@ if (!$is_admin && !$is_owner) {
             transform: rotate(-10deg);
             opacity: 0.8;
         }
-        .info-section h5 { font-weight: 600; color: #555; margin-bottom: 15px; }
-        .info-section p { margin-bottom: 5px; color: #666; }
-        .receipt-table { margin-top: 30px; }
-        .receipt-table th { background-color: var(--light-gray-bg); }
-        .receipt-table .total-row td { font-size: 1.2rem; font-weight: bold; }
-        .receipt-footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 0.9rem; color: #888; }
-        
+
+        .info-section h5 {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .info-section p {
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .receipt-table {
+            margin-top: 30px;
+        }
+
+        .receipt-table th {
+            background-color: var(--light-gray-bg);
+        }
+
+        .receipt-table .total-row td {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .receipt-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
         @media print {
-            body { background-color: #fff; }
-            .receipt-wrapper { margin: 0; }
-            .receipt-actions { display: none; }
-            .receipt-container { box-shadow: none; border: 1px solid #ddd; }
+            body {
+                background-color: #fff;
+            }
+
+            .receipt-wrapper {
+                margin: 0;
+            }
+
+            .receipt-actions {
+                display: none;
+            }
+
+            .receipt-container {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="receipt-wrapper">
         <div class="receipt-actions">
             <button onclick="window.print()" class="btn btn-primary"><i class="fas fa-print me-2"></i> In hoặc Lưu PDF</button>
-            <a href="../../admin.php?nav=thanhtoan" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i> Quay lại</a>
         </div>
         <div class="receipt-container">
             <div class="receipt-title">BIÊN LAI</div>
@@ -149,4 +226,5 @@ if (!$is_admin && !$is_owner) {
         </div>
     </div>
 </body>
+
 </html>

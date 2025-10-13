@@ -12,7 +12,7 @@ $result_courses = $conn->query($sql_courses);
             <p class="section-subtitle">Những cuộc phiêu lưu tri thức đang chờ bạn khám phá</p>
         </div>
 
-        <div class="row g-4">
+        <div class="row g-4 ">
             <?php
             if ($result_courses && $result_courses->num_rows > 0) {
                 $delay = 0;
@@ -55,7 +55,8 @@ $result_courses = $conn->query($sql_courses);
 
 <style>
     .featured-courses-section {
-        padding: 50px 0;
+        padding: 20px 0px 60px 0px;
+        background-color: #f9f9f9;
     }
 
     .section-header {
@@ -63,18 +64,7 @@ $result_courses = $conn->query($sql_courses);
         margin-bottom: 50px;
     }
 
-    .introduce-title {
-        font-size: 36px;
-        font-weight: 700;
-        color: #222;
-        margin-bottom: 10px;
-    }
-
-    .section-subtitle {
-        font-size: 18px;
-        color: #666;
-    }
-
+    
     .course-card-featured {
         background-color: #fff;
         border-radius: 15px;

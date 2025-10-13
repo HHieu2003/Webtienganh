@@ -1,61 +1,302 @@
+<style>
+    /* --- Cài đặt chung & Biến màu --- */
+    :root {
+        --brand-color: #0db33b;
+        --brand-color-dark: #0a8a2c;
+        --background-light: #f8f9fa;
+        --text-dark: #212529;
+        --text-light: #6c757d;
+        --border-color: #dee2e6;
+        --shadow-sm: 0 4px 15px rgba(0,0,0,0.06);
+    }
+
+    /* --- Hero Banner Section --- */
+    .about-hero-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, rgba(13, 179, 59, 0.8), rgba(40, 167, 69, 0.9)), url('images/khoahoc1.jpg') no-repeat center center;
+        background-size: cover;
+        color: #fff;
+        text-align: center;
+    }
+    .about-hero-section h1 {
+        font-size: 48px;
+        font-weight: 700;
+        text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    .about-hero-section p {
+        font-size: 18px;
+        max-width: 700px;
+        margin: 15px auto 0;
+        opacity: 0.9;
+    }
+
+    /* --- Bố cục chính --- */
+    .about-container {
+        padding: 60px 0;
+    }
+
+    /* --- Nội dung bài viết & các khối Section --- */
+    .about-post-section {
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 40px;
+    }
+    .about-post-section h2 {
+        font-size: 28px;
+        font-weight: 600;
+        color: var(--brand-color);
+        margin-bottom: 20px;
+    }
+    .about-post-section .lead-text {
+        font-size: 18px;
+        font-style: italic;
+        color: var(--text-dark);
+        margin-bottom: 25px;
+    }
+    .about-post-section p, .about-post-section li {
+        font-size: 16px;
+        line-height: 1.8;
+        color: var(--text-light);
+    }
+    .about-post-section ul {
+        padding-left: 20px;
+        list-style-type: '✓  ';
+    }
+    .about-post-section ul li {
+        padding-left: 10px;
+        margin-bottom: 10px;
+    }
+
+    /* --- Mục "Giá trị cốt lõi" --- */
+    .values-section .value-card {
+        background-color: var(--background-light);
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        height: 100%;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+    .values-section .value-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border-color: var(--brand-color);
+    }
+    .values-section .value-icon {
+        font-size: 40px;
+        color: var(--brand-color);
+        margin-bottom: 15px;
+    }
+    .values-section .value-card h4 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--text-dark);
+    }
+
+    /* --- Timeline Hành trình phát triển --- */
+    .timeline-section {
+        position: relative;
+        padding: 40px 0;
+    }
+    .timeline-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 3px;
+        height: 100%;
+        background-color: #e9ecef;
+    }
+    .timeline-item {
+        position: relative;
+        width: 50%;
+        padding: 20px 40px;
+        box-sizing: border-box;
+    }
+    .timeline-item:nth-child(odd) {
+        left: 0;
+        padding-right: 60px;
+        text-align: right;
+    }
+    .timeline-item:nth-child(even) {
+        left: 50%;
+        padding-left: 60px;
+        text-align: left;
+    }
+    .timeline-dot {
+        position: absolute;
+        top: 35px;
+        width: 20px;
+        height: 20px;
+        background-color: #fff;
+        border: 4px solid var(--brand-color);
+        border-radius: 50%;
+        z-index: 1;
+    }
+    .timeline-item:nth-child(odd) .timeline-dot {
+        right: -10px;
+    }
+    .timeline-item:nth-child(even) .timeline-dot {
+        left: -10px;
+    }
+    .timeline-content .year {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--brand-color);
+    }
+    .timeline-content h5 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 10px 0;
+    }
+    
+    /* --- Sidebar --- */
+    .sidebar-sticky {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 100px;
+    }
+    .sidebar-widget {
+        background-color: #fff;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 25px;
+    }
+    .sidebar-widget h4 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        position: relative;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .sidebar-widget h4::after {
+        content: '';
+        position: absolute;
+        bottom: -1px; left: 0;
+        width: 50px; height: 2px;
+        background-color: var(--brand-color);
+    }
+    .course-item-sidebar a {
+        display: flex; gap: 15px; align-items: center;
+        text-decoration: none; margin-bottom: 15px; padding: 10px;
+        border-radius: 8px; transition: background-color 0.3s ease;
+    }
+    .course-item-sidebar a:hover { background-color: var(--background-light); }
+    .course-item-sidebar img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; }
+    .course-item-sidebar p { font-size: 15px; color: var(--text-dark); font-weight: 500; margin: 0; }
+    
+    /* Responsive cho Timeline */
+    @media (max-width: 767px) {
+        .timeline-section::before { left: 10px; }
+        .timeline-item { width: 100%; padding-left: 50px; padding-right: 20px; text-align: left !important; }
+        .timeline-item:nth-child(even) { left: 0; }
+        .timeline-dot { left: 1px; }
+    }
+
+</style>
+<div class="about-hero-section" data-aos="fade-in">
+    <div class="container">
+        <h1>Về Tiếng Anh Fighter</h1>
+        <p>Thắp lửa đam mê, chắp cánh ước mơ Anh ngữ cho hàng triệu người Việt.</p>
+    </div>
+</div>
 
 <div class="about-container">
     <div class="container">
-        <div class="row">
+        <div class="row gx-lg-5">
             <div class="col-lg-8">
-                <div class="about-post" data-aos="fade-up">
+
+                <div class="about-post-section" data-aos="fade-up">
                     <h2>Chào mừng bạn đến với Tiếng Anh Fighter!</h2>
                     <p class="lead-text">
-                        Dựa trên 5 giá trị cốt lõi "Tử tế - Lắng nghe - Chia sẻ - Học tập - Kỷ luật", mỗi sản phẩm của chúng tôi đều là tâm huyết của đội ngũ giảng viên cùng với óc sáng tạo và tinh thần đoàn kết.
+                        Chúng tôi tin rằng việc học tiếng Anh không chỉ dừng lại ở điểm số, mà là một hành trình khám phá, giúp bạn phát triển tư duy, phản xạ ngôn ngữ và tự tin ứng dụng vào học tập, công việc và cuộc sống.
                     </p>
                     <img src="images/khoahoc1.jpg" alt="Môi trường học tập tại Tiếng Anh Fighter" class="img-fluid rounded mb-4">
                     
+                    <h3>Sứ mệnh của chúng tôi</h3>
+                    <p>Với phương châm "Học là phải dùng được", Tiếng Anh Fighter ra đời với sứ mệnh mang đến một môi trường học tập hiện đại, thực tiễn và truyền cảm hứng. Chúng tôi không ngừng nâng cao chất lượng dịch vụ bằng cách ứng dụng công nghệ và đổi mới phương pháp giảng dạy để đáp ứng mọi nhu cầu ngày càng cao của học viên.</p>
+                    
                     <h3>Lĩnh vực hoạt động chính:</h3>
                     <ul>
-                        <li>Đào tạo các khóa học tiếng Anh trực tuyến và trực tiếp.</li>
+                        <li>Đào tạo và luyện thi các chứng chỉ quốc tế: IELTS, TOEIC,...</li>
+                        <li>Các khóa học tiếng Anh giao tiếp, tiếng Anh cho người đi làm.</li>
                         <li>Biên soạn sách và các tài liệu học tập độc quyền.</li>
-                        <li>Tổ chức thi thử và các sự kiện học thuật.</li>
+                        <li>Tổ chức thi thử và các sự kiện học thuật cộng đồng.</li>
                     </ul>
-                    <p>Với phương châm đặt khách hàng làm trung tâm, chúng tôi luôn không ngừng nâng cao chất lượng sản phẩm dịch vụ bằng cách ứng dụng công nghệ để có thể đáp ứng được mọi nhu cầu ngày càng cao của khách hàng.</p>
                 </div>
 
-                <div class="values-section" data-aos="fade-up">
+                <div class="about-post-section values-section" data-aos="fade-up">
+                    <h2>Giá trị cốt lõi</h2>
                      <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-4 mb-3">
                             <div class="value-card">
                                 <div class="value-icon"><i class="fas fa-users"></i></div>
-                                <h4>Về Chúng Tôi</h4>
-                                <p>Hành trình thắp lửa, chắp cánh ước mơ IELTS cho hàng triệu người Việt.</p>
+                                <h4>Tận tâm vì học viên</h4>
+                                <p>Luôn đặt sự tiến bộ và thành công của học viên làm trung tâm cho mọi hoạt động.</p>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4 mb-3">
                             <div class="value-card">
                                 <div class="value-icon"><i class="fas fa-book-open-reader"></i></div>
-                                <h4>Phương Pháp Đào Tạo</h4>
-                                <p>Phương pháp RIPL độc quyền, đề cao tương tác và thực hành liên tục.</p>
+                                <h4>Phương pháp vượt trội</h4>
+                                <p>Phương pháp RIPL độc quyền, đề cao tương tác và thực hành liên tục để tối ưu hiệu quả.</p>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4 mb-3">
                              <div class="value-card">
                                 <div class="value-icon"><i class="fas fa-chalkboard-user"></i></div>
-                                <h4>Đội Ngũ Giảng Viên</h4>
-                                <p>Những người "thầy" tài năng, tâm huyết và luôn truyền cảm hứng.</p>
+                                <h4>Đội ngũ chuyên môn</h4>
+                                <p>Những người "thầy" tài năng, tâm huyết và luôn là người truyền cảm hứng bất tận.</p>
                             </div>
                         </div>
                      </div>
                 </div>
-
-                <div class="about-post" data-aos="fade-up">
+                
+                <div class="about-post-section" data-aos="fade-up">
                     <h2>Hành trình phát triển</h2>
-                    <p>Trải qua 17 năm hình thành và phát triển, Tiếng Anh Fighter đã nâng tổng số lên hơn 150 chi nhánh đào tạo tại khắp các tỉnh thành trên toàn quốc, đào tạo thành công hơn 1.000.000 học viên.</p>
-                    <ul>
-                        <li>Hệ thống giáo dục Anh ngữ uy tín hàng đầu tại Việt Nam với các chương trình học chuẩn quốc tế.</li>
-                        <li>Áp dụng công nghệ hiện đại và Hệ thống quản lý học tập trực tuyến (LMS) hàng đầu thế giới.</li>
-                        <li>Tiên phong với sứ mệnh "Giúp hàng triệu người Việt Nam giỏi tiếng Anh", trở thành nơi thắp sáng tiềm năng cho hàng triệu học viên.</li>
-                    </ul>
+                    <div class="timeline-section">
+                        <div class="timeline-item" data-aos="fade-right">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <p class="year">2008</p>
+                                <h5>Thành lập</h5>
+                                <p>Tiếng Anh Fighter ra đời với cơ sở đầu tiên tại Hà Nội, mang trong mình khát vọng thay đổi cách học tiếng Anh truyền thống.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item" data-aos="fade-left">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <p class="year">2015</p>
+                                <h5>Mở rộng chi nhánh</h5>
+                                <p>Phát triển hệ thống chi nhánh tại các thành phố lớn, đưa phương pháp học hiệu quả đến với hàng ngàn học viên.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item" data-aos="fade-right">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <p class="year">2020</p>
+                                <h5>Chuyển đổi số</h5>
+                                <p>Tiên phong ứng dụng công nghệ, ra mắt hệ thống học tập trực tuyến (LMS), giúp học viên học tập mọi lúc, mọi nơi.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item" data-aos="fade-left">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <p class="year">Hiện tại</p>
+                                <h5>Khẳng định vị thế</h5>
+                                <p>Trở thành một trong những hệ thống Anh ngữ uy tín hàng đầu, đào tạo thành công hơn 1.000.000 học viên trên toàn quốc.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                 <div class="welcome-img text-center" data-aos="fade-up">
+                
+                <div class="text-center" data-aos="fade-up">
                     <img src="images/anh1.png" alt="Đội ngũ Tiếng Anh Fighter" class="img-fluid rounded">
                 </div>
             </div>
@@ -64,7 +305,7 @@
                 <div class="sidebar-sticky">
                     <div class="sidebar-widget" data-aos="fade-up" data-aos-delay="200">
                         <h4>Tìm kiếm nhanh</h4>
-                        <form class="search-form" method="GET" action="index.php">
+                        <form class="search-form d-flex" method="GET" action="index.php">
                             <input type="hidden" name="nav" value="khoahoc">
                             <input type="text" name="search" class="form-control" placeholder="Tìm khóa học, bài viết...">
                             <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
@@ -94,14 +335,8 @@
                     
                     <div class="sidebar-widget" data-aos="fade-up" data-aos-delay="400">
                         <h4>Đăng ký tư vấn</h4>
-                        <div class="advertise-card">
-                            <img src="https://vietop.edu.vn/wp-content/uploads/2025/09/popup-back-to-school.jpg" alt="Quảng cáo">
-                             <div class="advertise-content">
-                                <h5>Nhận lộ trình học miễn phí!</h5>
-                                <p>Để lại thông tin để được các chuyên gia của chúng tôi tư vấn lộ trình học phù hợp nhất.</p>
-                                <a href="#consult-form" class="btn btn-success w-100">Đăng Ký Ngay</a>
-                            </div>
-                        </div>
+                        <p>Để lại thông tin để được các chuyên gia của chúng tôi tư vấn lộ trình học phù hợp nhất.</p>
+                        <a href="#consult-form" class="btn btn-success w-100">Đăng Ký Ngay</a>
                     </div>
                 </div>
             </div>
@@ -110,215 +345,3 @@
 </div>
 
 <?php include('pages/main/form-dk.php'); ?>
-
-
-<style>
-    /* Hero Banner */
-    .about-hero-section {
-        position: relative;
-        height: 400px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        text-align: center;
-        overflow: hidden;
-        background-image: linear-gradient(103deg, #8bf398 0%, #21d157 100%);
-    }
-    .parallax-bg {
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%;
-        height: 120%; /* Lớn hơn để có không gian di chuyển */
-        background-size: cover;
-        background-position: center;
-        z-index: -1;
-        filter: brightness(0.6);
-    }
-    .hero-content h1 {
-        font-size: 48px;
-        font-weight: 700;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-    }
-    .hero-content p {
-        font-size: 20px;
-        opacity: 0.9;
-    }
-
-    /* Bố cục chính */
-    .about-container {
-        margin: 0px auto;
-        padding: 20px 0;
-    }
-
-    /* Nội dung bài viết */
-    .about-post {
-        background-color: #fff;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 5px 25px rgba(0,0,0,0.05);
-        margin-bottom: 30px;
-    }
-    .about-post h2 {
-        font-size: 28px;
-        font-weight: 600;
-        color: #0db33b;
-        margin-bottom: 20px;
-    }
-    .about-post h3 {
-        font-size: 20px;
-        font-weight: 600;
-        margin-top: 25px;
-        margin-bottom: 15px;
-    }
-    .about-post p, .about-post li {
-        font-size: 16px;
-        line-height: 1.8;
-        color: #555;
-    }
-    .about-post ul {
-        padding-left: 20px;
-    }
-    .lead-text {
-        font-size: 18px !important;
-        font-style: italic;
-        color: #333 !important;
-    }
-
-    /* Thẻ giá trị cốt lõi */
-    .values-section {
-        margin-bottom: 30px;
-    }
-    .value-card {
-        background-color: #fff;
-        padding: 25px;
-        border-radius: 10px;
-        text-align: center;
-        height: 100%;
-        border: 1px solid #eee;
-        transition: all 0.3s ease;
-    }
-    .value-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        border-color: #0db33b;
-    }
-    .value-icon {
-        font-size: 36px;
-        color: #0db33b;
-        margin-bottom: 15px;
-    }
-    .value-card h4 {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 10px;
-    }
-    .value-card p {
-        font-size: 15px;
-        color: #666;
-        line-height: 1.6;
-    }
-
-    /* Sidebar */
-    .sidebar-sticky {
-        position: -webkit-sticky; /* Dành cho Safari */
-        position: sticky;
-        top: 100px; /* Vị trí bắt đầu dính lại */
-    }
-    .sidebar-widget {
-        background-color: #fff;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 5px 25px rgba(0,0,0,0.05);
-        margin-bottom: 25px;
-    }
-    .sidebar-widget h4 {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 20px;
-        position: relative;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #eee;
-    }
-     .sidebar-widget h4::after {
-        content: '';
-        position: absolute;
-        bottom: -1px;
-        left: 0;
-        width: 50px;
-        height: 2px;
-        background-color: #0db33b;
-    }
-
-    .search-form {
-        display: flex;
-        position: relative;
-    }
-    .search-form input {
-        padding-right: 45px;
-    }
-    .search-form button {
-        position: absolute;
-        right: 0;
-        top: 0;
-        height: 100%;
-        width: 45px;
-        border: none;
-        background: transparent;
-        color: #0db33b;
-        cursor: pointer;
-    }
-
-    .course-item-sidebar a {
-        display: flex;
-        gap: 15px;
-        align-items: center;
-        text-decoration: none;
-        margin-bottom: 15px;
-        padding: 10px;
-        border-radius: 8px;
-        transition: background-color 0.3s ease;
-    }
-    .course-item-sidebar a:hover {
-        background-color: #f8f9fa;
-    }
-    .course-item-sidebar img {
-        width: 70px;
-        height: 70px;
-        border-radius: 8px;
-        object-fit: cover;
-    }
-    .course-item-sidebar p {
-        font-size: 15px;
-        color: #333;
-        font-weight: 500;
-        margin: 0;
-    }
-    
-    .advertise-card {
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    .advertise-content {
-        padding: 20px;
-    }
-    .advertise-content h5 {
-        font-weight: 600;
-    }
-    .advertise-content p {
-        font-size: 14px;
-        margin-bottom: 15px;
-    }
-</style>
-
-<script>
-    // Hiệu ứng Parallax cho banner
-    window.addEventListener('scroll', function() {
-        const parallax = document.querySelector('.parallax-bg');
-        if (parallax) {
-            let offset = window.pageYOffset;
-            parallax.style.transform = 'translateY(' + offset * 0.3 + 'px)';
-        }
-    });
-</script>

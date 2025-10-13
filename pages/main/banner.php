@@ -52,7 +52,7 @@
 
 <style>
     .differentiators-section {
-        padding: 50px 0;
+        padding: 20px 0;
         background-color: #fff;
     }
     .section-header{

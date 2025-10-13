@@ -9,36 +9,39 @@ $id_hocvien = $_SESSION['id_hocvien'];
 // --- Xử lý bộ lọc ---
 $filter = $_GET['filter'] ?? 'all';
 $where_clause = '';
+// Chỉ hiển thị các khóa học đã được xác nhận thanh toán và đã được xếp lớp
+$base_condition = "dk.trang_thai = 'da xac nhan' AND dk.id_lop IS NOT NULL";
+
 switch ($filter) {
     case 'active':
-        $where_clause = "AND dk.trang_thai = 'da xac nhan'";
+        // Đang học: là các lớp có trạng thái 'dang hoc'
+        $where_clause = "AND lh.trang_thai = 'dang hoc'";
         break;
-    case 'pending':
-        $where_clause = "AND dk.trang_thai = 'cho xac nhan'";
+    case 'completed':
+        // Đã hoàn thành: là các lớp có trạng thái 'da xong'
+        $where_clause = "AND lh.trang_thai = 'da xong'";
         break;
-    case 'cancelled':
-        $where_clause = "AND (dk.trang_thai = 'da huy' OR dk.trang_thai = 'bi tu choi')";
-        break;
+    // 'all' sẽ không thêm điều kiện nào khác
 }
 
-// --- CẬP NHẬT CÂU TRUY VẤN ---
-// Lấy tên giảng viên từ bảng lop_hoc -> giangvien thay vì từ khoahoc
+// --- CẬP NHẬT CÂU TRUY VẤN: Lấy thêm ten_lop ---
 $sql = "
     SELECT 
         dk.id_dangky, 
         dk.id_khoahoc, 
         kh.ten_khoahoc, 
         kh.hinh_anh,
+        lh.ten_lop,
         gv.ten_giangvien, 
         dk.ngay_dangky, 
-        dk.trang_thai, 
-        dk.id_lop
+        lh.trang_thai AS trang_thai_lop,
+        td.tien_do
     FROM dangkykhoahoc dk
     JOIN khoahoc kh ON dk.id_khoahoc = kh.id_khoahoc
     LEFT JOIN lop_hoc lh ON dk.id_lop = lh.id_lop
     LEFT JOIN giangvien gv ON lh.id_giangvien = gv.id_giangvien
-    WHERE dk.id_hocvien = ? 
-    $where_clause
+    LEFT JOIN tien_do_hoc_tap td ON dk.id_hocvien = td.id_hocvien AND kh.id_khoahoc = td.id_khoahoc AND dk.id_lop = td.id_lop
+    WHERE dk.id_hocvien = ? AND $base_condition $where_clause
     ORDER BY dk.ngay_dangky DESC
 ";
 $stmt = $conn->prepare($sql);
@@ -46,31 +49,152 @@ $stmt->bind_param("i", $id_hocvien);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Hàm để tạo badge trạng thái
-function get_status_badge($status) {
-    switch ($status) {
-        case 'da xac nhan':
-            return '<span class="badge bg-success">Đang học</span>';
-        case 'cho xac nhan':
-            return '<span class="badge bg-warning text-dark">Chờ thanh toán</span>';
-        case 'da huy':
-            return '<span class="badge bg-secondary">Đã hủy</span>';
-        case 'bi tu choi':
-            return '<span class="badge bg-danger">Bị từ chối</span>';
-        default:
-            return '<span class="badge bg-light text-dark">' . htmlspecialchars($status) . '</span>';
+// Hàm để tạo badge trạng thái mới
+function get_status_badge_new($status) {
+    if ($status === 'dang hoc') {
+        return '<span class="badge status-badge status-active">Đang học</span>';
+    } elseif ($status === 'da xong') {
+        return '<span class="badge status-badge status-completed">Đã hoàn thành</span>';
+    } else {
+        // Fallback cho trường hợp chưa có trạng thái lớp
+        return '<span class="badge status-badge status-pending">Chờ cập nhật</span>';
     }
 }
 ?>
 
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .filter-buttons {
+        background: #fff;
+        padding: 10px;
+        border-radius: 50px;
+        display: inline-flex;
+        box-shadow: var(--shadow);
+    }
+    .filter-buttons .btn {
+        border-radius: 50px;
+        font-weight: 500;
+        border: none;
+        padding: 8px 20px;
+    }
+    .filter-buttons .btn.active {
+        background-color: var(--primary-color);
+        color: white;
+        box-shadow: 0 4px 10px rgba(13, 179, 59, 0.3);
+    }
+
+    .my-course-card {
+        background-color: #fff;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        opacity: 0;
+        animation: fadeInUp 0.5s ease-out forwards;
+        border: 1px solid var(--border-color);
+    }
+    .my-course-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-hover);
+    }
+    
+    .card-image {
+        position: relative;
+    }
+    .card-image img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        border-top-left-radius: var(--border-radius);
+        border-top-right-radius: var(--border-radius);
+    }
+    .card-status {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+    .status-badge {
+        font-size: 13px;
+        padding: 6px 12px;
+        font-weight: 600;
+        border-radius: 50px;
+    }
+    .status-active { background-color: #d1e7dd; color: #0f5132; }
+    .status-completed { background-color: #e2e3e5; color: #41464b; }
+    .status-pending { background-color: #fff3cd; color: #664d03; }
+
+    .card-content {
+        padding: 20px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .card-content h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+    .card-content .course-meta {
+        font-size: 14px;
+        color: var(--gray-text);
+        margin-bottom: 7px;
+        flex-grow: 1; /* Đẩy thanh tiến độ xuống dưới */
+    }
+    .card-content .course-meta p {
+        margin-bottom: 5px;
+    }
+    .card-content .course-meta i {
+        margin-right: 8px;
+        color: var(--primary-color);
+        width: 16px;
+        text-align: center;
+    }
+    
+    .progress-info {
+        margin-top: 5px;
+    }
+    .progress-info .info {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        margin-bottom: 5px;
+        color: var(--gray-text);
+    }
+    
+    .card-actions {
+        padding: 20px;
+        border-top: 1px solid var(--border-color);
+    }
+    .btn-primary-custom {
+        background-color: var(--primary-color);
+        color: #fff;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    .btn-primary-custom:hover {
+        background-color: var(--primary-color-dark);
+        color: #fff;
+        transform: translateY(-2px);
+    }
+</style>
 <div class="content-pane">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Tất cả khóa học</h2>
-        <div class="filter-buttons">
-            <a href="?nav=khoahoc&filter=all" class="btn btn-sm <?php echo ($filter == 'all') ? 'btn-primary' : 'btn-outline-primary'; ?>">Tất cả</a>
-            <a href="?nav=khoahoc&filter=active" class="btn btn-sm <?php echo ($filter == 'active') ? 'btn-success' : 'btn-outline-success'; ?>">Đang học</a>
-            <a href="?nav=khoahoc&filter=pending" class="btn btn-sm <?php echo ($filter == 'pending') ? 'btn-warning' : 'btn-outline-warning'; ?>">Chờ thanh toán</a>
-            <a href="?nav=khoahoc&filter=cancelled" class="btn btn-sm <?php echo ($filter == 'cancelled') ? 'btn-outline-secondary' : 'btn-outline-secondary'; ?>">Đã hủy</a>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+        <h2>Khóa học của tôi</h2>
+        <div class="filter-buttons mt-3 mt-md-0">
+            <a href="?nav=khoahoc&filter=all" class="btn <?php echo ($filter == 'all') ? 'active' : 'btn-light'; ?>">Tất cả</a>
+            <a href="?nav=khoahoc&filter=active" class="btn <?php echo ($filter == 'active') ? 'active' : 'btn-light'; ?>">Đang học</a>
+            <a href="?nav=khoahoc&filter=completed" class="btn <?php echo ($filter == 'completed') ? 'active' : 'btn-light'; ?>">Đã hoàn thành</a>
         </div>
     </div>
 
@@ -80,30 +204,42 @@ function get_status_badge($status) {
                 <?php 
                 $index = 0;
                 while ($row = $result->fetch_assoc()): 
+                    $progress = $row['tien_do'] ?? 0;
                 ?>
                     <div class="col-md-6 col-lg-4">
-                        <div class="my-course-card <?php echo ($row['trang_thai'] == 'da huy' || $row['trang_thai'] == 'bi tu choi') ? 'cancelled' : ''; ?>" style="animation-delay: <?php echo $index * 100; ?>ms;">
+                        <div class="my-course-card" style="animation-delay: <?php echo $index * 100; ?>ms;">
                             <div class="card-image">
-                                <img src="../<?php echo htmlspecialchars($row['hinh_anh']); ?>" alt="<?php echo htmlspecialchars($row['ten_khoahoc']); ?>">
+                                <a href="dashboard.php?nav=lichhoc&id_khoahoc=<?php echo $row['id_khoahoc']; ?>">
+                                    <img src="../<?php echo htmlspecialchars($row['hinh_anh']); ?>" alt="<?php echo htmlspecialchars($row['ten_khoahoc']); ?>">
+                                </a>
                                 <div class="card-status">
-                                    <?php echo get_status_badge($row['trang_thai']); ?>
+                                    <?php echo get_status_badge_new($row['trang_thai_lop']); ?>
                                 </div>
                             </div>
                             <div class="card-content">
                                 <h3><?php echo htmlspecialchars($row['ten_khoahoc']); ?></h3>
-                                <p class="instructor"><i class="fa-solid fa-chalkboard-user"></i> <?php echo htmlspecialchars($row['ten_giangvien'] ?? 'Chưa xếp lớp'); ?></p>
-                                <p class="date"><i class="fa-solid fa-calendar-day"></i> Ngày đăng ký: <?php echo date("d/m/Y", strtotime($row['ngay_dangky'])); ?></p>
+                                <div class="course-meta">
+                                    <p><i class="fa-solid fa-school"></i> <strong>Lớp:</strong> <?php echo htmlspecialchars($row['ten_lop'] ?? 'N/A'); ?></p>
+                                    <p><i class="fa-solid fa-chalkboard-user"></i> <strong>GV:</strong> <?php echo htmlspecialchars($row['ten_giangvien'] ?? 'Chưa xếp'); ?></p>
+                                </div>
+                                
+                                <div class="progress-info">
+                                    <div class="info">
+                                        <span>Tiến độ</span>
+                                        <strong><?php echo round($progress); ?>%</strong>
+                                    </div>
+                                    <div class="progress" style="height: 8px;" role="progressbar" aria-valuenow="<?php echo $progress; ?>">
+                                        <div class="progress-bar" style="width: <?php echo $progress; ?>%;"></div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="card-actions">
-                                <?php if ($row['trang_thai'] === 'da xac nhan' && $row['id_lop'] !== null): ?>
-                                    <a href="dashboard.php?nav=lichhoc&id_khoahoc=<?php echo $row['id_khoahoc']; ?>" class="btn btn-primary-custom w-100">Xem lịch học</a>
-                                <?php elseif ($row['trang_thai'] === 'da xac nhan' && $row['id_lop'] === null): ?>
-                                     <span class="text-muted small d-block text-center">Chờ xếp lớp...</span>
-                                <?php elseif ($row['trang_thai'] === 'cho xac nhan'): ?>
-                                    <a href="../pages/main/thanhtoan/checkout.php?dangky_id=<?php echo $row['id_dangky']; ?>" class="btn btn-success w-100 mb-2">Thanh toán ngay</a>
-                                    <a href="modules/cancel_registration.php?id=<?php echo $row['id_dangky']; ?>" class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('Bạn có chắc chắn muốn hủy đăng ký này?');">Hủy đăng ký</a>
+                                <?php if ($row['trang_thai_lop'] === 'dang hoc'): ?>
+                                    <a href="dashboard.php?nav=lichhoc&id_khoahoc=<?php echo $row['id_khoahoc']; ?>" class="btn-primary-custom w-100">Lịch học</a>
+                                <?php elseif ($row['trang_thai_lop'] === 'da xong'): ?>
+                                    <a href="dashboard.php?nav=bangdiem" class="btn btn-outline-secondary w-100">Xem lại kết quả</a>
                                 <?php else: ?>
-                                    <a href="../index.php?nav=course_detail&course_id=<?php echo $row['id_khoahoc']; ?>" class="btn btn-secondary w-100">Đăng ký lại</a>
+                                     <span class="text-muted d-block text-center">Chưa có hoạt động</span>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -114,27 +250,10 @@ function get_status_badge($status) {
                 ?>
             </div>
         <?php else: ?>
-            <div class="alert alert-info text-center">Không có khóa học nào phù hợp với bộ lọc đã chọn.</div>
+            <div class="alert alert-light text-center mt-4">
+                 <i class="fa-solid fa-box-open fa-3x mb-3 text-muted"></i>
+                 <p class="mb-0">Không có khóa học nào trong mục này.</p>
+            </div>
         <?php endif; ?>
     </div>
 </div>
-
-<style>
-    /* CSS được giữ nguyên */
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .filter-buttons .btn { margin-left: 5px; font-weight: 500; }
-    .my-course-card { background-color: #fff; border-radius: var(--border-radius); box-shadow: var(--shadow); display: flex; flex-direction: column; height: 100%; transition: transform 0.3s ease, box-shadow 0.3s ease; opacity: 0; animation: fadeInUp 0.5s ease-out forwards; }
-    .my-course-card:hover { transform: translateY(-5px); }
-    .my-course-card.cancelled { opacity: 0.7; animation: none; }
-    .my-course-card.cancelled:hover { opacity: 1; }
-    .card-image { position: relative; }
-    .card-image img { width: 100%; height: 180px; object-fit: cover; border-top-left-radius: var(--border-radius); border-top-right-radius: var(--border-radius); }
-    .card-status { position: absolute; top: 15px; right: 15px; }
-    .card-content { padding: 20px; flex-grow: 1; }
-    .card-content h3 { font-size: 18px; font-weight: 600; margin-bottom: 10px; line-height: 1.4; min-height: 50px; }
-    .card-content p { font-size: 14px; color: var(--gray-text); margin-bottom: 8px; }
-    .card-content p i { margin-right: 8px; color: var(--primary-color); }
-    .card-actions { padding: 0 20px 20px 20px; border-top: 1px solid #f0f0f0; margin-top: auto; padding-top: 20px; }
-    .btn-primary-custom { background-color: var(--primary-color); color: #fff; padding: 10px 15px; border-radius: 8px; font-weight: 500; text-decoration: none; display: inline-block; transition: background-color 0.3s ease; text-align: center; }
-    .btn-primary-custom:hover { background-color: var(--primary-color-dark); color: #fff; }
-</style>

@@ -1,4 +1,4 @@
-<div class="course-section">
+<div class="course-section section-p20">
     <div class="section-header" data-aos="fade-down">
         <h2 class="introduce-title">TẤT CẢ KHÓA HỌC</h2>
         <p class="section-subtitle">Khám phá các khóa học được thiết kế dành riêng cho bạn</p>
@@ -84,12 +84,6 @@
         font-weight: 700;
         margin-bottom: 10px;
     }
-
-    .section-subtitle {
-        font-size: 18px;
-        color: #666;
-    }
-
     .course-grid {
         display: flex;
         flex-wrap: wrap;

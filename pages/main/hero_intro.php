@@ -7,21 +7,21 @@
                         <span class="brand-name">Tiếng Anh Fighter</span><br>
                         Học là phải dùng được!
                     </h1>
-                    <p class="hero-description">Việc học tiếng Anh không chỉ dừng lại ở điểm số, mà là hành trình giúp bạn phát triển tư duy, phản xạ ngôn ngữ và ứng dụng hiệu quả vào học tập, công việc và cuộc sống thực tế.</p>
+                    <p class="hero-description">Việc học tiếng anh không chỉ dừng lại ở điểm số, mà là hành trình giúp bạn phát triển tư duy, phản xạ ngôn ngữ và ứng dụng hiệu quả vào học tập, công việc và cuộc sống thực tế.</p>
                     <p class="hero-description">Trung tâm mang đến môi trường học hiện đại – nơi học viên rèn luyện toàn diện với:</p>
-
                     <ul class="features-list">
                         <li class="feature-item" data-aos="fade-right" data-aos-delay="200">
+                        <span>
                             <i class="fas fa-check-circle feature-icon"></i>
-                            <span>Phương pháp E.M.P.O.W.E.R – Tăng phản xạ, tư duy phản biện</span>
+                            Phương pháp E.M.P.O.W.E.R – Tăng phản xạ, tư duy phản biện.</span>
                         </li>
                         <li class="feature-item" data-aos="fade-right" data-aos-delay="300">
-                            <i class="fas fa-check-circle feature-icon"></i>
-                            <span>Nền tảng công nghệ toàn diện và đột phá.</span>
+
+                            <span> <i class="fas fa-check-circle feature-icon"></i>Nền tảng công nghệ toàn diện và đột phá.</span>
                         </li>
                         <li class="feature-item" data-aos="fade-right" data-aos-delay="400">
-                            <i class="fas fa-check-circle feature-icon"></i>
-                            <span>Đội ngũ giáo viên chuyên môn cao và tận tâm.</span>
+
+                            <span><i class="fas fa-check-circle feature-icon"></i>Đội ngũ giáo viên chuyên môn cao và tận tâm.</span>
                         </li>
                     </ul>
 
@@ -48,7 +48,7 @@
         /* THAY ĐỔI 1: Đổi màu nền sang xanh nhạt của dự án */
         background-color: #d1f8e2;
         overflow: hidden;
-        padding: 50px 0;
+        padding: 40px 0;
     }
 
     .intro-content {
@@ -155,11 +155,32 @@
         }
 
         .feature-item {
-            justify-content: center;
+            text-align: left;
+
         }
 
         .image-grid {
             margin-top: 40px;
+        }
+    }
+
+    @media (max-width: 551px) {
+         .hero-intro-section {
+            text-align: center;
+        }
+
+
+        .image-grid {
+            margin-top: 40px;
+        }
+        .hero-title {
+            font-size: 30px;
+        }
+        .hero-description{
+            font-size: 15px;
+        }
+        .feature-item {
+            font-size: 15px;
         }
     }
 </style>

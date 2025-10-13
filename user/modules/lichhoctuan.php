@@ -28,15 +28,17 @@ $next_week_dt = (clone $start_of_week_dt)->modify('+1 week');
 // --- Lấy dữ liệu lịch học cho tuần đã chọn ---
 
 $sql_schedule = "
-    SELECT 
-        lh.ngay_hoc, lh.gio_bat_dau, lh.gio_ket_thuc, lh.phong_hoc,
-        l.ten_lop, kh.ten_khoahoc
-    FROM lichhoc lh
-    JOIN lop_hoc l ON lh.id_lop = l.id_lop
-    JOIN khoahoc kh ON l.id_khoahoc = kh.id_khoahoc
-    JOIN dangkykhoahoc dk ON l.id_lop = dk.id_lop
-    WHERE dk.id_hocvien = ? AND lh.ngay_hoc BETWEEN ? AND ?
-    ORDER BY lh.ngay_hoc, lh.gio_bat_dau ASC
+  SELECT 
+    lh.ngay_hoc, lh.gio_bat_dau, lh.gio_ket_thuc, lh.phong_hoc,
+    l.ten_lop, kh.ten_khoahoc
+FROM lichhoc lh
+JOIN lop_hoc l ON lh.id_lop = l.id_lop
+JOIN khoahoc kh ON l.id_khoahoc = kh.id_khoahoc
+JOIN dangkykhoahoc dk ON l.id_lop = dk.id_lop
+WHERE dk.id_hocvien = ? 
+    AND dk.trang_thai = 'da xac nhan'
+    AND lh.ngay_hoc BETWEEN ? AND ?
+ORDER BY lh.ngay_hoc, lh.gio_bat_dau ASC
 ";
 
 $stmt = $conn->prepare($sql_schedule);
@@ -46,8 +48,13 @@ $result = $stmt->get_result();
 
 // Sắp xếp các buổi học vào mảng theo ngày trong tuần
 $schedule_by_day = [
-    'Monday' => [], 'Tuesday' => [], 'Wednesday' => [], 'Thursday' => [],
-    'Friday' => [], 'Saturday' => [], 'Sunday' => []
+    'Monday' => [],
+    'Tuesday' => [],
+    'Wednesday' => [],
+    'Thursday' => [],
+    'Friday' => [],
+    'Saturday' => [],
+    'Sunday' => []
 ];
 
 while ($row = $result->fetch_assoc()) {
@@ -59,16 +66,72 @@ $stmt->close();
 
 <style>
     /* CSS cho bảng lịch học và các item (giữ nguyên) */
-    .weekly-schedule-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
-    .weekly-schedule-table th, .weekly-schedule-table td { border: 1px solid #dee2e6; padding: 8px; text-align: left; vertical-align: top; }
-    .weekly-schedule-table thead th { background-color: #f8f9fa; text-align: center; font-weight: 600; }
-    .schedule-day { min-height: 150px; }
-    .schedule-item { background-color: #e7f7ec; border-left: 4px solid #0db33b; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 14px; animation: fadeInUp 0.5s ease-out forwards; opacity: 0; }
-    .schedule-item p { margin: 0 0 5px 0; }
-    .schedule-item .time { font-weight: bold; color: #0a8a2c; }
-    .schedule-item .course { font-style: italic; }
-    .no-schedule { color: #6c757d; font-size: 14px; text-align: center; padding-top: 20px; }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    .weekly-schedule-table {
+        border-collapse: collapse;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .weekly-schedule-table th,
+    .weekly-schedule-table td {
+        border: 1px solid #dee2e6;
+        padding: 8px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .weekly-schedule-table thead th {
+        background-color: #f8f9fa;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .schedule-day {
+        min-height: 150px;
+    }
+
+    .schedule-item {
+        background-color: #e7f7ec;
+        border-left: 4px solid #0db33b;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        font-size: 14px;
+        animation: fadeInUp 0.5s ease-out forwards;
+        opacity: 0;
+    }
+
+    .schedule-item p {
+        margin: 0 0 5px 0;
+    }
+
+    .schedule-item .time {
+        font-weight: bold;
+        color: #0a8a2c;
+    }
+
+    .schedule-item .course {
+        font-style: italic;
+    }
+
+    .no-schedule {
+        color: #6c757d;
+        font-size: 14px;
+        text-align: center;
+        padding-top: 20px;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
     /* CSS mới cho thanh điều hướng */
     .week-navigation {
@@ -81,6 +144,7 @@ $stmt->close();
         border-radius: var(--border-radius);
         box-shadow: var(--shadow);
     }
+
     .week-navigation .nav-buttons a {
         padding: 8px 15px;
         border: 1px solid var(--border-color);
@@ -90,16 +154,19 @@ $stmt->close();
         font-weight: 500;
         transition: all 0.2s ease;
     }
+
     .week-navigation .nav-buttons a:hover {
         background-color: var(--primary-color);
         color: #fff;
         border-color: var(--primary-color);
     }
+
     .week-navigation .date-picker-group {
         display: flex;
         align-items: center;
         gap: 10px;
     }
+
     .week-navigation .form-control-sm {
         max-width: 150px;
     }
@@ -124,12 +191,18 @@ $stmt->close();
             <a href="?nav=lichhoctuan&date=<?php echo $next_week_dt->format('Y-m-d'); ?>">Tuần sau <i class="fa-solid fa-chevron-right"></i></a>
         </div>
     </div>
-    
+
     <div class="table-responsive">
         <table class="weekly-schedule-table">
             <thead>
                 <tr>
-                    <th>Thứ Hai</th><th>Thứ Ba</th><th>Thứ Tư</th><th>Thứ Năm</th><th>Thứ Sáu</th><th>Thứ Bảy</th><th>Chủ Nhật</th>
+                    <th>Thứ Hai</th>
+                    <th>Thứ Ba</th>
+                    <th>Thứ Tư</th>
+                    <th>Thứ Năm</th>
+                    <th>Thứ Sáu</th>
+                    <th>Thứ Bảy</th>
+                    <th>Chủ Nhật</th>
                 </tr>
             </thead>
             <tbody>
@@ -151,7 +224,7 @@ $stmt->close();
                                 <?php endif; ?>
                             </div>
                         </td>
-                    <?php endforeach; ?>
+                    <?php endforeach; ?>    
                 </tr>
             </tbody>
         </table>
@@ -159,16 +232,16 @@ $stmt->close();
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const datePicker = document.getElementById('date-picker');
-    if(datePicker) {
-        datePicker.addEventListener('change', function() {
-            const selectedDate = this.value;
-            if(selectedDate) {
-                // Tự động chuyển đến trang lịch học tuần của ngày đã chọn
-                window.location.href = `?nav=lichhoctuan&date=${selectedDate}`;
-            }
-        });
-    }
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        const datePicker = document.getElementById('date-picker');
+        if (datePicker) {
+            datePicker.addEventListener('change', function() {
+                const selectedDate = this.value;
+                if (selectedDate) {
+                    // Tự động chuyển đến trang lịch học tuần của ngày đã chọn
+                    window.location.href = `?nav=lichhoctuan&date=${selectedDate}`;
+                }
+            });
+        }
+    });
 </script>
