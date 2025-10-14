@@ -1,7 +1,6 @@
 <?php
-// Kết nối CSDL và Session đã được khởi tạo từ file dashboard.php
+// user/modules/lichhoc.php
 
-// Kiểm tra nếu `id_khoahoc` được truyền qua URL
 if (!isset($_GET['id_khoahoc'])) {
     die("Không tìm thấy thông tin khóa học.");
 }
@@ -33,7 +32,7 @@ $sql_schedule = "
     FROM lichhoc lh
     JOIN lop_hoc l ON lh.id_lop = l.id_lop
     JOIN dangkykhoahoc dk ON l.id_lop = dk.id_lop
-    WHERE dk.id_hocvien = ? AND dk.id_khoahoc = ?
+    WHERE dk.id_hocvien = ? AND dk.id_khoahoc = ? AND l.trang_thai = 'dang hoc'
     ORDER BY lh.ngay_hoc ASC, lh.gio_bat_dau ASC
 ";
 $stmt = $conn->prepare($sql_schedule);
@@ -43,15 +42,15 @@ $result = $stmt->get_result();
 ?>
 
 <div class="content-pane">
-    <h2>Lịch học: <?php echo htmlspecialchars($ten_khoahoc); ?></h2>
+    <h2 class="mb-4">Lịch học chi tiết: <?php echo htmlspecialchars($ten_khoahoc); ?></h2>
 
     <div class="schedule-timeline">
         <?php if ($result->num_rows > 0): ?>
-            <?php 
+            <?php
             $index = 0; // Biến cho animation delay
-            while ($row = $result->fetch_assoc()): 
+            while ($row = $result->fetch_assoc()):
             ?>
-                <div class="timeline-item" style="animation-delay: <?php echo $index * 150; ?>ms;">
+                <div class="timeline-item" style="animation-delay: <?php echo $index * 100; ?>ms;">
                     <div class="timeline-dot"></div>
                     <div class="timeline-content">
                         <div class="timeline-header">
@@ -61,15 +60,22 @@ $result = $stmt->get_result();
                         <div class="timeline-body">
                             <p><strong>Lớp:</strong> <?php echo htmlspecialchars($row['ten_lop']); ?></p>
                             <p><strong>Phòng học:</strong> <?php echo htmlspecialchars($row['phong_hoc']); ?></p>
+
                             <?php if (!empty($row['ghi_chu'])): ?>
-                                <p class="note"><strong>Ghi chú:</strong> <?php echo htmlspecialchars($row['ghi_chu']); ?></p>
+                                <div class="note-container"
+                                    data-date="<?php echo $row['ngay_hoc']; ?>"
+                                    data-start="<?php echo $row['gio_bat_dau']; ?>"
+                                    data-end="<?php echo $row['gio_ket_thuc']; ?>"
+                                    style="display: none;">
+                                    <p class="note"><strong>Ghi chú:</strong> <a href="<?php echo htmlspecialchars($row['ghi_chu']); ?>"><?php echo htmlspecialchars($row['ghi_chu']); ?> </a> </p>
+                                </div>
                             <?php endif; ?>
                         </div>
                     </div>
                 </div>
-            <?php 
+            <?php
                 $index++;
-            endwhile; 
+            endwhile;
             ?>
         <?php else: ?>
             <div class="alert alert-info text-center">Lớp học của bạn cho khóa này chưa có lịch học. Vui lòng quay lại sau.</div>
@@ -83,6 +89,7 @@ $result = $stmt->get_result();
             opacity: 0;
             transform: translateX(-30px);
         }
+
         to {
             opacity: 1;
             transform: translateX(0);
@@ -104,7 +111,7 @@ $result = $stmt->get_result();
 
     .timeline-dot {
         position: absolute;
-        left: -42px; /* (30px padding + 3px border)/2 - 12px/2 */
+        left: -18px;
         top: 5px;
         width: 18px;
         height: 18px;
@@ -135,6 +142,7 @@ $result = $stmt->get_result();
         font-weight: 600;
         color: var(--primary-color-dark);
     }
+
     .timeline-header .time {
         font-size: 15px;
         color: var(--dark-text);
@@ -148,12 +156,46 @@ $result = $stmt->get_result();
 
     .timeline-body p.note {
         font-style: italic;
-        background-color: #e9ecef;
+        background-color: #fff3cd;
+        color: #664d03;
         padding: 8px 12px;
         border-radius: 6px;
+        border-left: 3px solid #ffc107;
     }
 
     .timeline-body i {
         margin-right: 8px;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const noteContainers = document.querySelectorAll('.note-container');
+
+        function checkNotesVisibility() {
+            const now = new Date();
+
+            noteContainers.forEach(container => {
+                const date = container.dataset.date;
+                const startTimeStr = container.dataset.start;
+                const endTimeStr = container.dataset.end;
+
+                // Tạo đối tượng Date từ chuỗi ngày và giờ
+                const startDateTime = new Date(`${date}T${startTimeStr}`);
+                const endDateTime = new Date(`${date}T${endTimeStr}`);
+
+                // So sánh thời gian hiện tại với thời gian bắt đầu và kết thúc
+                if (now >= startDateTime && now <= endDateTime) {
+                    container.style.display = 'block'; // Hiển thị ghi chú
+                } else {
+                    container.style.display = 'none'; // Ẩn ghi chú
+                }
+            });
+        }
+
+        // Chạy hàm kiểm tra ngay khi tải trang
+        checkNotesVisibility();
+        // Lặp lại việc kiểm tra mỗi 30 giây
+        setInterval(checkNotesVisibility, 30000);
+    });
+</script>

@@ -17,7 +17,7 @@ if (session_status() == PHP_SESSION_NONE) {
     <div class="header-right">
         <a href="../index.php" class="header-link" title="Quay về trang chủ">
             <i class="fa-solid fa-house"></i>
-            <span class="d-none d-md-inline">Trang chủ</span>
+            <span class="d-none d-md-inline"> Về trang chủ &nbsp; | </span>
         </a>
         <a href="./dashboard.php?nav=thongbao" class="header-link" title="Thông báo">
             <i class="fa-solid fa-bell"></i>

@@ -1,23 +1,18 @@
 <?php
 // user/modules/home.php
-
 if (!isset($_SESSION['id_hocvien'])) {
     die("Session không hợp lệ.");
 }
 $id_hocvien = $_SESSION['id_hocvien'];
 
-// --- Lấy dữ liệu cho các widget ---
-
-// 1. Lấy buổi học gần nhất sắp tới (chỉ từ các lớp đang học)
+// Lấy buổi học gần nhất sắp tới
 $sql_upcoming = "
     SELECT lh.ngay_hoc, lh.gio_bat_dau, l.ten_lop, kh.ten_khoahoc
     FROM lichhoc lh
-    JOIN lop_hoc l ON lh.id_lop = l.id_lop
-    JOIN khoahoc kh ON l.id_khoahoc = kh.id_khoahoc
+    JOIN lop_hoc l ON lh.id_lop = l.id_lop JOIN khoahoc kh ON l.id_khoahoc = kh.id_khoahoc
     JOIN dangkykhoahoc dk ON l.id_lop = dk.id_lop
     WHERE dk.id_hocvien = ? AND lh.ngay_hoc >= CURDATE() AND l.trang_thai = 'dang hoc'
-    ORDER BY lh.ngay_hoc ASC, lh.gio_bat_dau ASC
-    LIMIT 1
+    ORDER BY lh.ngay_hoc ASC, lh.gio_bat_dau ASC LIMIT 1
 ";
 $stmt_upcoming = $conn->prepare($sql_upcoming);
 $stmt_upcoming->bind_param("i", $id_hocvien);
@@ -25,7 +20,7 @@ $stmt_upcoming->execute();
 $upcoming_class = $stmt_upcoming->get_result()->fetch_assoc();
 $stmt_upcoming->close();
 
-// 2. Lấy 3 khóa học ĐANG HỌC gần nhất (lớp có trạng thái 'dang hoc')
+// Lấy 3 khóa học ĐANG HỌC gần nhất
 $sql_active = "
     SELECT kh.ten_khoahoc, td.tien_do, dk.id_khoahoc
     FROM tien_do_hoc_tap td
@@ -33,8 +28,7 @@ $sql_active = "
     JOIN dangkykhoahoc dk ON td.id_hocvien = dk.id_hocvien AND td.id_lop = dk.id_lop
     JOIN lop_hoc lh ON dk.id_lop = lh.id_lop
     WHERE td.id_hocvien = ? AND lh.trang_thai = 'dang hoc'
-    ORDER BY dk.ngay_dangky DESC
-    LIMIT 3
+    ORDER BY dk.ngay_dangky DESC LIMIT 3
 ";
 $stmt_active = $conn->prepare($sql_active);
 $stmt_active->bind_param("i", $id_hocvien);
@@ -42,29 +36,11 @@ $stmt_active->execute();
 $active_courses = $stmt_active->get_result();
 $stmt_active->close();
 
-
-// 3. Lấy kết quả bài test gần nhất
-$sql_latest_test = "
-    SELECT bt.ten_baitest, kq.diem, (SELECT COUNT(*) FROM cauhoi WHERE id_baitest = bt.id_baitest) as total_questions
-    FROM ketquabaitest kq
-    JOIN baitest bt ON kq.id_baitest = bt.id_baitest
-    WHERE kq.id_hocvien = ?
-    ORDER BY kq.ngay_lam_bai DESC
-    LIMIT 1
-";
-$stmt_latest_test = $conn->prepare($sql_latest_test);
-$stmt_latest_test->bind_param("i", $id_hocvien);
-$stmt_latest_test->execute();
-$latest_test = $stmt_latest_test->get_result()->fetch_assoc();
-$stmt_latest_test->close();
-
-// 4. Lấy thông báo chưa đọc gần nhất
+// Lấy thông báo chưa đọc gần nhất
 $sql_latest_notification = "
-    SELECT tieu_de, noi_dung, ngay_tao
-    FROM thongbao
+    SELECT tieu_de, noi_dung, ngay_tao FROM thongbao
     WHERE id_hocvien = ? AND trang_thai = 'chưa đọc'
-    ORDER BY ngay_tao DESC
-    LIMIT 1
+    ORDER BY ngay_tao DESC LIMIT 1
 ";
 $stmt_notification = $conn->prepare($sql_latest_notification);
 $stmt_notification->bind_param("i", $id_hocvien);
@@ -72,21 +48,25 @@ $stmt_notification->execute();
 $latest_notification = $stmt_notification->get_result()->fetch_assoc();
 $stmt_notification->close();
 
-// 5. Đếm số khóa học đã hoàn thành (lớp có trạng thái 'da xong')
-$sql_completed = "SELECT COUNT(DISTINCT dk.id_khoahoc) as total
-                  FROM dangkykhoahoc dk
-                  JOIN lop_hoc lh ON dk.id_lop = lh.id_lop
-                  WHERE dk.id_hocvien = ? AND lh.trang_thai = 'da xong'";
-$stmt_completed = $conn->prepare($sql_completed);
-$stmt_completed->bind_param("i", $id_hocvien);
-$stmt_completed->execute();
-$completed_courses = $stmt_completed->get_result()->fetch_assoc()['total'] ?? 0;
-$stmt_completed->close();
-
+// Hàm tạo badge điểm danh
+function get_latest_attendance_badge($status)
+{
+    if ($status === null) return '';
+    switch ($status) {
+        case 'co mat':
+            return '<span class="badge bg-success-soft text-success">Có mặt</span>';
+        case 'vang':
+            return '<span class="badge bg-danger-soft text-danger">Vắng</span>';
+        case 'muon':
+            return '<span class="badge bg-warning-soft text-warning">Muộn</span>';
+        default:
+            return '<span class="badge bg-secondary-soft text-secondary">Chưa điểm danh</span>';
+    }
+}
 ?>
 
 <style>
-    @keyframes fadeIn {
+    @keyframes fadeInUp {
         from {
             opacity: 0;
             transform: translateY(20px);
@@ -99,7 +79,7 @@ $stmt_completed->close();
     }
 
     .animated-component {
-        animation: fadeIn 0.6s ease-out forwards;
+        animation: fadeInUp 0.6s ease-out forwards;
         opacity: 0;
     }
 
@@ -231,8 +211,40 @@ $stmt_completed->close();
     .notification-card:hover {
         box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
     }
-</style>
 
+    /* Custom badge colors */
+    .bg-success-soft {
+        background-color: #d4edda;
+    }
+
+    .text-success {
+        color: #155724 !important;
+    }
+
+    .bg-warning-soft {
+        background-color: #fff3cd;
+    }
+
+    .text-warning {
+        color: #856404 !important;
+    }
+
+    .bg-danger-soft {
+        background-color: #f8d7da;
+    }
+
+    .text-danger {
+        color: #721c24 !important;
+    }
+
+    .bg-secondary-soft {
+        background-color: #e2e3e5;
+    }
+
+    .text-secondary {
+        color: #41464b !important;
+    }
+</style>
 
 <div class="stat-grid">
     <div class="stat-card animated-component" style="animation-delay: 100ms;">
@@ -250,14 +262,14 @@ $stmt_completed->close();
         </div>
     </div>
     <div class="stat-card animated-component" style="animation-delay: 300ms;">
-        <div class="stat-icon" style="background: #fd7e14;"><i class="fa-solid fa-wallet"></i></div>
+        <div class="stat-icon" style="background: #6f42c1;"><i class="fa-solid fa-calendar-week"></i></div>
         <div class="stat-info">
-            <h5>Giao dịch</h5>
-            <p><?php echo htmlspecialchars($total_transactions); ?></p>
+            <h5>Lịch tuần này</h5>
+            <p><?php echo htmlspecialchars($total_classes_this_week); ?></p>
         </div>
     </div>
     <div class="stat-card animated-component" style="animation-delay: 400ms;">
-        <div class="stat-icon" style="background: #6f42c1;"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="stat-icon" style="background: #fd7e14;"><i class="fa-solid fa-circle-check"></i></div>
         <div class="stat-info">
             <h5>Hoàn thành</h5>
             <p><?php echo htmlspecialchars($completed_courses); ?></p>
@@ -306,8 +318,7 @@ $stmt_completed->close();
                         <p class="mb-0"><strong>Thời gian:</strong> <?php echo date("H:i", strtotime($upcoming_class['gio_bat_dau'])); ?> - <?php echo date("d/m/Y", strtotime($upcoming_class['ngay_hoc'])); ?></p>
                     </div>
                 <?php else: ?>
-                    <div class="text-center p-3 text-muted">
-                        <i class="fa-solid fa-calendar-xmark fa-2x mb-2"></i>
+                    <div class="text-center p-3 text-muted"><i class="fa-solid fa-calendar-xmark fa-2x mb-2"></i>
                         <p class="mb-0">Không có buổi học nào sắp diễn ra.</p>
                     </div>
                 <?php endif; ?>
@@ -315,18 +326,17 @@ $stmt_completed->close();
 
             <div class="widget animated-component" style="animation-delay: 700ms;">
                 <div class="widget-header">
-                    <h4><i class="fa-solid fa-square-poll-vertical text-info"></i> Kết quả gần đây</h4>
-                    <a href="./dashboard.php?nav=ketquakiemtra">Xem chi tiết</a>
+                    <h4><i class="fa-solid fa-user-check text-info"></i> Điểm danh gần nhất</h4>
+                    <a href="./dashboard.php?nav=diemdanh">Xem chi tiết</a>
                 </div>
-                <?php if ($latest_test):
-                    $percentage = ($latest_test['total_questions'] > 0) ? round(($latest_test['diem'] / $latest_test['total_questions']) * 100) : 0;
-                ?>
-                    <p class="mb-1"><strong><?php echo htmlspecialchars($latest_test['ten_baitest']); ?></strong></p>
-                    <p class="mb-0 text-muted">Kết quả: <strong class="text-dark"><?php echo (int)$latest_test['diem'] . "/" . $latest_test['total_questions']; ?> (<?php echo $percentage; ?>%)</strong></p>
+                <?php if ($latest_attendance): ?>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Buổi học ngày: <strong><?php echo date("d/m/Y", strtotime($latest_attendance['ngay_hoc'])); ?></strong></span>
+                        <?php echo get_latest_attendance_badge($latest_attendance['trang_thai']); ?>
+                    </div>
                 <?php else: ?>
-                    <div class="text-center p-3 text-muted">
-                        <i class="fa-solid fa-file-circle-question fa-2x mb-2"></i>
-                        <p class="mb-0">Bạn chưa làm bài kiểm tra nào.</p>
+                    <div class="text-center p-3 text-muted"><i class="fa-solid fa-file-circle-question fa-2x mb-2"></i>
+                        <p class="mb-0">Chưa có dữ liệu điểm danh.</p>
                     </div>
                 <?php endif; ?>
             </div>

@@ -13,7 +13,7 @@ $nav = $_GET['nav'] ?? 'home';
 
 // --- Lấy các số liệu thống kê cho toàn bộ dashboard ---
 
-// Đếm tổng số khóa học đang học (lớp có trạng thái 'dang hoc')
+// Đếm tổng số khóa học đang học
 $sql_total_courses = "SELECT COUNT(DISTINCT dk.id_khoahoc) AS total 
                       FROM dangkykhoahoc dk
                       JOIN lop_hoc lh ON dk.id_lop = lh.id_lop
@@ -24,14 +24,6 @@ $stmt_courses->execute();
 $total_courses = $stmt_courses->get_result()->fetch_assoc()['total'] ?? 0;
 $stmt_courses->close();
 
-// Đếm tổng số giao dịch
-$sql_total_transactions = "SELECT COUNT(*) AS total FROM lichsu_thanhtoan WHERE id_hocvien = ?";
-$stmt_transactions = $conn->prepare($sql_total_transactions);
-$stmt_transactions->bind_param("i", $id_hocvien);
-$stmt_transactions->execute();
-$total_transactions = $stmt_transactions->get_result()->fetch_assoc()['total'] ?? 0;
-$stmt_transactions->close();
-
 // Đếm tổng số bài test đã làm
 $sql_total_tests = "SELECT COUNT(*) AS total FROM ketquabaitest WHERE id_hocvien = ?";
 $stmt_tests = $conn->prepare($sql_total_tests);
@@ -39,6 +31,48 @@ $stmt_tests->bind_param("i", $id_hocvien);
 $stmt_tests->execute();
 $total_tests = $stmt_tests->get_result()->fetch_assoc()['total'] ?? 0;
 $stmt_tests->close();
+
+// Đếm số khóa học đã hoàn thành
+$sql_completed = "SELECT COUNT(DISTINCT dk.id_khoahoc) as total
+                  FROM dangkykhoahoc dk
+                  JOIN lop_hoc lh ON dk.id_lop = lh.id_lop
+                  WHERE dk.id_hocvien = ? AND lh.trang_thai = 'da xong'";
+$stmt_completed = $conn->prepare($sql_completed);
+$stmt_completed->bind_param("i", $id_hocvien);
+$stmt_completed->execute();
+$completed_courses = $stmt_completed->get_result()->fetch_assoc()['total'] ?? 0;
+$stmt_completed->close();
+
+// *** BẮT ĐẦU: LOGIC MỚI ***
+// Đếm tổng số buổi học trong tuần này
+$today = new DateTime();
+$today->setISODate((int)$today->format('Y'), (int)$today->format('W'));
+$start_of_week = $today->format('Y-m-d');
+$end_of_week = $today->modify('+6 days')->format('Y-m-d');
+
+$sql_classes_this_week = "SELECT COUNT(lh.id_lichhoc) AS total
+                          FROM lichhoc lh
+                          JOIN dangkykhoahoc dk ON lh.id_lop = dk.id_lop
+                          WHERE dk.id_hocvien = ? AND dk.trang_thai = 'da xac nhan' AND lh.ngay_hoc BETWEEN ? AND ?";
+$stmt_week = $conn->prepare($sql_classes_this_week);
+$stmt_week->bind_param("iss", $id_hocvien, $start_of_week, $end_of_week);
+$stmt_week->execute();
+$total_classes_this_week = $stmt_week->get_result()->fetch_assoc()['total'] ?? 0;
+$stmt_week->close();
+
+// Lấy thông tin điểm danh gần nhất
+$sql_latest_attendance = "SELECT dd.trang_thai, lh.ngay_hoc
+                          FROM diem_danh dd
+                          JOIN lichhoc lh ON dd.id_lichhoc = lh.id_lichhoc
+                          WHERE dd.id_hocvien = ?
+                          ORDER BY lh.ngay_hoc DESC, lh.gio_bat_dau DESC
+                          LIMIT 1";
+$stmt_att = $conn->prepare($sql_latest_attendance);
+$stmt_att->bind_param("i", $id_hocvien);
+$stmt_att->execute();
+$latest_attendance = $stmt_att->get_result()->fetch_assoc();
+$stmt_att->close();
+// *** KẾT THÚC: LOGIC MỚI ***
 
 // Đếm số thông báo chưa đọc để hiển thị badge
 $sql_unread_notifications = "SELECT COUNT(*) as total FROM thongbao WHERE id_hocvien = ? AND trang_thai = 'chưa đọc'";
@@ -214,7 +248,6 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
         }
 
-        /* --- RESPONSIVE CHO MENU --- */
         @media (max-width: 991.98px) {
             .account-left {
                 transform: translateX(-100%);
@@ -246,7 +279,6 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
                 display: none;
             }
 
-            /* SỬA LỖI: Chỉ hiển thị overlay trên mobile khi menu được mở */
             body.sidebar-toggled .sidebar-overlay {
                 opacity: 1;
                 visibility: visible;
@@ -325,8 +357,8 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-   <script>
-        document.addEventListener('DOMContentLoaded', function () {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
             const menuToggleBtn = document.getElementById('menu-toggle-btn');
             const closeSidebarBtn = document.getElementById('close-sidebar-btn');
             const sidebarOverlay = document.getElementById('sidebar-overlay');
@@ -343,11 +375,9 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
             menuToggleBtn.addEventListener('click', openSidebar);
             closeSidebarBtn.addEventListener('click', closeSidebar);
             sidebarOverlay.addEventListener('click', closeSidebar);
-            
-            // --- SỬA LỖI TẠI ĐÂY ---
+
             const navLinks = document.querySelectorAll('.account-nav a');
             navLinks.forEach(link => {
-                // Chỉ gán sự kiện đóng menu cho những link không phải là dropdown toggle
                 if (!link.classList.contains('nav-link-collapse')) {
                     link.addEventListener('click', function() {
                         if (window.innerWidth < 992) {
@@ -356,25 +386,18 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
                     });
                 }
             });
-            // --- KẾT THÚC SỬA LỖI ---
-            
+
             function adjustSidebar() {
                 if (window.innerWidth >= 992) {
                     body.classList.add('sidebar-toggled');
                 } else {
-                    body.classList.remove('sidebar-toggled'); 
+                    body.classList.remove('sidebar-toggled');
                 }
             }
-            
             adjustSidebar();
             window.addEventListener('resize', adjustSidebar);
         });
     </script>
 </body>
+
 </html>
-
-
-
-
-
-

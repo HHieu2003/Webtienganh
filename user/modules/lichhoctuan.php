@@ -31,8 +31,9 @@ $vietnamese_days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ S
 
 
 // --- Lấy dữ liệu và xử lý thành ma trận [Buổi][Ngày] ---
+// THÊM: Lấy cả `ghi_chu`
 $sql_schedule = "
-    SELECT lh.ngay_hoc, lh.gio_bat_dau, lh.gio_ket_thuc, lh.phong_hoc, l.ten_lop, kh.ten_khoahoc
+    SELECT lh.ngay_hoc, lh.gio_bat_dau, lh.gio_ket_thuc, lh.phong_hoc, l.ten_lop, kh.ten_khoahoc, lh.ghi_chu
     FROM lichhoc lh
     JOIN lop_hoc l ON lh.id_lop = l.id_lop
     JOIN khoahoc kh ON l.id_khoahoc = kh.id_khoahoc
@@ -73,9 +74,17 @@ $stmt->close();
 
 <style>
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(15px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
+
     .animated-component {
         opacity: 0;
         animation: fadeInUp 0.5s ease-out forwards;
@@ -86,13 +95,17 @@ $stmt->close();
         flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 25px;
+        margin-bottom: 10px;
         padding: 15px;
         background-color: #fff;
         border-radius: var(--border-radius);
         box-shadow: var(--shadow);
     }
-    .week-navigation a { text-decoration: none; }
+
+    .week-navigation a {
+        text-decoration: none;
+    }
+
     .week-navigation .nav-buttons a {
         padding: 8px 15px;
         border: 1px solid var(--border-color);
@@ -102,61 +115,124 @@ $stmt->close();
         font-weight: 500;
         transition: all 0.2s ease;
     }
+
     .week-navigation .nav-buttons a:hover {
         background-color: var(--primary-color);
         color: #fff;
         border-color: var(--primary-color);
     }
+
     .week-navigation .date-picker-group {
         display: flex;
         align-items: center;
         gap: 10px;
     }
-    .week-navigation .form-control-sm { max-width: 150px; }
-    
+
+    .week-navigation .form-control-sm {
+        max-width: 150px;
+    }
+
     .schedule-table-wrapper {
         background-color: #fff;
-        padding: 20px;
+        padding: 10px;
         border-radius: var(--border-radius);
         box-shadow: var(--shadow);
-        overflow-x: auto; /* KÍCH HOẠT THANH CUỘN NGANG */
+        overflow-x: auto;
+        /* KÍCH HOẠT THANH CUỘN NGANG */
     }
+
     .weekly-schedule-table {
         border-collapse: collapse;
         width: 100%;
-        min-width: 900px; /* Đảm bảo bảng có chiều rộng tối thiểu để cuộn */
+        min-width: 900px;
+        /* Chiều rộng tối thiểu để bảng không bị co lại */
     }
-    .weekly-schedule-table th, .weekly-schedule-table td {
+
+    .weekly-schedule-table th,
+    .weekly-schedule-table td {
         border: 1px solid var(--border-color);
         padding: 8px;
         vertical-align: top;
-        width: 13%; /* Chia đều các cột ngày */
+        /* min-width: 160px;
+        max-width: 170px; */
     }
+
     .weekly-schedule-table thead th {
         background-color: #f8f9fa;
         text-align: center;
         font-weight: 600;
-        position: sticky; top: -1px; /* Giữ header cố định khi cuộn dọc */
+        position: sticky;
+        top: -1px;
         z-index: 2;
     }
+
     .weekly-schedule-table tbody .session-cell {
         font-weight: 600;
         text-align: center;
         vertical-align: middle;
         background-color: #f8f9fa;
-        width: 9%; /* Cột buổi có thể hẹp hơn */
+        /* min-width: 100px; */
+        left: 0;
         z-index: 1;
     }
 
     /* Thẻ hiển thị buổi học */
-    .schedule-item { background-color: #e7f7ec; border-left: 4px solid var(--primary-color); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
-    .schedule-item p { margin: 0 0 5px 0; }
-    .schedule-item .time { font-weight: bold; color: var(--primary-color-dark); }
-    .schedule-item .course { font-style: italic; }
-    .no-schedule { text-align: center; padding-top: 20px; }
-    .no-schedule-dot { font-size: 24px; color: #ced4da; }
+    .schedule-item {
+        background-color: #e7f7ec;
+        border-left: 4px solid var(--primary-color);
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
 
-    /* Responsive cho thanh điều hướng */
+    .schedule-item p {
+        margin: 0 0 5px 0;
+    }
+
+    .schedule-item .time {
+        font-weight: bold;
+        color: var(--primary-color-dark);
+    }
+
+    .schedule-item .course {
+        font-style: italic;
+    }
+
+    /* THÊM: CSS CHO GHI CHÚ */
+    .schedule-item .note {
+        font-style: italic;
+        background-color: #fff3cd;
+        color: #664d03;
+        padding: 5px 5px;
+        border-radius: 6px;
+        border-left: 3px solid #ffc107;
+        margin-top: 8px;
+
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        /* Giới hạn 2 dòng */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.5;
+        /* Điều chỉnh khoảng cách dòng */
+        max-width: 100%;
+        /* Đảm bảo không vượt quá container */
+        word-wrap: break-word;
+        /* Ngắt từ khi quá dài */
+    }
+
+    .no-schedule {
+        text-align: center;
+        padding-top: 20px;
+    }
+
+    .no-schedule-dot {
+        font-size: 24px;
+        color: #ced4da;
+    }
+
     @media (max-width: 767px) {
         .week-navigation {
             flex-direction: column;
@@ -165,9 +241,9 @@ $stmt->close();
     }
 </style>
 <div class="content-pane">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center">
         <h2>Lịch học tuần</h2>
-        <h4 class="d-none d-md-block"><?php echo $start_of_week_dt->format("d/m") . " - " . $end_of_week_dt->format("d/m/Y"); ?></h4>
+        <h2 class="d-none d-md-block content-date-now"><?php echo $start_of_week_dt->format("d/m") . " - " . $end_of_week_dt->format("d/m/Y"); ?></h2>
     </div>
 
     <div class="week-navigation animated-component">
@@ -183,39 +259,50 @@ $stmt->close();
             <a href="?nav=lichhoctuan&date=<?php echo $next_week_dt->format('Y-m-d'); ?>">Tuần sau <i class="fa-solid fa-chevron-right"></i></a>
         </div>
     </div>
-    
-    <div class="schedule-table-wrapper animated-component" style="animation-delay: 200ms;">
+
+    <div class="table-responsive schedule-table-wrapper animated-component" style="animation-delay: 200ms;">
         <table class="weekly-schedule-table">
             <thead>
                 <tr>
-                    <th class="session-cell" style="z-index: 3; width: 8%">Buổi</th> <?php for ($i = 0; $i < 7; $i++): 
+                    <th class="session-cell" style="z-index: 3; width: 8%">Buổi</th>
+                    <?php for ($i = 0; $i < 7; $i++):
                         $day_dt = (clone $start_of_week_dt)->modify("+$i days");
                     ?>
-                        <th><?php echo $vietnamese_days[$i]; ?><br><small><?php echo $day_dt->format('d/m'); ?></small></th>
+                        <th style="min-width: 160px"><?php echo $vietnamese_days[$i]; ?><br><small><?php echo $day_dt->format('d/m'); ?></small></th>
                     <?php endfor; ?>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($sessions as $session): ?>
-                <tr>
-                    <td class="session-cell"><strong><?php echo $session; ?></strong></td>
-                    <?php foreach ($days_of_week as $day): ?>
-                        <td>
-                            <?php if (!empty($schedule_matrix[$session][$day])): ?>
-                                <?php foreach ($schedule_matrix[$session][$day] as $item): ?>
-                                    <div class="schedule-item">
-                                        <p class="time"><i class="fa-solid fa-clock"></i> <?php echo date("H:i", strtotime($item['gio_bat_dau'])) . ' - ' . date("H:i", strtotime($item['gio_ket_thuc'])); ?></p>
-                                        <p class="course"><i class="fa-solid fa-book"></i> <?php echo htmlspecialchars($item['ten_khoahoc']); ?></p>
-                                        <p><i class="fa-solid fa-chalkboard-user"></i> Lớp: <?php echo htmlspecialchars($item['ten_lop']); ?></p>
-                                        <p><i class="fa-solid fa-map-marker-alt"></i> Phòng: <?php echo htmlspecialchars($item['phong_hoc']); ?></p>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <div class="no-schedule"><span class="no-schedule-dot">&middot;</span></div>
-                            <?php endif; ?>
-                        </td>
-                    <?php endforeach; ?>
-                </tr>
+                    <tr>
+                        <td class="session-cell"><strong><?php echo $session; ?></strong></td>
+                        <?php foreach ($days_of_week as $day): ?>
+                            <td>
+                                <?php if (!empty($schedule_matrix[$session][$day])): ?>
+                                    <?php foreach ($schedule_matrix[$session][$day] as $item): ?>
+                                        <div class="schedule-item">
+                                            <p class="time"><i class="fa-solid fa-clock"></i> <?php echo date("H:i", strtotime($item['gio_bat_dau'])) . ' - ' . date("H:i", strtotime($item['gio_ket_thuc'])); ?></p>
+                                            <p class="course"><i class="fa-solid fa-book"></i> <?php echo htmlspecialchars($item['ten_khoahoc']); ?></p>
+                                            <p><i class="fa-solid fa-chalkboard-user"></i> Lớp: <?php echo htmlspecialchars($item['ten_lop']); ?></p>
+                                            <p><i class="fa-solid fa-map-marker-alt"></i> Phòng: <?php echo htmlspecialchars($item['phong_hoc']); ?></p>
+
+                                            <?php if (!empty($item['ghi_chu'])): ?>
+                                                <div class="note-container"
+                                                    data-date="<?php echo $item['ngay_hoc']; ?>"
+                                                    data-start="<?php echo $item['gio_bat_dau']; ?>"
+                                                    data-end="<?php echo $item['gio_ket_thuc']; ?>"
+                                                    style="display: none;">
+                                                    <p class="note"><strong>Ghi chú:</strong> <a href="<?php echo htmlspecialchars($item['ghi_chu']); ?>"><?php echo htmlspecialchars($item['ghi_chu']); ?></a> </p>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="no-schedule"><span class="no-schedule-dot">&middot;</span></div>
+                                <?php endif; ?>
+                            </td>
+                        <?php endforeach; ?>
+                    </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
@@ -224,15 +311,38 @@ $stmt->close();
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Xử lý chọn ngày
         const datePicker = document.getElementById('date-picker');
         if (datePicker) {
             datePicker.addEventListener('change', function() {
                 const selectedDate = this.value;
                 if (selectedDate) {
-                    // Tự động chuyển đến trang lịch học tuần của ngày đã chọn
                     window.location.href = `?nav=lichhoctuan&date=${selectedDate}`;
                 }
             });
         }
+
+        // Xử lý hiển thị ghi chú động
+        const noteContainers = document.querySelectorAll('.note-container');
+
+        function checkNotesVisibility() {
+            const now = new Date();
+            noteContainers.forEach(container => {
+                const date = container.dataset.date;
+                const startTimeStr = container.dataset.start;
+                const endTimeStr = container.dataset.end;
+
+                const startDateTime = new Date(`${date}T${startTimeStr}`);
+                const endDateTime = new Date(`${date}T${endTimeStr}`);
+
+                if (now >= startDateTime && now <= endDateTime) {
+                    container.style.display = 'block';
+                } else {
+                    container.style.display = 'none';
+                }
+            });
+        }
+        checkNotesVisibility();
+        setInterval(checkNotesVisibility, 30000); // Kiểm tra lại mỗi 30 giây
     });
 </script>
