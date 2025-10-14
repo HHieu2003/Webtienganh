@@ -146,7 +146,32 @@ $stmt->close();
         width: 100%;
         min-width: 900px;
         /* Chiều rộng tối thiểu để bảng không bị co lại */
+        
     }
+.weekly-schedule-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+/* Tùy chỉnh chiều rộng từng cột */
+.weekly-schedule-table thead th:nth-child(2) { width: 170px; } /* Thứ Ba */
+.weekly-schedule-table thead th:nth-child(3) { width: 170px; } /* Thứ Tư */
+.weekly-schedule-table thead th:nth-child(4) { width: 170px; } /* Thứ Năm */
+.weekly-schedule-table thead th:nth-child(5) { width: 170px; } /* Thứ Sáu */
+.weekly-schedule-table thead th:nth-child(6) { width: 170px; } /* Thứ Bảy */
+.weekly-schedule-table thead th:nth-child(7) { width: 170px; } /* Chủ Nhật */
+.weekly-schedule-table thead th:nth-child(8) { width: 170px; } /* Chủ Nhật */
+
+
+/* Áp dụng cho td tương ứng */
+.weekly-schedule-table tbody td:nth-child(2) { width: 170px; }
+.weekly-schedule-table tbody td:nth-child(3) { width: 170px; }
+.weekly-schedule-table tbody td:nth-child(4) { width: 170px; }
+.weekly-schedule-table tbody td:nth-child(5) { width: 170px; }
+.weekly-schedule-table tbody td:nth-child(6) { width: 170px; }
+.weekly-schedule-table tbody td:nth-child(7) { width: 170px; }
+.weekly-schedule-table thead th:nth-child(8) { width: 170px; } /* Chủ Nhật */
+
 
     .weekly-schedule-table th,
     .weekly-schedule-table td {
@@ -166,6 +191,7 @@ $stmt->close();
         z-index: 2;
     }
 
+    
     .weekly-schedule-table tbody .session-cell {
         font-weight: 600;
         text-align: center;
@@ -264,11 +290,11 @@ $stmt->close();
         <table class="weekly-schedule-table">
             <thead>
                 <tr>
-                    <th class="session-cell" style="z-index: 3; width: 8%">Buổi</th>
+                    <th class="session-cell" style="z-index: 3; width: 55px">Buổi</th>
                     <?php for ($i = 0; $i < 7; $i++):
                         $day_dt = (clone $start_of_week_dt)->modify("+$i days");
                     ?>
-                        <th style="min-width: 160px"><?php echo $vietnamese_days[$i]; ?><br><small><?php echo $day_dt->format('d/m'); ?></small></th>
+                        <th style="min-width: 160px;"><?php echo $vietnamese_days[$i]; ?><br><small><?php echo $day_dt->format('d/m'); ?></small></th>
                     <?php endfor; ?>
                 </tr>
             </thead>
@@ -292,9 +318,50 @@ $stmt->close();
                                                     data-start="<?php echo $item['gio_bat_dau']; ?>"
                                                     data-end="<?php echo $item['gio_ket_thuc']; ?>"
                                                     style="display: none;">
-                                                    <p class="note"><strong>Ghi chú:</strong> <a href="<?php echo htmlspecialchars($item['ghi_chu']); ?>"><?php echo htmlspecialchars($item['ghi_chu']); ?></a> </p>
+                                                    <div class="note">
+                                                        <strong> Ghi chú:</strong>
+                                                        <div class="note-content">
+                                                            <?php
+                                                            $note = htmlspecialchars($item['ghi_chu']);
+
+                                                            // Kiểm tra xem ghi chú có phải URL không
+                                                            if (filter_var($note, FILTER_VALIDATE_URL)) {
+                                                                // Nếu là URL hợp lệ, tạo link rút gọn
+                                                                $parsedUrl = parse_url($note);
+                                                                $displayUrl = $parsedUrl['host'] . (isset($parsedUrl['path']) ? $parsedUrl['path'] : '');
+
+                                                                // Cắt ngắn URL nếu quá dài
+                                                                if (strlen($displayUrl) > 50) {
+                                                                    $displayUrl = substr($displayUrl, 0, 47) . '...';
+                                                                }
+
+                                                                echo '<a href="' . $note . '" target="_blank" rel="noopener noreferrer" class="note-link" title="' . $note . '">';
+                                                                echo ' ' . $displayUrl;
+                                                                echo '</a>';
+                                                            } else {
+                                                                // Nếu không phải URL, tìm và chuyển đổi các URL có trong text
+                                                                $pattern = '/(https?:\/\/[^\s<>"]+)/i';
+                                                                $noteWithLinks = preg_replace_callback($pattern, function ($matches) {
+                                                                    $url = $matches[1];
+                                                                    $parsedUrl = parse_url($url);
+                                                                    $displayUrl = $parsedUrl['host'] . (isset($parsedUrl['path']) ? $parsedUrl['path'] : '');
+
+                                                                    if (strlen($displayUrl) > 50) {
+                                                                        $displayUrl = substr($displayUrl, 0, 47) . '...';
+                                                                    }
+
+                                                                    return '<a href="' . $url . '" target="_blank" rel="noopener noreferrer" class="note-link" title="' . $url . '">'
+                                                                        . ' ' . $displayUrl . '</a>';
+                                                                }, $note);
+
+                                                                echo $noteWithLinks;
+                                                            }
+                                                            ?>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             <?php endif; ?>
+
                                         </div>
                                     <?php endforeach; ?>
                                 <?php else: ?>
@@ -308,7 +375,6 @@ $stmt->close();
         </table>
     </div>
 </div>
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Xử lý chọn ngày
@@ -335,13 +401,20 @@ $stmt->close();
                 const startDateTime = new Date(`${date}T${startTimeStr}`);
                 const endDateTime = new Date(`${date}T${endTimeStr}`);
 
-                if (now >= startDateTime && now <= endDateTime) {
+                // Tính thời gian trước 1 tiếng (60 phút) và sau 1 tiếng (60 phút)
+                const oneHourInMs = 60 * 60 * 1000; // 1 giờ = 60 phút * 60 giây * 1000 ms
+                const showStartTime = new Date(startDateTime.getTime() - oneHourInMs); // Trước 1 giờ
+                const showEndTime = new Date(endDateTime.getTime() + oneHourInMs); // Sau 1 giờ
+
+                // Hiển thị nếu thời gian hiện tại nằm trong khoảng [trước 1h -> sau 1h]
+                if (now >= showStartTime && now <= showEndTime) {
                     container.style.display = 'block';
                 } else {
                     container.style.display = 'none';
                 }
             });
         }
+
         checkNotesVisibility();
         setInterval(checkNotesVisibility, 30000); // Kiểm tra lại mỗi 30 giây
     });

@@ -15,12 +15,12 @@ $my_classes = $stmt_classes->get_result();
 // --- LẤY LỊCH SỬ CÁC THÔNG BÁO ĐÃ GỬI CỦA GIẢNG VIÊN ---
 $sql_history = "
     SELECT DISTINCT
-        tb.tieu_de, 
-        tb.ngay_tao, 
+        tb.tieu_de,
+        MAX(tb.noi_dung) as noi_dung,
+        tb.ngay_tao,
         tb.id_lop,
         lh.ten_lop,
-        (SELECT COUNT(id_thongbao) FROM thongbao t_count WHERE t_count.id_lop = tb.id_lop AND t_count.ngay_tao = tb.ngay_tao) as student_count,
-        MAX(tb.noi_dung) as noi_dung
+        (SELECT COUNT(DISTINCT id_hocvien) FROM thongbao t_count WHERE t_count.id_lop = tb.id_lop AND t_count.tieu_de = tb.tieu_de AND t_count.ngay_tao = tb.ngay_tao) as student_count
     FROM thongbao tb
     JOIN lop_hoc lh ON tb.id_lop = lh.id_lop
     WHERE lh.id_giangvien = ?
@@ -33,60 +33,123 @@ $stmt_history->execute();
 $history = $stmt_history->get_result();
 ?>
 
-<div class="card animated-card">
-    <div class="card-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h4 class="mb-0"><i class="fa-solid fa-bell me-2"></i>Lịch sử thông báo đã gửi</h4>
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addNotificationModal">
-                <i class="fa-solid fa-paper-plane"></i> Soạn Thông báo mới
-            </button>
-        </div>
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animated-item {
+        opacity: 0;
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+    .notification-card {
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .notification-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+    }
+    .card-header-custom {
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .card-title-custom {
+        font-weight: 600;
+        margin: 0;
+        font-size: 1.1rem;
+        color: var(--brand-color-dark);
+    }
+    .card-body-custom {
+        padding: 20px;
+        flex-grow: 1;
+        font-size: 0.95rem;
+        color: #555;
+    }
+    .card-body-custom .content-preview {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-height: 60px;
+    }
+    .card-footer-custom {
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+    }
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-color-light);
+    }
+    .meta-item i {
+        color: var(--brand-color);
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h1 class="title-color mb-0" style="border:none; padding-bottom: 0;">Quản lý Thông báo</h1>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addNotificationModal">
+            <i class="fa-solid fa-paper-plane me-2"></i> Soạn Thông báo mới
+        </button>
     </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th style="width: 25%;">Tiêu đề</th>
-                        <th style="width: 35%;">Nội dung (rút gọn)</th>
-                        <th>Gửi đến lớp</th>
-                        <th class="text-center">Ngày gửi</th>
-                        <th class="text-center">Số HV nhận</th>
-                        <th class="text-center">Hành động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if ($history->num_rows > 0):
-                        $index = 0;
-                        while ($row = $history->fetch_assoc()):
-                    ?>
-                        <tr class="animated-row" id="notification-row-<?php echo md5($row['tieu_de'] . $row['ngay_tao']); ?>">
-                            <td><strong><?php echo htmlspecialchars($row['tieu_de']); ?></strong></td>
-                            <td><?php echo htmlspecialchars(substr(strip_tags($row['noi_dung']), 0, 100)) . '...'; ?></td>
-                            <td><span class="badge bg-primary"><?php echo htmlspecialchars($row['ten_lop']); ?></span></td>
-                            <td class="text-center"><?php echo date("d/m/Y H:i", strtotime($row['ngay_tao'])); ?></td>
-                            <td class="text-center"><span class="badge bg-secondary"><?php echo $row['student_count']; ?></span></td>
-                            <td class="text-center">
-                                <button class="btn btn-danger btn-sm" 
-                                        onclick="deleteNotification(
-                                            '<?php echo htmlspecialchars(addslashes($row['tieu_de'])); ?>', 
-                                            '<?php echo htmlspecialchars($row['id_lop']); ?>', 
-                                            '<?php echo htmlspecialchars($row['ngay_tao']); ?>',
-                                            '<?php echo md5($row['tieu_de'] . $row['ngay_tao']); ?>'
-                                        )"
-                                        title="Xóa nhóm thông báo này">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    <?php endwhile;
-                    else: ?>
-                        <tr><td colspan="6" class="text-center text-muted py-4">Bạn chưa gửi thông báo nào.</td></tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+
+    <?php if ($history->num_rows > 0): ?>
+        <div class="row g-4">
+            <?php 
+            $index = 0;
+            while ($row = $history->fetch_assoc()): 
+                $unique_id = md5($row['tieu_de'] . $row['ngay_tao'] . $row['id_lop']);
+            ?>
+                <div class="col-lg-4 col-md-6 animated-item" style="animation-delay: <?php echo $index++ * 70; ?>ms;" id="notification-card-<?php echo $unique_id; ?>">
+                    <div class="notification-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title-custom"><?php echo htmlspecialchars($row['tieu_de']); ?></h5>
+                            <button class="btn btn-sm btn-outline-danger" 
+                                    onclick="deleteNotification(
+                                        '<?php echo htmlspecialchars(addslashes($row['tieu_de'])); ?>', 
+                                        '<?php echo htmlspecialchars($row['id_lop']); ?>', 
+                                        '<?php echo htmlspecialchars($row['ngay_tao']); ?>',
+                                        '<?php echo $unique_id; ?>'
+                                    )"
+                                    title="Xóa nhóm thông báo này">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="card-body-custom">
+                            <div class="content-preview"><?php echo strip_tags($row['noi_dung']); ?></div>
+                        </div>
+                        <div class="card-footer-custom">
+                            <span class="meta-item"><i class="fa-solid fa-school"></i> <strong><?php echo htmlspecialchars($row['ten_lop']); ?></strong></span>
+                            <span class="meta-item"><i class="fa-solid fa-calendar-alt"></i> <?php echo date("d/m/Y", strtotime($row['ngay_tao'])); ?></span>
+                        </div>
+                    </div>
+                </div>
+            <?php endwhile; ?>
         </div>
-    </div>
+    <?php else: ?>
+        <div class="alert alert-light text-center">
+            <i class="fa-solid fa-bell-slash fa-3x mb-3 text-muted"></i>
+            <p class="mb-0">Bạn chưa gửi thông báo nào.</p>
+        </div>
+    <?php endif; ?>
 </div>
 
 <div class="modal fade" id="addNotificationModal" tabindex="-1" aria-hidden="true">
@@ -98,22 +161,36 @@ $history = $stmt_history->get_result();
             </div>
             <form id="sendNotificationForm_teacher">
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-8"><div class="form-floating mb-3"><input type="text" name="tieu_de" class="form-control" placeholder="Tiêu đề thông báo" required><label>Tiêu đề *</label></div></div>
-                        <div class="col-md-4"><div class="form-floating mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <div class="form-floating">
+                                <input type="text" name="tieu_de" class="form-control" placeholder="Tiêu đề thông báo" required>
+                                <label>Tiêu đề *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-floating">
                                 <select name="id_lop" class="form-select" required>
                                     <option value="" selected disabled>-- Vui lòng chọn lớp --</option>
                                     <?php if ($my_classes->num_rows > 0): mysqli_data_seek($my_classes, 0); while($class = $my_classes->fetch_assoc()): ?>
                                             <option value="<?php echo htmlspecialchars($class['id_lop']); ?>"><?php echo htmlspecialchars($class['ten_lop']); ?></option>
                                     <?php endwhile; else: ?><option disabled>Bạn chưa có lớp học nào đang hoạt động</option><?php endif; ?>
-                                </select><label>Gửi đến lớp *</label>
-                        </div></div>
+                                </select>
+                                <label>Gửi đến lớp *</label>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3"><label class="form-label">Nội dung thông báo *</label><textarea name="noi_dung" id="noi_dung_editor_teacher" class="form-control"></textarea></div>
+                    <div class="mt-3">
+                        <label class="form-label">Nội dung thông báo *</label>
+                        <textarea name="noi_dung" id="noi_dung_editor_teacher" class="form-control"></textarea>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary" <?php if($my_classes->num_rows == 0) echo 'disabled'; ?>>Gửi đi</button>
+                    <button type="submit" class="btn btn-primary" id="submit-notification-btn" <?php if($my_classes->num_rows == 0) echo 'disabled'; ?>>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        Gửi đi
+                    </button>
                 </div>
             </form>
         </div>
@@ -121,10 +198,7 @@ $history = $stmt_history->get_result();
 </div>
 
 <script>
-    // ================================================================
-    // === SỬA LỖI & HOÀN THIỆN JAVASCRIPT ===
-    // ================================================================
-    function deleteNotification(tieu_de, id_lop, ngay_tao, row_id) {
+    function deleteNotification(tieu_de, id_lop, ngay_tao, card_id) {
         Swal.fire({
             title: 'Bạn có chắc chắn?',
             text: "Xóa nhóm thông báo này sẽ xóa tất cả các bản ghi liên quan và không thể khôi phục!",
@@ -136,31 +210,24 @@ $history = $stmt_history->get_result();
             cancelButtonText: 'Hủy'
         }).then((result) => {
             if (result.isConfirmed) {
-                // SỬA LỖI ĐƯỜNG DẪN: Đường dẫn phải tính từ file admin.php
                 fetch('./modules/teacher/teacher_delete_notification.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        tieu_de: tieu_de,
-                        id_lop: id_lop,
-                        ngay_tao: ngay_tao
-                    })
+                    body: JSON.stringify({ tieu_de, id_lop, ngay_tao })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
                         Swal.fire('Đã xóa!', data.message, 'success');
-                        const row = document.getElementById(`notification-row-${row_id}`);
-                        if (row) {
-                            row.remove();
+                        const card = document.getElementById(`notification-card-${card_id}`);
+                        if (card) {
+                            card.remove();
                         }
                     } else {
                         Swal.fire('Lỗi!', data.message, 'error');
                     }
                 })
-                .catch(error => {
-                    Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ để xóa.', 'error');
-                });
+                .catch(error => Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ.', 'error'));
             }
         });
     }
@@ -168,6 +235,9 @@ $history = $stmt_history->get_result();
     document.addEventListener('DOMContentLoaded', function() {
         let editor;
         const addNotificationModal = new bootstrap.Modal(document.getElementById('addNotificationModal'));
+        const form = document.getElementById('sendNotificationForm_teacher');
+        const submitBtn = document.getElementById('submit-notification-btn');
+        const spinner = submitBtn.querySelector('.spinner-border');
         
         document.getElementById('addNotificationModal').addEventListener('shown.bs.modal', function () {
             if (CKEDITOR.instances.noi_dung_editor_teacher) {
@@ -177,17 +247,16 @@ $history = $stmt_history->get_result();
             editor = CKEDITOR.instances.noi_dung_editor_teacher;
         });
 
-        const form = document.getElementById('sendNotificationForm_teacher');
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            if (editor) {
-                editor.updateElement();
-            }
+            if (editor) editor.updateElement();
+            
+            submitBtn.disabled = true;
+            spinner.classList.remove('d-none');
 
             const formData = new FormData(this);
 
-            // SỬA LỖI ĐƯỜNG DẪN: Đường dẫn phải tính từ file admin.php
-            fetch('./modules/thongbao/delete_notification.php', {
+            fetch('./modules/teacher/teacher_send_notification.php', {
                 method: 'POST',
                 body: formData
             })
@@ -201,15 +270,15 @@ $history = $stmt_history->get_result();
                         text: data.message,
                         timer: 2000,
                         showConfirmButton: false
-                    }).then(() => {
-                        location.reload();
-                    });
+                    }).then(() => location.reload());
                 } else {
                     Swal.fire('Lỗi!', data.message, 'error');
                 }
             })
-            .catch(error => {
-                Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ để gửi.', 'error');
+            .catch(error => Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ.', 'error'))
+            .finally(() => {
+                submitBtn.disabled = false;
+                spinner.classList.add('d-none');
             });
         });
     });

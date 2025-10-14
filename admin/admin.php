@@ -33,16 +33,17 @@ $is_teacher = $_SESSION['is_teacher'] ?? false;
 
 <body>
     <div class="wrapper">
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar" id="admin-sidebar">
             <?php
             if ($is_admin) {
                 include('modules/menu.php');
             } else {
-                // Giả định bạn có file teacher_menu.php cho giảng viên
                 include('modules/teacher/teacher_menu.php');
             }
             ?>
         </aside>
+
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
         <main class="admin-main">
             <header class="admin-header">
@@ -54,7 +55,6 @@ $is_teacher = $_SESSION['is_teacher'] ?? false;
                 if ($is_admin) {
                     include('modules/main.php');
                 } else {
-                    // Giả định bạn có file teacher_main.php cho giảng viên
                     include('modules/teacher/teacher_main.php');
                 }
                 ?>
@@ -68,6 +68,34 @@ $is_teacher = $_SESSION['is_teacher'] ?? false;
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('admin-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const openBtn = document.getElementById('menu-toggle-btn');
+            const closeBtn = document.getElementById('sidebar-close-btn');
+
+            function openSidebar() {
+                if (sidebar) sidebar.classList.add('show');
+                if (overlay) overlay.classList.add('show');
+            }
+
+            function closeSidebar() {
+                if (sidebar) sidebar.classList.remove('show');
+                if (overlay) overlay.classList.remove('show');
+            }
+
+            if (openBtn) {
+                openBtn.addEventListener('click', openSidebar);
+            }
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeSidebar);
+            }
+            if (overlay) {
+                overlay.addEventListener('click', closeSidebar);
+            }
+        });
+    </script>
 </body>
 
 </html>

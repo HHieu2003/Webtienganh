@@ -5,86 +5,195 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 
 $lop_id = $_GET['lop_id'] ?? null;
-$view = $_GET['view'] ?? 'students';
+$view = $_GET['view'] ?? 'students'; // Mặc định là tab học viên
 $search_classes = $_GET['search_classes'] ?? '';
 
 // Lấy danh sách giảng viên và khóa học để dùng cho các modal
 $lecturers = $conn->query("SELECT id_giangvien, ten_giangvien FROM giangvien ORDER BY ten_giangvien");
 $courses = $conn->query("SELECT id_khoahoc, ten_khoahoc FROM khoahoc ORDER BY ten_khoahoc");
 
-// Lấy danh sách học viên đủ điều kiện để thêm vào lớp (nếu đang xem chi tiết một lớp)
-$eligible_students = null;
+// Lấy thông tin lớp học và số liệu thống kê
+$class_info = null;
+$student_count = 0;
+$schedule_count = 0;
 if ($lop_id) {
-    $stmt_kh = $conn->prepare("SELECT id_khoahoc FROM lop_hoc WHERE id_lop = ?");
-    $stmt_kh->bind_param('s', $lop_id);
-    $stmt_kh->execute();
-    $id_khoahoc_result = $stmt_kh->get_result();
-    if ($id_khoahoc_result->num_rows > 0) {
-        $id_khoahoc = $id_khoahoc_result->fetch_assoc()['id_khoahoc'];
-        $stmt_kh->close();
-
-        // Học viên đã đăng ký khóa học, đã được xác nhận, và chưa được xếp vào lớp nào
-        $sql_eligible = "SELECT hv.id_hocvien, hv.ten_hocvien, hv.email FROM dangkykhoahoc dk
-                         JOIN hocvien hv ON dk.id_hocvien = hv.id_hocvien
-                         WHERE dk.id_khoahoc = ? AND dk.trang_thai = 'da xac nhan' AND dk.id_lop IS NULL";
-        $stmt_el = $conn->prepare($sql_eligible);
-        $stmt_el->bind_param('i', $id_khoahoc);
-        $stmt_el->execute();
-        $eligible_students = $stmt_el->get_result();
-    }
+    $stmt_info = $conn->prepare("
+        SELECT 
+            lh.ten_lop, 
+            kh.ten_khoahoc,
+            (SELECT COUNT(*) FROM dangkykhoahoc WHERE id_lop = ?) as student_count,
+            (SELECT COUNT(*) FROM lichhoc WHERE id_lop = ?) as schedule_count
+        FROM lop_hoc lh
+        JOIN khoahoc kh ON lh.id_khoahoc = kh.id_khoahoc
+        WHERE lh.id_lop = ?
+    ");
+    $stmt_info->bind_param('sss', $lop_id, $lop_id, $lop_id);
+    $stmt_info->execute();
+    $class_info = $stmt_info->get_result()->fetch_assoc();
+    if (!$class_info) die("Lớp học không tồn tại.");
+    $student_count = $class_info['student_count'];
+    $schedule_count = $class_info['schedule_count'];
+    $stmt_info->close();
 }
 ?>
+<style>
+    .class-management-header {
+        background: linear-gradient(135deg, #f5f7fa, #eef2f7);
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+    }
+    .class-title-section a {
+        flex-shrink: 0;
+    }
+    .class-title-section h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--dark-text);
+    }
+    .class-title-section p {
+        color: var(--gray-text);
+        margin-bottom: 0;
+    }
+    .class-stats {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+    }
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .stat-item .icon {
+        font-size: 1.5rem;
+        color: var(--brand-color);
+    }
+    .stat-item .value {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    .stat-item .label {
+        font-size: 0.85rem;
+        color: var(--gray-text);
+    }
+
+    .management-nav-tabs {
+        background-color: #fff;
+        border-radius: 50px;
+        padding: 0.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        display: inline-flex;
+    }
+    .management-nav-tabs .nav-link {
+        color: var(--gray-text);
+        font-weight: 500;
+        border-radius: 50px;
+        padding: 0.5rem 1.25rem;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .management-nav-tabs .nav-link.active {
+        background-color: var(--brand-color);
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(13, 179, 59, 0.3);
+    }
+    
+    @media (max-width: 991.98px) {
+        .class-management-header {
+            text-align: center;
+        }
+        .class-stats {
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        .management-nav-tabs {
+            flex-wrap: wrap;
+            border-radius: 12px;
+        }
+    }
+</style>
 
 <div class="container-fluid">
-    <?php if ($lop_id): ?>
-        <?php
-        // Lấy thông tin lớp học để hiển thị tiêu đề
-        $sql_lop = "SELECT lh.ten_lop FROM lop_hoc lh WHERE lh.id_lop = ?";
-        $stmt_lop = $conn->prepare($sql_lop);
-        $stmt_lop->bind_param('s', $lop_id);
-        $stmt_lop->execute();
-        $lop = $stmt_lop->get_result()->fetch_assoc();
-        if (!$lop) die("Lớp học không tồn tại.");
-        ?>
-        <div class="d-flex align-items-center mb-3">
-            <a href="./admin.php?nav=lichhoc" class="btn btn-secondary me-3"><i class="fa-solid fa-arrow-left"></i> Quay lại</a>
-            <h1 class="title-color mb-0" style="border: none; padding-bottom: 0; margin-bottom: 0;">Lớp: <?php echo htmlspecialchars($lop['ten_lop']); ?></h1>
+    <?php if ($lop_id && $class_info): ?>
+        <div class="class-management-header animated-card">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-3 class-title-section">
+                    <a href="./admin.php?" class="btn btn-light border"><i class="fa-solid fa-arrow-left"></i></a>
+                    <div>
+                        <h1><?php echo htmlspecialchars($class_info['ten_lop']); ?></h1>
+                        <p><?php echo htmlspecialchars($class_info['ten_khoahoc']); ?></p>
+                    </div>
+                </div>
+                <div class="class-stats">
+                    <div class="stat-item">
+                        <i class="fa-solid fa-users icon"></i>
+                        <div>
+                            <div class="value"><?php echo $student_count; ?></div>
+                            <div class="label">Học viên</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fa-solid fa-calendar-alt icon"></i>
+                        <div>
+                            <div class="value"><?php echo $schedule_count; ?></div>
+                            <div class="label">Buổi học</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="card animated-card">
-            <div class="card-header">
-                <ul class="nav nav-tabs card-header-tabs">
-                    <li class="nav-item"><a class="nav-link <?php echo ($view == 'students') ? 'active' : ''; ?>" href="./admin.php?nav=lichhoc&lop_id=<?php echo $lop_id; ?>&view=students"><i class="fa-solid fa-users me-2"></i>Quản lý Học viên</a></li>
-                    <li class="nav-item"><a class="nav-link <?php echo ($view == 'schedule') ? 'active' : ''; ?>" href="./admin.php?nav=lichhoc&lop_id=<?php echo $lop_id; ?>&view=schedule"><i class="fa-solid fa-calendar-days me-2"></i>Quản lý Lịch học</a></li>
-                    <li class="nav-item"><a class="nav-link <?php echo ($view == 'grades') ? 'active' : ''; ?>" href="./admin.php?nav=lichhoc&lop_id=<?php echo $lop_id; ?>&view=grades"><i class="fa-solid fa-marker me-2"></i>Quản lý Điểm số</a></li>
-                    <li class="nav-item"><a class="nav-link <?php echo ($view == 'diemdanh') ? 'active' : ''; ?>" href="./admin.php?nav=lichhoc&lop_id=<?php echo $lop_id; ?>&view=diemdanh"><i class="fa-solid fa-user-check me-2"></i>Điểm danh</a></li>
-                </ul>
-            </div>
-            <div class="card-body">
-                <?php
-                if ($view === 'students') {
-                    include(__DIR__ . '/hocvienlop/view_students.php');
-                } elseif ($view === 'schedule') {
-                    include(__DIR__ . '/lichhoclop/view_schedule.php');
-                } elseif ($view === 'grades') {
-                    include(__DIR__ . '/diemso/view_grades.php');
-                } elseif ($view === 'diemdanh') {
-                    include(__DIR__ . '/diemdanh/diemdanh.php');
-                }
-                ?>
-            </div>
+        <div class="text-center mb-4 animated-card" style="animation-delay: 100ms;">
+            <ul class="nav nav-pills management-nav-tabs" id="managementTabs">
+                <li class="nav-item"><a class="nav-link <?php echo ($view == 'students') ? 'active' : ''; ?>" href="./admin.php?nav=lichhoc&lop_id=<?php echo $lop_id; ?>&view=students"><i class="fa-solid fa-users me-2"></i>Học viên</a></li>
+                <li class="nav-item"><a class="nav-link <?php echo ($view == 'schedule') ? 'active' : ''; ?>" href="./admin.php?nav=lichhoc&lop_id=<?php echo $lop_id; ?>&view=schedule"><i class="fa-solid fa-calendar-days me-2"></i>Lịch học</a></li>
+                <li class="nav-item"><a class="nav-link <?php echo ($view == 'grades') ? 'active' : ''; ?>" href="./admin.php?nav=lichhoc&lop_id=<?php echo $lop_id; ?>&view=grades"><i class="fa-solid fa-marker me-2"></i>Điểm số</a></li>
+                <li class="nav-item"><a class="nav-link <?php echo ($view == 'diemdanh') ? 'active' : ''; ?>" href="./admin.php?nav=lichhoc&lop_id=<?php echo $lop_id; ?>&view=diemdanh"><i class="fa-solid fa-user-check me-2"></i>Điểm danh</a></li>
+            </ul>
         </div>
+
+        <?php
+            // Các tệp này sẽ được làm mới ở các bước sau
+            if ($view === 'students') {
+                include(__DIR__ . '/hocvienlop/view_students.php');
+            } elseif ($view === 'schedule') {
+                include(__DIR__ . '/lichhoclop/view_schedule.php');
+            } elseif ($view === 'grades') {
+                include(__DIR__ . '/diemso/view_grades.php');
+            } elseif ($view === 'diemdanh') {
+                include(__DIR__ . '/diemdanh/diemdanh.php');
+            }
+        ?>
+
     <?php else: ?>
         <?php include(__DIR__ . '/lophoc/view_classes.php'); ?>
     <?php endif; ?>
 
     <?php include(__DIR__ . '/lophoc/modals_lophoc.php'); ?>
     <?php if ($lop_id): ?>
+        <?php 
+            // Cập nhật logic lấy học viên đủ điều kiện cho modal
+            $eligible_students = null;
+            if ($lop_id) {
+                $stmt_kh = $conn->prepare("SELECT id_khoahoc FROM lop_hoc WHERE id_lop = ?");
+                $stmt_kh->bind_param('s', $lop_id);
+                $stmt_kh->execute();
+                if($id_khoahoc_res = $stmt_kh->get_result()->fetch_assoc()) {
+                    $id_khoahoc = $id_khoahoc_res['id_khoahoc'];
+                    $sql_eligible = "SELECT hv.id_hocvien, hv.ten_hocvien, hv.email FROM dangkykhoahoc dk JOIN hocvien hv ON dk.id_hocvien = hv.id_hocvien WHERE dk.id_khoahoc = ? AND dk.trang_thai = 'da xac nhan' AND dk.id_lop IS NULL";
+                    $stmt_el = $conn->prepare($sql_eligible);
+                    $stmt_el->bind_param('i', $id_khoahoc);
+                    $stmt_el->execute();
+                    $eligible_students = $stmt_el->get_result();
+                }
+            }
+        ?>
         <?php include(__DIR__ . '/hocvienlop/modal_add_student.php'); ?>
         <?php include(__DIR__ . '/lichhoclop/modals_lichhoc.php'); ?>
     <?php endif; ?>
 </div>
-
 <script>
     let addClassModal, editClassModal, addStudentModal, addScheduleModal, editScheduleModal;
 
