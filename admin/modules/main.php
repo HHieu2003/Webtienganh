@@ -39,6 +39,11 @@ if ($temp == 'courses') {
 } else if ($temp == 'hoclieu') {
     include("modules/hoclieu/manage_hoclieu.php");
 }
+
+else if ($temp == 'view_submission_admin') {
+    include("modules/cauhoi/view_submission_admin.php"); 
+}
+
  else if ($temp == 'thongke') {
     include("modules/thongke/baocao.php");
 // ===================================

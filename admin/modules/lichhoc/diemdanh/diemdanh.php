@@ -116,8 +116,15 @@ while ($row = $diemDanhResult->fetch_assoc()) {
             font-size: 0.45rem;
             padding: 0.1rem 0.3rem;
         }
-        .text-muted{
+
+        .text-muted {
             font-size: 7px;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .card-sub-diemdanh {
+            max-width: 986px;
         }
     }
 </style>
@@ -133,7 +140,7 @@ while ($row = $diemDanhResult->fetch_assoc()) {
             </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body card-sub-diemdanh">
         <?php if (count($lichHoc) > 0 && count($hocVien) > 0): ?>
             <form id="attendanceForm">
                 <input type="hidden" name="id_lop" value="<?php echo $lop_id; ?>">

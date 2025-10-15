@@ -14,7 +14,8 @@ $teaching_management_pages = [
     'teacher_materials',
     'question',
     'ds_cauhoi_gv',
-    'kqhocvien_gv'
+    'kqhocvien_gv',
+     'teacher_schedule' 
 ];
 
 $is_teaching_management_active = in_array($current_page, $teaching_management_pages);
@@ -124,6 +125,11 @@ $is_teaching_management_active = in_array($current_page, $teaching_management_pa
                 <li>
                     <a href="./admin.php?nav=teacher_classes" class="<?php echo in_array($current_page, ['teacher_classes', 'lichhoc']) ? 'active' : ''; ?>">
                         Lớp học của tôi
+                    </a>
+                </li>
+                <li>
+                    <a href="./admin.php?nav=teacher_schedule" class="<?php echo ($current_page == 'teacher_schedule') ? 'active' : ''; ?>">
+                        Lịch dạy
                     </a>
                 </li>
                 <li>

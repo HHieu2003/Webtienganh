@@ -1,135 +1,476 @@
 <?php
-// File: admin/modules/teacher_tests.php
-if (session_status() == PHP_SESSION_NONE) { session_start(); }
-if (!isset($_SESSION['is_teacher']) || !$_SESSION['is_teacher']) die("Truy cập bị từ chối.");
+// File: admin/modules/cauhoi/question.php (Giao diện Hoàn thiện)
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
-$id_giangvien = $_SESSION['id_giangvien'];
+// --- XỬ LÝ TÌM KIẾM ---
+$search_term = $_GET['search'] ?? '';
+$sql_search = "";
+$params = [];
+$types = "";
+if (!empty($search_term)) {
+    $sql_search = " WHERE bt.ten_baitest LIKE ? OR kh.ten_khoahoc LIKE ? OR lh.ten_lop LIKE ?";
+    $search_param = "%" . $search_term . "%";
+    $params = [$search_param, $search_param, $search_param];
+    $types = "sss";
+}
 
-// --- LẤY DANH SÁCH BÀI TEST LIÊN QUAN ĐẾN GIẢNG VIÊN ---
-// Một bài test được coi là liên quan nếu:
-// 1. Nó được gán cho lớp học mà giảng viên này dạy.
-// 2. Nó được gán cho khóa học mà giảng viên này có lớp dạy trong đó.
+// Lấy danh sách bài test và thông tin liên quan
 $sql = "
-    SELECT DISTINCT bt.id_baitest, bt.ten_baitest, bt.ngay_tao, bt.loai_baitest, kh.ten_khoahoc, lh.ten_lop
+    SELECT 
+        bt.id_baitest, bt.ten_baitest, bt.ngay_tao, bt.loai_baitest, bt.thoi_gian,
+        kh.ten_khoahoc, 
+        lh.ten_lop,
+        (SELECT COUNT(*) FROM cauhoi WHERE id_baitest = bt.id_baitest) as question_count
     FROM baitest bt 
-    LEFT JOIN lop_hoc lh ON bt.id_lop = lh.id_lop
     LEFT JOIN khoahoc kh ON bt.id_khoahoc = kh.id_khoahoc
-    WHERE lh.id_giangvien = ? 
-       OR kh.id_khoahoc IN (SELECT DISTINCT id_khoahoc FROM lop_hoc WHERE id_giangvien = ?)
+    LEFT JOIN lop_hoc lh ON bt.id_lop = lh.id_lop
+    $sql_search
     ORDER BY bt.id_baitest DESC
 ";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ii", $id_giangvien, $id_giangvien);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
 $stmt->execute();
 $result = $stmt->get_result();
 
-// --- LẤY DỮ LIỆU CHO MODAL: Chỉ lấy các khóa học/lớp học mà giảng viên này dạy ---
-$courses = $conn->query("SELECT DISTINCT kh.id_khoahoc, kh.ten_khoahoc FROM khoahoc kh JOIN lop_hoc lh ON kh.id_khoahoc = lh.id_khoahoc WHERE lh.id_giangvien = $id_giangvien ORDER BY kh.ten_khoahoc");
+// Lấy danh sách khóa học cho các modal
+$courses = $conn->query("SELECT id_khoahoc, ten_khoahoc FROM khoahoc ORDER BY ten_khoahoc");
+$courses_for_edit_modal = $conn->query("SELECT id_khoahoc, ten_khoahoc FROM khoahoc ORDER BY ten_khoahoc");
 
-// Hàm hiển thị badge (giữ nguyên)
-function get_test_type_badge_gv($type) {
+function get_test_type_badge($type)
+{
     switch ($type) {
-        case 'dinh_ky': return '<span class="badge bg-info text-dark">Test định kỳ</span>';
-        case 'on_tap': return '<span class="badge bg-secondary">Test ôn tập</span>';
-        default: return '<span class="badge bg-light text-dark">' . htmlspecialchars($type) . '</span>';
+        case 'dau_vao':
+            return '<span class="badge bg-primary">Test đầu vào</span>';
+        case 'dinh_ky':
+            return '<span class="badge bg-info text-dark">Test định kỳ</span>';
+        case 'on_tap':
+            return '<span class="badge bg-secondary">Test ôn tập</span>';
+        default:
+            return '<span class="badge bg-light text-dark">' . htmlspecialchars($type) . '</span>';
     }
 }
 ?>
 
-<div class="card animated-card">
-    <div class="card-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h4 class="mb-0"><i class="fa-solid fa-circle-question me-2"></i>Bài Test Của Tôi</h4>
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTestModal"><i class="fa-solid fa-plus"></i> Tạo Bài Test Mới</button>
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .test-list-container {
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        /* Quan trọng để bo góc hoạt động */
+    }
+
+    .table-header-custom {
+        background-color: #e7f7ec;
+        /* Màu nền xanh lá rất nhạt cho tiêu đề */
+        color: #0a8a2c;
+        /* Màu chữ xanh lá đậm */
+        font-weight: 600;
+        border-bottom: 2px solid var(--brand-color);
+    }
+
+    .table-header-custom th {
+        padding: 1rem 1.5rem;
+        white-space: nowrap;
+        /* Ngăn tiêu đề xuống dòng */
+    }
+
+    /* Chiều rộng cột cố định trên desktop */
+    .test-table {
+        table-layout: fixed;
+        /* Bắt buộc các cột tuân theo chiều rộng đã định */
+        width: 100%;
+    }
+
+    .test-table .name-col {
+        width: 25%;
+    }
+
+    .test-table .scope-col {
+        width: 15%;
+    }
+
+    .test-table .type-col {
+        width: 10%;
+    }
+
+    .test-table .q-col {
+        width: 10%;
+    }
+
+    .test-table .time-col {
+        width: 10%;
+    }
+
+    .test-table .actions-col {
+        width: 10%;
+        min-width: 180px;
+    }
+
+
+    .test-table tbody tr {
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    /* Màu sắc xen kẽ cho các dòng */
+    .test-table tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    .test-table tbody tr:hover {
+        background-color: #e9ecef;
+        /* Màu đậm hơn khi hover */
+    }
+
+    .test-table td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        word-break: break-word;
+        /* Chống vỡ layout nếu tên quá dài */
+    }
+
+    .test-name {
+        font-weight: 600;
+        color: var(--dark-text);
+        display: block;
+    }
+
+    .test-scope {
+        font-size: 0.85rem;
+        color: var(--gray-text);
+    }
+
+    .actions-cell .btn {
+        margin: 0 2px;
+    }
+
+    /* --- CSS Responsive Table -> Card --- */
+    @media (max-width: 1200px) {
+
+        /* Áp dụng sớm hơn để có trải nghiệm tốt hơn */
+        .test-list-container {
+            background-color: transparent;
+            box-shadow: none;
+        }
+
+        .table-responsive {
+            display: none;
+            /* Ẩn bảng trên mobile */
+        }
+
+        .mobile-card-list {
+            display: block !important;
+            /* Hiện danh sách card trên mobile */
+        }
+
+        .test-card-mobile {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out forwards;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .test-card-mobile:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-mobile-header {
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .card-mobile-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-mobile-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-mobile-row .label {
+            color: var(--gray-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-mobile-row .value {
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .card-mobile-footer {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f0f0f0;
+        }
+    }
+</style>
+<div class="container-fluid">
+    <div class="page-header animated-card">
+        <h1 class="title-color mb-0" style="border:none; padding: 0;">Quản lý Bài Test</h1>
+        <div class="d-flex align-items-center gap-2">
+            <form method="GET" action="./admin.php" class="d-flex">
+                <input type="hidden" name="nav" value="question">
+                <input type="text" name="search" class="form-control" placeholder="Tìm kiếm bài test..." value="<?php echo htmlspecialchars($search_term); ?>">
+                <button type="submit" class="btn btn-primary ms-2"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </form>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTestModal">
+                <i class="fa-solid fa-plus"></i> Thêm
+            </button>
         </div>
     </div>
-    <div class="card-body">
-        <?php if (isset($_SESSION['message'])) { echo '<div class="alert alert-'.$_SESSION['message']['type'].' alert-dismissible fade show">'.htmlspecialchars($_SESSION['message']['text']).'<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>'; unset($_SESSION['message']); } ?>
+
+    <hr>
+
+    <?php if (isset($_SESSION['message'])): ?>
+        <div class="alert alert-<?php echo $_SESSION['message']['type']; ?> alert-dismissible fade show animated-card">
+            <?php echo htmlspecialchars($_SESSION['message']['text']); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php unset($_SESSION['message']); ?>
+    <?php endif; ?>
+
+    <div class="test-list-container animated-card mt-4">
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
-                    <tr><th>Tên Bài Test</th><th>Phạm vi</th><th class="text-center">Loại</th><th class="text-center">Ngày Tạo</th><th class="text-center">Hành động</th></tr>
+            <table class="table test-table table-hover align-middle mb-0 table-bordered ">
+                <thead class="table-header-custom table-info">
+                    <tr>
+                        <th class="name-col">Tên Bài Test</th>
+                        <th class="scope-col">Phạm vi</th>
+                        <th class="text-center type-col">Loại</th>
+                        <th class="text-center q-col">Câu hỏi</th>
+                        <th class="text-center time-col">Thời gian</th>
+                        <th class="text-center actions-col">Hành động</th>
+                    </tr>
                 </thead>
                 <tbody>
-                    <?php 
-                    if ($result->num_rows > 0):
-                        while ($row = $result->fetch_assoc()): 
-                            $scope = '<span class="badge bg-secondary">Chung</span>';
-                            if ($row['ten_lop']) { $scope = '<strong>Lớp:</strong> ' . htmlspecialchars($row['ten_lop']); } 
-                            elseif ($row['ten_khoahoc']) { $scope = '<strong>Khóa:</strong> ' . htmlspecialchars($row['ten_khoahoc']); }
+                    <?php if ($result->num_rows > 0):
+                        mysqli_data_seek($result, 0); // Reset con trỏ
+                        while ($row = $result->fetch_assoc()):
+                            $scope_text = 'Công khai';
+                            if ($row['ten_lop']) {
+                                $scope_text = 'Lớp: ' . htmlspecialchars($row['ten_lop']);
+                            } elseif ($row['ten_khoahoc']) {
+                                $scope_text = 'Khóa: ' . htmlspecialchars($row['ten_khoahoc']);
+                            }
                     ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($row['ten_baitest']); ?></td>
-                            <td><?php echo $scope; ?></td>
-                            <td class="text-center"><?php echo get_test_type_badge_gv($row['loai_baitest']); ?></td>
-                            <td class="text-center"><?php echo date("d/m/Y", strtotime($row['ngay_tao'])); ?></td>
-                            <td class="text-center">
-                                <a href="./admin.php?nav=ds_cauhoi_gv&id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-primary btn-sm" title="Quản lý câu hỏi"><i class="fa-solid fa-list-check"></i></a>
-                                <a href="./admin.php?nav=kqhocvien_gv&id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-info btn-sm text-white" title="Xem kết quả"><i class="fa-solid fa-square-poll-vertical"></i></a>
-                                 <a href="./modules/cauhoi/delete_test.php?id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Xóa bài test này sẽ xóa tất cả dữ liệu liên quan. Bạn chắc chắn?');" title="Xóa"><i class="fa-solid fa-trash"></i></a>
-                            </td>
-                        </tr>
-                    <?php endwhile; else: ?>
-                        <tr><td colspan="5" class="text-center text-muted py-4">Bạn chưa tạo hoặc được giao bài test nào.</td></tr>
-                    <?php endif; ?>
+                            <tr>
+                                <td>
+                                    <span class="test-name"><?php echo htmlspecialchars($row['ten_baitest']); ?></span>
+                                    <span class="test-scope fst-italic">Ngày tạo: <?php echo date("d/m/Y", strtotime($row['ngay_tao'])); ?></span>
+                                </td>
+                                <td class="test-scope"><?php echo $scope_text; ?></td>
+                                <td class="text-center"><?php echo get_test_type_badge($row['loai_baitest']); ?></td>
+                                <td class="text-center fw-bold"><?php echo $row['question_count']; ?></td>
+                                <td class="text-center fw-bold"><?php echo $row['thoi_gian']; ?>'</td>
+                                <td class="text-center actions-cell">
+                                    <a href="./admin.php?nav=ds_cauhoi_gv&id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-outline-primary btn-sm" title="Câu hỏi"><i class="fa-solid fa-list-check"></i></a>
+                                    <a href="./admin.php?nav=kqhocvien_gv&id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-outline-info btn-sm" title="Kết quả"><i class="fa-solid fa-square-poll-vertical"></i></a>
+                                    <button onclick="openEditModal(<?php echo $row['id_baitest']; ?>)" class="btn btn-outline-warning btn-sm" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                                    <a href="./modules/cauhoi/delete_test.php?id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xóa bài test này và tất cả dữ liệu liên quan không?');" title="Xóa"><i class="fa-solid fa-trash"></i></a>
+                                </td>
+                            </tr>
+                    <?php endwhile;
+                    endif; ?>
                 </tbody>
             </table>
         </div>
+
+        <div class="mobile-card-list d-none">
+            <?php if ($result->num_rows > 0):
+                mysqli_data_seek($result, 0);
+                $index = 0;
+                while ($row = $result->fetch_assoc()):
+                    $scope_text = 'Công khai';
+                    if ($row['ten_lop']) {
+                        $scope_text = 'Lớp: ' . htmlspecialchars($row['ten_lop']);
+                    } elseif ($row['ten_khoahoc']) {
+                        $scope_text = 'Khóa: ' . htmlspecialchars($row['ten_khoahoc']);
+                    }
+            ?>
+                    <div class="test-card-mobile" style="animation-delay: <?php echo $index++ * 70; ?>ms;">
+                        <div class="card-mobile-header">
+                            <div>
+                                <h6 class="card-mobile-title"><?php echo htmlspecialchars($row['ten_baitest']); ?></h6>
+                                <span class="test-scope"><?php echo $scope_text; ?></span>
+                            </div>
+                            <a href="./modules/cauhoi/delete_test.php?id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc muốn xóa bài test này?');" title="Xóa"><i class="fa-solid fa-trash"></i></a>
+                        </div>
+                        <div class="card-mobile-body">
+                            <div class="card-mobile-row"><span class="label"><i class="fa-solid fa-tags text-muted"></i> Loại Test</span> <span class="value"><?php echo get_test_type_badge($row['loai_baitest']); ?></span></div>
+                            <div class="card-mobile-row"><span class="label"><i class="fa-solid fa-list-ol text-muted"></i> Số câu hỏi</span> <span class="value fw-bold"><?php echo $row['question_count']; ?></span></div>
+                            <div class="card-mobile-row"><span class="label"><i class="fa-solid fa-clock text-muted"></i> Thời gian</span> <span class="value fw-bold"><?php echo $row['thoi_gian']; ?> phút</span></div>
+                        </div>
+                        <div class="card-mobile-footer">
+                            <div class="btn-group w-100">
+                                <a href="./admin.php?nav=ds_cauhoi_gv&id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-list-check"></i> Câu hỏi</a>
+                                <a href="./admin.php?nav=kqhocvien_gv&id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-outline-info btn-sm"><i class="fa-solid fa-square-poll-vertical"></i> Kết quả</a>
+                                <button onclick="openEditModal(<?php echo $row['id_baitest']; ?>)" class="btn btn-outline-warning btn-sm"><i class="fa-solid fa-pen"></i> Sửa</button>
+                            </div>
+                        </div>
+                    </div>
+            <?php endwhile;
+            endif; ?>
+        </div>
+
+        <?php if ($result->num_rows == 0): ?>
+            <div class="text-center p-5">
+                <i class="fa-solid fa-folder-open fa-3x mb-3 text-muted"></i>
+                <p class="mb-0 text-muted">Không tìm thấy bài test nào.</p>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
-<div class="modal fade" id="addTestModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="addTestModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">Tạo Bài Test mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Bài Test mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
             <form action="modules/cauhoi/add_test.php" method="POST">
-                <input type="hidden" name="is_teacher" value="1"> <?php // Thêm cờ để file backend nhận diện ?>
                 <div class="modal-body">
-                    <div class="mb-3"><label class="form-label">Tên Bài Test *</label><input type="text" name="ten_baitest" class="form-control" required></div>
-                    <div class="mb-3"><label class="form-label">Loại bài test *</label><select name="loai_baitest" class="form-select" required><option value="dinh_ky">Kiểm tra định kỳ</option><option value="on_tap" selected>Bài ôn tập</option></select></div>
-                    <div class="mb-3"><label class="form-label">Áp dụng cho Khóa học *</label>
-                        <select name="id_khoahoc" class="form-select" id="add_id_khoahoc_gv" required>
-                            <option value="">-- Chọn khóa học --</option>
-                            <?php mysqli_data_seek($courses, 0); while ($course = $courses->fetch_assoc()): ?>
-                                <option value="<?php echo $course['id_khoahoc']; ?>"><?php echo htmlspecialchars($course['ten_khoahoc']); ?></option>
-                            <?php endwhile; ?>
-                        </select>
-                    </div>
-                    <div class="mb-3"><label class="form-label">Hoặc Lớp học cụ thể (Tùy chọn)</label>
-                        <select name="id_lop" class="form-select" id="add_id_lop_gv">
+                    <div class="mb-3"><label class="form-label">Tên Bài Test <span class="text-danger">*</span></label><input type="text" name="ten_baitest" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Loại bài test <span class="text-danger">*</span></label><select name="loai_baitest" class="form-select" required>
+                            <option value="dau_vao">Kiểm tra đầu vào</option>
+                            <option value="dinh_ky">Kiểm tra định kỳ</option>
+                            <option value="on_tap" selected>Bài ôn tập</option>
+                        </select></div>
+                    <div class="mb-3"><label class="form-label">Phạm vi áp dụng</label><select name="id_khoahoc" class="form-select" id="add_id_khoahoc">
+                            <option value="">-- Công khai hoặc Chọn khóa học --</option><?php mysqli_data_seek($courses, 0);
+                                                                                        while ($course = $courses->fetch_assoc()): ?><option value="<?php echo $course['id_khoahoc']; ?>"><?php echo htmlspecialchars($course['ten_khoahoc']); ?></option><?php endwhile; ?>
+                        </select></div>
+                    <div class="mb-3" id="add_class_wrapper" style="display:none;"><label class="form-label">Gán cho Lớp học (Tùy chọn)</label><select name="id_lop" class="form-select" id="add_id_lop">
                             <option value="">-- Áp dụng cho toàn khóa học --</option>
-                        </select>
-                    </div>
-                    <div class="mb-3"><label class="form-label">Thời Gian (phút) *</label><input type="number" name="thoi_gian" class="form-control" required></div>
+                        </select></div>
+                    <div class="mb-3"><label class="form-label">Thời Gian (phút) <span class="text-danger">*</span></label><input type="number" name="thoi_gian" class="form-control" required></div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-primary">Tạo</button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-primary">Thêm</button></div>
             </form>
         </div>
     </div>
 </div>
-
+<div class="modal fade" id="editTestModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chỉnh sửa Bài Test</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="modules/cauhoi/edit_test.php" method="POST">
+                <input type="hidden" name="id_baitest" id="edit_id_baitest">
+                <div class="modal-body">
+                    <div class="mb-3"><label class="form-label">Tên Bài Test <span class="text-danger">*</span></label><input type="text" name="ten_baitest" id="edit_ten_baitest" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Loại bài test <span class="text-danger">*</span></label><select name="loai_baitest" id="edit_loai_baitest" class="form-select" required>
+                            <option value="dau_vao">Kiểm tra đầu vào</option>
+                            <option value="dinh_ky">Kiểm tra định kỳ</option>
+                            <option value="on_tap">Bài ôn tập</option>
+                        </select></div>
+                    <div class="mb-3"><label class="form-label">Phạm vi áp dụng</label><select name="id_khoahoc" id="edit_id_khoahoc" class="form-select">
+                            <option value="">-- Công khai --</option><?php mysqli_data_seek($courses_for_edit_modal, 0);
+                                                                        while ($course = $courses_for_edit_modal->fetch_assoc()): ?><option value="<?php echo $course['id_khoahoc']; ?>"><?php echo htmlspecialchars($course['ten_khoahoc']); ?></option><?php endwhile; ?>
+                        </select></div>
+                    <div class="mb-3" id="edit_class_wrapper" style="display:none;"><label class="form-label">Gán cho Lớp học (Tùy chọn)</label><select name="id_lop" class="form-select" id="edit_id_lop">
+                            <option value="">-- Toàn khóa học --</option>
+                        </select></div>
+                    <div class="mb-3"><label class="form-label">Thời Gian (phút) <span class="text-danger">*</span></label><input type="number" name="thoi_gian" id="edit_thoi_gian" class="form-control" required></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-primary">Lưu thay đổi</button></div>
+            </form>
+        </div>
+    </div>
+</div>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const addCourseSelect = document.getElementById('add_id_khoahoc_gv');
-    const addClassSelect = document.getElementById('add_id_lop_gv');
-
-    addCourseSelect.addEventListener('change', async function() {
-        const courseId = this.value;
-        addClassSelect.innerHTML = '<option value="">Đang tải...</option>';
+    async function loadClasses(courseId, classSelect, classWrapper, selectedLopId = null) {
         if (courseId) {
-            // Lấy danh sách lớp DỰA TRÊN KHÓA HỌC và GIẢNG VIÊN
-            const response = await fetch(`./modules/cauhoi/get_classes_by_course.php?course_id=${courseId}&teacher_only=1`);
-            const classes = await response.json();
-            
-            addClassSelect.innerHTML = '<option value="">-- Áp dụng cho toàn khóa học --</option>';
-            if (classes.length > 0) {
-                classes.forEach(cls => addClassSelect.add(new Option(cls.ten_lop, cls.id_lop)));
-            } else {
-                addClassSelect.innerHTML = '<option value="">-- Không có lớp nào của bạn trong khóa này --</option>';
+            classWrapper.style.display = 'block';
+            classSelect.innerHTML = '<option>Đang tải...</option>';
+            try {
+                const response = await fetch(`./modules/cauhoi/get_classes_by_course.php?course_id=${courseId}`);
+                const classes = await response.json();
+                classSelect.innerHTML = '<option value="">-- Áp dụng cho toàn khóa học --</option>';
+                classes.forEach(cls => {
+                    const option = new Option(cls.ten_lop, cls.id_lop);
+                    if (selectedLopId && cls.id_lop == selectedLopId) {
+                        option.selected = true;
+                    }
+                    classSelect.add(option);
+                });
+            } catch (error) {
+                classSelect.innerHTML = '<option value="">-- Lỗi tải lớp học --</option>';
+                console.error('Fetch error:', error);
             }
         } else {
-             addClassSelect.innerHTML = '<option value="">-- Vui lòng chọn khóa học trước --</option>';
+            classWrapper.style.display = 'none';
+            classSelect.innerHTML = '<option value="">-- Áp dụng cho toàn khóa học --</option>';
         }
+    }
+
+    async function openEditModal(testId) {
+        try {
+            const response = await fetch(`./modules/cauhoi/get_test_info.php?id=${testId}`);
+            const data = await response.json();
+            if (data.error) {
+                Swal.fire('Lỗi!', data.error, 'error');
+                return;
+            }
+
+            document.getElementById('edit_id_baitest').value = data.id_baitest;
+            document.getElementById('edit_ten_baitest').value = data.ten_baitest;
+            document.getElementById('edit_loai_baitest').value = data.loai_baitest;
+            document.getElementById('edit_id_khoahoc').value = data.id_khoahoc || "";
+            document.getElementById('edit_thoi_gian').value = data.thoi_gian;
+
+            const editCourseSelect = document.getElementById('edit_id_khoahoc');
+            const editClassSelect = document.getElementById('edit_id_lop');
+            const editClassWrapper = document.getElementById('edit_class_wrapper');
+            await loadClasses(data.id_khoahoc, editClassSelect, editClassWrapper, data.id_lop);
+
+            const editModal = new bootstrap.Modal(document.getElementById('editTestModal'));
+            editModal.show();
+        } catch (error) {
+            Swal.fire('Lỗi!', 'Không thể lấy dữ liệu bài test.', 'error');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const addCourseSelect = document.getElementById('add_id_khoahoc');
+        const addClassWrapper = document.getElementById('add_class_wrapper');
+        const addClassSelect = document.getElementById('add_id_lop');
+        addCourseSelect.addEventListener('change', () => loadClasses(addCourseSelect.value, addClassSelect, addClassWrapper));
+
+        const editCourseSelect = document.getElementById('edit_id_khoahoc');
+        const editClassWrapper = document.getElementById('edit_class_wrapper');
+        const editClassSelect = document.getElementById('edit_id_lop');
+        editCourseSelect.addEventListener('change', () => loadClasses(editCourseSelect.value, editClassSelect, editClassWrapper));
     });
-});
 </script>

@@ -12,8 +12,7 @@
                     <ul class="features-list">
                         <li class="feature-item" data-aos="fade-right" data-aos-delay="200">
                         <span>
-                            <i class="fas fa-check-circle feature-icon"></i>
-                            Phương pháp E.M.P.O.W.E.R – Tăng phản xạ, tư duy phản biện.</span>
+                            <i class="fas fa-check-circle feature-icon"></i>Phương pháp E.M.P.O.W.E.R – Tăng phản xạ, tư duy phản biện.</span>
                         </li>
                         <li class="feature-item" data-aos="fade-right" data-aos-delay="300">
 

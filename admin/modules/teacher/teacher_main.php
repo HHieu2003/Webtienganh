@@ -16,10 +16,14 @@ switch ($nav) {
     case 'lichhoc':
         include("./modules/lichhoc/lichhoc.php");
         break;
+    case 'teacher_schedule':
+        include("teacher_schedule.php");
+        break;
 
-    // ================================================================
-    // === BỔ SUNG MỚI: ĐIỀU HƯỚNG CHO CÁC CHỨC NĂNG BÀI TEST ===
-    // ================================================================
+     case 'view_submission_admin': // Thêm case mới để xem chi tiết bài làm
+        include("./modules/cauhoi/view_submission_admin.php");
+        break;
+        
     case 'question': // Trang danh sách bài test của giảng viên
         include("teacher_tests.php");
         break;

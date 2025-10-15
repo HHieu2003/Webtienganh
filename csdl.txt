@@ -236,6 +236,36 @@ CREATE TABLE `dapan_hocvien` (
   CONSTRAINT `dapan_hocvien_ibfk_1` FOREIGN KEY (`id_ketqua`) REFERENCES `ketquabaitest` (`id_ketqua`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+-- Tạo bảng lưu lịch sử chat
+CREATE TABLE `chat_history` (
+  `id_chat` INT PRIMARY KEY AUTO_INCREMENT,
+  `id_hocvien` INT NULL,
+  `session_id` VARCHAR(255) NOT NULL,
+  `message_type` ENUM('user', 'bot') NOT NULL,
+  `message_content` TEXT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_session` (`session_id`),
+  INDEX `idx_hocvien` (`id_hocvien`),
+  FOREIGN KEY (`id_hocvien`) REFERENCES `hocvien`(`id_hocvien`) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+
+-- Thêm cột 'loai_cauhoi' vào bảng 'cauhoi' để phân biệt câu hỏi trắc nghiệm và tự luận
+ALTER TABLE `cauhoi`
+ADD `loai_cauhoi` ENUM('trac_nghiem', 'tu_luan') NOT NULL DEFAULT 'trac_nghiem' AFTER `noi_dung`;
+
+-- Thêm các cột mới vào bảng 'dapan_hocvien' để lưu câu trả lời và kết quả chấm tự luận
+ALTER TABLE `dapan_hocvien`
+ADD `tra_loi_tu_luan` TEXT NULL DEFAULT NULL COMMENT 'Nội dung bài làm của học viên' AFTER `id_dapan_chon`,
+ADD `diem_tu_luan` DECIMAL(5, 2) NULL DEFAULT NULL COMMENT 'Điểm AI chấm' AFTER `tra_loi_tu_luan`,
+ADD `nhan_xet_tu_luan` TEXT NULL DEFAULT NULL COMMENT 'Nhận xét chi tiết từ AI' AFTER `diem_tu_luan`,
+ADD `trang_thai_cham` ENUM('da_cham', 'cho_cham', 'dang_cham') NOT NULL DEFAULT 'da_cham' COMMENT 'Trạng thái chấm bài tự luận' AFTER `nhan_xet_tu_luan`;
+
+-- Sửa đổi cột 'id_dapan_chon' để cho phép giá trị NULL, vì câu hỏi tự luận không có đáp án chọn sẵn
+ALTER TABLE `dapan_hocvien`
+MODIFY `id_dapan_chon` INT(11) NULL;
+
 -- --------------------------------------------------------
 -- CÁC TRIGGER
 -- --------------------------------------------------------

@@ -74,8 +74,8 @@ function get_payment_status_badge($status)
 {
     // Chuẩn hóa trạng thái về chữ thường để so sánh
     switch (strtolower(trim($status))) {
-        case 'Đã thanh toán':
-        case 'thanh cong':
+        case 'Đã thanh toán' :
+        case 'Đã hoàn thành' :
             return '<span class="badge status-badge status-success">Thành công</span>';
         case 'Đã hủy':
             return '<span class="badge status-badge status-pending">Đã hủy</span>';
@@ -290,7 +290,7 @@ function get_payment_status_badge($status)
                 $index = 0;
                 while ($row = $result->fetch_assoc()):
                     // Biến để kiểm tra trạng thái thành công
-                    $is_successful = (strtolower(trim($row['trang_thai'])) === 'Đã thanh toán' || strtolower(trim($row['trang_thai'])) === 'thanh cong');
+                    $is_successful = (strtolower(trim($row['trang_thai'])) === 'Đã thanh toán' || strtolower(trim($row['trang_thai'])) === 'Đã hoàn thành');
                 ?>
                     <tr class="transaction-row" style="animation-delay: <?php echo $index * 100; ?>ms;">
                         <td data-label="Chi tiết">

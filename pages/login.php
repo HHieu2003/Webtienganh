@@ -1,5 +1,4 @@
 <?php
-// Luôn bắt đầu session ở đầu file
 session_start();
 include("../config/config.php");
 
@@ -8,7 +7,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     $email = $_POST['email'];
     $mat_khau = $_POST['mat_khau'];
 
-    // Sử dụng Prepared Statements để chống SQL Injection
     $stmt = $conn->prepare("SELECT * FROM hocvien WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -18,13 +16,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
         $user = $result->fetch_assoc();
 
         if (password_verify($mat_khau, $user['mat_khau'])) {
-            $_SESSION['user'] = $user['ten_hocvien'];
-            $_SESSION['email'] = $email;
-            $_SESSION['id_hocvien'] = $user['id_hocvien'];
-            $_SESSION['is_admin'] = $user['is_admin'];
-
-            header("Location: ../index.php");
-            exit();
+            // **BƯỚC KIỂM TRA MỚI**
+            if ($user['is_verified'] == 0) {
+                $message = "Tài khoản của bạn chưa được kích hoạt. Vui lòng kiểm tra email để xác thực.";
+            } else {
+                // Đăng nhập thành công
+                $_SESSION['user'] = $user['ten_hocvien'];
+                $_SESSION['email'] = $email;
+                $_SESSION['id_hocvien'] = $user['id_hocvien'];
+                $_SESSION['is_admin'] = $user['is_admin'];
+                header("Location: ../index.php");
+                exit();
+            }
         } else {
             $message = "Email hoặc mật khẩu không đúng!";
         }
@@ -225,8 +228,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
         </form>
 
         <div class="form-footer">
-            <p>Bạn chưa có tài khoản? <a href="register.php">Đăng ký ngay</a></p>
-            <p style="margin-top: 10px;"><a href="login_teacher.php" style="font-size: 16px">Đăng nhập dành cho giáo viên</a></p>
+            <div class="d-flex justify-content-between">
+                <p><a href="forgot-password.php">Quên mật khẩu?</a></p>
+
+                <p style="margin-top: 7px;">Bạn chưa có tài khoản? <a href="register.php">Đăng ký ngay</a></p>
+            </div>
+            <p style="margin-top: 15px;"><a href="login_teacher.php" style="font-size: 16px">Đăng nhập dành cho giáo viên</a></p>
         </div>
     </div>
 </body>

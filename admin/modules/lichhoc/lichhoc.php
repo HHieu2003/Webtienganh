@@ -8,6 +8,11 @@ $lop_id = $_GET['lop_id'] ?? null;
 $view = $_GET['view'] ?? 'students'; // Mặc định là tab học viên
 $search_classes = $_GET['search_classes'] ?? '';
 
+// Xác định link quay lại dựa trên vai trò
+$is_teacher = isset($_SESSION['is_teacher']) && $_SESSION['is_teacher'] === true;
+$back_link = $is_teacher ? './admin.php?nav=teacher_classes' : './admin.php?nav=lichhoc';
+
+
 // Lấy danh sách giảng viên và khóa học để dùng cho các modal
 $lecturers = $conn->query("SELECT id_giangvien, ten_giangvien FROM giangvien ORDER BY ten_giangvien");
 $courses = $conn->query("SELECT id_khoahoc, ten_khoahoc FROM khoahoc ORDER BY ten_khoahoc");
@@ -120,7 +125,10 @@ if ($lop_id) {
         <div class="class-management-header animated-card">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div class="d-flex align-items-center gap-3 class-title-section">
-                    <a href="./admin.php?" class="btn btn-light border"><i class="fa-solid fa-arrow-left"></i></a>
+                     <a href="<?php echo $back_link; ?>" class="btn btn-light border" title="Quay lại">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    
                     <div>
                         <h1><?php echo htmlspecialchars($class_info['ten_lop']); ?></h1>
                         <p><?php echo htmlspecialchars($class_info['ten_khoahoc']); ?></p>

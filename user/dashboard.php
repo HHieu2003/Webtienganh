@@ -327,6 +327,7 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
                             </ul>
                         </li>
                         <li>
+                            <hr>
                             <a href="../pages/logout.php" class="nav-link-top text-danger"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
                         </li>
                     </ul>

@@ -28,27 +28,41 @@ if (!$baitest) {
     exit();
 }
 
-// Lấy danh sách câu hỏi và đáp án
-$sql_questions = "
-    SELECT c.id_cauhoi, c.noi_dung, d.id_dapan, d.noi_dung_dapan 
-    FROM cauhoi c
-    JOIN dapan d ON c.id_cauhoi = d.id_cauhoi
-    WHERE c.id_baitest = ?
-    ORDER BY c.id_cauhoi, d.id_dapan
-";
+// --- LOGIC MỚI: Lấy câu hỏi và đáp án riêng biệt ---
+
+// 1. Lấy tất cả câu hỏi (bao gồm cả loại câu hỏi)
+$sql_questions = "SELECT id_cauhoi, noi_dung, loai_cauhoi FROM cauhoi WHERE id_baitest = ? ORDER BY id_cauhoi";
 $stmt_questions = $conn->prepare($sql_questions);
 $stmt_questions->bind_param("i", $id_baitest);
 $stmt_questions->execute();
 $result_questions = $stmt_questions->get_result();
 
-$questions_with_answers = [];
+$questions_data = [];
+$mc_question_ids = []; // Mảng chứa ID các câu hỏi trắc nghiệm
 while ($row = $result_questions->fetch_assoc()) {
-    $questions_with_answers[$row['id_cauhoi']]['noi_dung'] = $row['noi_dung'];
-    $questions_with_answers[$row['id_cauhoi']]['answers'][] = [
-        'id_dapan' => $row['id_dapan'],
-        'noi_dung_dapan' => $row['noi_dung_dapan']
-    ];
+    $row['answers'] = []; // Khởi tạo mảng đáp án rỗng
+    $questions_data[$row['id_cauhoi']] = $row;
+    if ($row['loai_cauhoi'] === 'trac_nghiem') {
+        $mc_question_ids[] = $row['id_cauhoi'];
+    }
 }
+$stmt_questions->close();
+
+// 2. Nếu có câu hỏi trắc nghiệm, lấy tất cả đáp án của chúng trong 1 truy vấn
+if (!empty($mc_question_ids)) {
+    $placeholders = implode(',', array_fill(0, count($mc_question_ids), '?'));
+    $sql_answers = "SELECT id_dapan, id_cauhoi, noi_dung_dapan FROM dapan WHERE id_cauhoi IN ($placeholders) ORDER BY id_dapan";
+    $stmt_answers = $conn->prepare($sql_answers);
+    $stmt_answers->bind_param(str_repeat('i', count($mc_question_ids)), ...$mc_question_ids);
+    $stmt_answers->execute();
+    $result_answers = $stmt_answers->get_result();
+
+    while ($answer_row = $result_answers->fetch_assoc()) {
+        $questions_data[$answer_row['id_cauhoi']]['answers'][] = $answer_row;
+    }
+    $stmt_answers->close();
+}
+// --- KẾT THÚC LOGIC MỚI ---
 ?>
 
 <style>
@@ -63,6 +77,21 @@ while ($row = $result_questions->fetch_assoc()) {
     .answers-list label { display: block; background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 12px 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; }
     .answers-list label:hover { background-color: #e9ecef; }
     .answers-list input[type="radio"] { margin-right: 10px; }
+    /* CSS mới cho câu hỏi tự luận */
+    .essay-answer-area {
+        width: 100%;
+        min-height: 200px;
+        padding: 15px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        resize: vertical;
+    }
+    .essay-answer-area:focus {
+        outline: none;
+        border-color: #0db33b;
+        box-shadow: 0 0 0 0.25rem rgba(13, 179, 59, 0.25);
+    }
     .submit-btn { display: block; width: 100%; padding: 12px 20px; background-color: #28a745; color: white; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s ease; }
     .submit-btn:hover { background-color: #218838; }
 </style>
@@ -74,25 +103,36 @@ while ($row = $result_questions->fetch_assoc()) {
 <div class="quiz-container">
     <div class="quiz-header">
         <h1><?php echo htmlspecialchars($baitest['ten_baitest']); ?></h1>
-        <p class="instruction">Vui lòng đọc kỹ câu hỏi và chọn câu trả lời đúng nhất. Bài thi sẽ tự động nộp khi hết giờ.</p>
+        <p class="instruction">Vui lòng đọc kỹ câu hỏi và chọn/viết câu trả lời. Bài thi sẽ tự động nộp khi hết giờ.</p>
     </div>
     <hr>
     <form id="quizForm" method="POST" action="index.php?nav=dapan">
         <input type="hidden" name="id_baitest" value="<?php echo htmlspecialchars($id_baitest); ?>">
         <?php
         $question_number = 1;
-        foreach ($questions_with_answers as $id_cauhoi => $data):
+        foreach ($questions_data as $id_cauhoi => $data):
         ?>
             <div class="question-block">
                 <p><strong>Câu <?php echo $question_number++; ?>.</strong> <?php echo htmlspecialchars($data['noi_dung']); ?></p>
-                <div class="answers-list">
-                    <?php foreach ($data['answers'] as $answer): ?>
-                        <label>
-                            <input type="radio" name="answers[<?php echo htmlspecialchars($id_cauhoi); ?>]" value="<?php echo htmlspecialchars($answer['id_dapan']); ?>" required> 
-                            <?php echo htmlspecialchars($answer['noi_dung_dapan']); ?>
-                        </label>
-                    <?php endforeach; ?>
-                </div>
+                
+                <?php if ($data['loai_cauhoi'] === 'trac_nghiem'): ?>
+                    <div class="answers-list">
+                        <?php foreach ($data['answers'] as $answer): ?>
+                            <label>
+                                <input type="radio" name="answers[<?php echo htmlspecialchars($id_cauhoi); ?>][id_dapan_chon]" value="<?php echo htmlspecialchars($answer['id_dapan']); ?>" required>
+                                <?php echo htmlspecialchars($answer['noi_dung_dapan']); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: // Đây là câu hỏi tự luận ?>
+                    <textarea 
+                        name="answers[<?php echo htmlspecialchars($id_cauhoi); ?>][tra_loi_tu_luan]" 
+                        class="essay-answer-area"
+                        placeholder="Nhập bài làm của bạn vào đây..."
+                        required
+                    ></textarea>
+                <?php endif; ?>
+
             </div>
         <?php endforeach; ?>
         <button type="submit" class="submit-btn">Nộp bài</button>
@@ -100,6 +140,7 @@ while ($row = $result_questions->fetch_assoc()) {
 </div>
 
 <script>
+// --- Phần JavaScript giữ nguyên, không cần thay đổi ---
 document.addEventListener("DOMContentLoaded", function() {
     const timeDisplay = document.getElementById('time-display');
     const quizForm = document.getElementById('quizForm');
@@ -115,7 +156,16 @@ document.addEventListener("DOMContentLoaded", function() {
         const formData = new FormData(quizForm);
         const answers = {};
         for (let [key, value] of formData.entries()) {
-            if (key.startsWith('answers[')) { answers[key] = value; }
+            // Cập nhật logic lưu để hoạt động với cả radio và textarea
+            if (key.startsWith('answers[')) {
+                 const match = key.match(/answers\[(\d+)\]\[(\w+)\]/);
+                if (match) {
+                    const qId = match[1];
+                    const field = match[2];
+                    if (!answers[qId]) answers[qId] = {};
+                    answers[qId][field] = value;
+                }
+            }
         }
         sessionStorage.setItem(answersKey, JSON.stringify(answers));
     }
@@ -123,14 +173,23 @@ document.addEventListener("DOMContentLoaded", function() {
     function loadAnswers() {
         const savedAnswers = JSON.parse(sessionStorage.getItem(answersKey));
         if (savedAnswers) {
-            for (const name in savedAnswers) {
-                const radio = quizForm.querySelector(`input[name="${name}"][value="${savedAnswers[name]}"]`);
-                if (radio) { radio.checked = true; }
+             for (const qId in savedAnswers) {
+                for (const field in savedAnswers[qId]) {
+                    const value = savedAnswers[qId][field];
+                    const input = quizForm.querySelector(`[name="answers[${qId}][${field}]"][value="${value}"]`) || quizForm.querySelector(`[name="answers[${qId}][${field}]"]`);
+                    if (input) {
+                        if (input.type === 'radio') {
+                            input.checked = true;
+                        } else {
+                            input.value = value;
+                        }
+                    }
+                }
             }
         }
     }
 
-    quizForm.addEventListener('change', saveAnswers);
+    quizForm.addEventListener('input', saveAnswers);
     loadAnswers();
 
     let endTime = sessionStorage.getItem(timerKey);
@@ -151,7 +210,6 @@ document.addEventListener("DOMContentLoaded", function() {
         clearStorage();
         
         if (isAuto) {
-            // Hiển thị thông báo khi tự động nộp
             alert("Đã hết thời gian làm bài! Bài của bạn sẽ được tự động nộp.");
         }
         quizForm.submit();
@@ -162,7 +220,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (remainingTime <= 0) {
             clearInterval(timerInterval);
             timeDisplay.textContent = "00:00";
-            submitForm(true); // Tự động nộp khi hết giờ
+            submitForm(true);
             return;
         }
         const minutes = Math.floor((remainingTime / 1000) / 60);
@@ -186,10 +244,8 @@ document.addEventListener("DOMContentLoaded", function() {
         clearStorage();
     });
 
-    // SỬ DỤNG `unload` ĐỂ TƯƠNG THÍCH TỐT HƠN
     window.addEventListener('unload', function(event) {
         if (!hasSubmitted) {
-            // Tạo một form data và gửi nó bằng sendBeacon
             const formData = new FormData(quizForm);
             navigator.sendBeacon('index.php?nav=dapan', formData);
             clearStorage();
