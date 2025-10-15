@@ -1,138 +1,177 @@
 <style>
-    /* --- CÀI ĐẶT CHUNG --- */
-    .testimonial-section {
-        padding: 20px 0;
-        background-color: #f8f9fa; /* Màu nền sáng hơn */
-    }
+   /* --- CÀI ĐẶT CHUNG --- */
+.testimonial-section {
+    padding: 80px 0px;
+    background: linear-gradient(135deg, #d8faeaff 0%, #90dbeeff 50%rgba(82, 120, 130, 1)90 100%);
+    position: relative;
+}
 
-    .testimonial-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 15px;
-        position: relative; /* Cần cho việc định vị các nút */
-    }
+.testimonial-section::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+}
+
+.testimonial-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+    position: relative;
+}
 
 
-    /* --- SLIDER --- */
-    .testimonial-slider {
-        overflow: hidden; /* Quan trọng: Ẩn các slide thừa */
-    }
 
-    .slider-track {
-        display: flex;
-        /* transition-timing-function được đặt trong JS để kiểm soát tốt hơn */
-    }
+.slider-track {
+    display: flex;
+}
 
-    .review-card {
-        flex: 0 0 100%; /* Mặc định cho mobile, sẽ được ghi đè */
-        box-sizing: border-box;
-        padding: 25px;
-        background-color: #fff;
-        border-radius: 15px;
-        margin: 0 10px;
-        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
-        display: flex;
-        flex-direction: column;
-        height: 100%; /* Giúp các card có chiều cao bằng nhau */
-        border: 1px solid #eee;
-    }
+.review-card {
+    flex: 0 0 100%;
+    box-sizing: border-box;
+    padding: 35px;
+    background: #ffffff;
+    border-radius: 24px;
+    margin: 0 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+    transition: all 0.4s ease;
+}
 
-    .review-card .review-text {
-        font-size: 16px;
-        color: #555;
-        line-height: 1.7;
-        flex-grow: 1; /* Đẩy phần tên xuống dưới */
-        font-style: italic;
-    }
-    .review-card .review-text::before {
-        content: '“';
-        font-size: 24px;
-        color: #0db33b;
-        font-weight: bold;
-        margin-right: 5px;
-    }
+.review-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 24px;
+    padding: 3px;
+    background: linear-gradient(135deg, #06b6d4, #10b981);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
 
-    .review-author {
-        margin-top: 20px;
-        padding-top: 15px;
-        border-top: 1px dashed #e0e0e0;
-        text-align: center;
-    }
+.review-card:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 25px 70px rgba(6, 182, 212, 0.25);
+}
 
-    .review-author .name {
-        font-weight: 600;
-        font-size: 17px;
-        color: #333;
-    }
+.review-card:hover::before {
+    opacity: 1;
+}
 
-    .review-author .stars {
-        margin-top: 5px;
-        color: #ffc107; /* Màu vàng cho sao */
-    }
+.review-card .review-text {
+    font-size: 16px;
+    color: #475569;
+    line-height: 1.85;
+    flex-grow: 1;
+    font-style: italic;
+    position: relative;
+    padding-left: 25px;
+}
 
-    /* --- NÚT ĐIỀU HƯỚNG --- */
-    .slider-arrow {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 20px;
-        background: #fff;
-        border: none;
-        border-radius: 50%;
-        width: 45px;
-        height: 45px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        cursor: pointer;
-        z-index: 10;
-        transition: all 0.3s ease;
-    }
+.review-card .review-text::before {
+    content: '"';
+    position: absolute;
+    left: -5px;
+    top: -15px;
+    font-size: 60px;
+    background: linear-gradient(135deg, #06b6d4, #10b981);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+    opacity: 0.2;
+}
 
-    .slider-arrow:hover {
-        background: #0db33b;
-        color: #fff;
-        transform: translateY(-50%) scale(1.1);
-    }
+.review-author {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 2px dashed #cbd5e1;
+    text-align: center;
+}
 
-    .arrow-left {
-        left: -20px;
-    }
+.review-author .name {
+    font-weight: 700;
+    font-size: 18px;
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
 
-    .arrow-right {
-        right: -20px;
-    }
-    
-    /* --- RESPONSIVE --- */
-    
-    /* Màn hình máy tính bảng */
-    @media (min-width: 768px) {
-        .review-card {
-            flex-basis: 50%; /* 2 items trên hàng */
-        }
-    }
+.review-author .stars {
+    margin-top: 10px;
+    color: #f59e0b;
+    font-size: 20px;
+    letter-spacing: 3px;
+    filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.3));
+}
 
-    /* Màn hình máy tính nhỏ */
-    @media (min-width: 992px) {
-        .review-card {
-            flex-basis: 33.333%; /* 3 items trên hàng */
-        }
-    }
-    
-    /* Màn hình máy tính lớn */
-    @media (min-width: 1200px) {
-        .review-card {
-            flex-basis: 25%; /* 4 items trên hàng */
-        }
-    }
-    
-    /* Ẩn nút điều hướng trên điện thoại để tiết kiệm không gian */
-    @media (max-width: 767px) {
-        .slider-arrow {
-            display: none;
-        }
-        .testimonial-container {
-            padding: 0;
-        }
-    }
+/* --- NÚT ĐIỀU HƯỚNG --- */
+.slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 22px;
+    background: #ffffff;
+    color: #06b6d4;
+    border: 3px solid #06b6d4;
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.25);
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.slider-arrow:hover {
+    background: linear-gradient(135deg, #06b6d4, #10b981);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-50%) scale(1.2) rotate(360deg);
+    box-shadow: 0 12px 35px rgba(6, 182, 212, 0.4);
+}
+
+.arrow-left {
+    left: -27px;
+}
+
+.arrow-right {
+    right: -27px;
+}
+
+/* --- RESPONSIVE --- */
+@media (min-width: 768px) {
+    .review-card { flex-basis: 50%; }
+}
+
+@media (min-width: 992px) {
+    .review-card { flex-basis: 33.333%; }
+}
+
+@media (min-width: 1200px) {
+    .review-card { flex-basis: 25%; }
+}
+
+@media (max-width: 767px) {
+    .slider-arrow { display: none; }
+    .testimonial-container { padding: 0; }
+    .introduce-title { font-size: 28px; margin-bottom: 30px; }
+}
+
 
 </style>
 
