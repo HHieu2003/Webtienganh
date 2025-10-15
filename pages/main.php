@@ -7,7 +7,7 @@ switch ($nav) {
     case 'khoahoc':
         include("main/khoahoc.php");
         break;
-    
+
     case 'dskhoahoc':
         include("main/dskhoahoc.php");
         break;
@@ -39,7 +39,7 @@ switch ($nav) {
     case 'dangkykhoahoc':
         include("main/dangkykhoahoc.php");
         break;
-    
+
     // --- BẮT ĐẦU THÊM CÁC TRANG MỚI ---
     case 'lecturers':
         include("main/lecturers.php");
@@ -52,7 +52,12 @@ switch ($nav) {
     case 'blog':
         include("main/blog.php");
         break;
-    
+    case 'phuongphaphoc':
+        include("main/phuong-phap-empower.php");
+        break;
+    case 'huongdandambaodaura':
+        include("main/chinhsachdambaodaura.php");
+        break;
     case 'blog_single':
         include("main/blog_single.php");
         break;
@@ -71,4 +76,3 @@ switch ($nav) {
         include("main/home.php");
         break;
 }
-?>

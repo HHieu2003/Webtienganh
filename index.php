@@ -27,7 +27,7 @@ if (!isset($_SESSION['has_counted'])) {
         $stmt_views->execute();
         $stmt_views->close();
     }
-    
+
     // Đánh dấu rằng phiên này đã được đếm
     $_SESSION['has_counted'] = true;
 }
@@ -43,7 +43,7 @@ if (!isset($_SESSION['has_counted'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tiếng Anh Fighter!</title>
-    
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
@@ -52,17 +52,17 @@ if (!isset($_SESSION['has_counted'])) {
     <link rel="stylesheet" href="./pages/main.css">
 </head>
 <style>
-    
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Times New Roman', Times, serif !important;
-}
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Times New Roman', Times, serif !important;
+    }
 
-html, body {
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-}
+    html,
+    body {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+    }
 </style>
 
 <body>
@@ -71,11 +71,11 @@ html, body {
         <header>
             <?php include('./pages/header.php'); ?>
         </header>
-        
+
         <section>
             <?php include('./pages/main.php'); ?>
         </section>
-        
+
         <footer>
             <?php include('./pages/footer.php'); ?>
         </footer>
@@ -86,12 +86,13 @@ html, body {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script>
-      // Khởi tạo AOS
-      AOS.init({
-          duration: 1000,
-          once: true,
-      });
+        // Khởi tạo AOS
+        AOS.init({
+            duration: 1000,
+            once: true,
+        });
     </script>
 
 </body>
+
 </html>

@@ -640,6 +640,8 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="./index.php?nav=about">Giới Thiệu</a>
                                 <a class="dropdown-item" href="./index.php?nav=lecturers">Đội Ngũ Giảng Viên</a>
+                                <a class="dropdown-item" href="./index.php?nav=phuongphaphoc">Phương Pháp E.M.P.O.W.E.R</a>
+                                <a class="dropdown-item" href="./index.php?nav=huongdandambaodaura">Chính sách đảm bảo đầu</a>
                             </div>
                         </li>
                         <li class="nav-item">
@@ -696,6 +698,8 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
                 <div id="about-submenu" class="dropdown-menu">
                     <a class="dropdown-item" href="./index.php?nav=about">Giới Thiệu</a>
                     <a class="dropdown-item" href="./index.php?nav=lecturers">Đội Ngũ Giảng Viên</a>
+                    <a class="dropdown-item" href="./index.php?nav=phuongphaphoc">Phương Pháp E.M.P.O.W.E.R</a>
+                    <a class="dropdown-item" href="./index.php?nav=huongdandambaodaura">Chính sách đảm bảo đầu</a>
                 </div>
             </li>
             <li><a href="./index.php?nav=khoahoc">Khóa Học</a></li>
