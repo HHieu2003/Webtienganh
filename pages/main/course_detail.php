@@ -1,10 +1,4 @@
 <?php
-// =================================================================
-// PHẦN 1: KHỞI TẠO VÀ CẤU HÌNH
-// =================================================================
-
-// BƯỚC 1: Bật hiển thị lỗi để gỡ lỗi (RẤT QUAN TRỌNG!)
-// Xóa hoặc bình luận dòng này khi triển khai trên server thật
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
@@ -12,22 +6,6 @@ error_reporting(E_ALL);
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-// BƯỚC 3: Kết nối cơ sở dữ liệu
-// !!! QUAN TRỌNG: Hãy thay thế dòng `require` dưới đây bằng file kết nối CSDL của bạn.
-// Ví dụ: require_once 'config/db_connection.php';
-// Nếu file kết nối của bạn tên là 'ketnoi.php' thì dùng: require_once 'ketnoi.php';
-
-// Giả lập biến $conn để mã không báo lỗi. Bạn PHẢI thay thế phần này.
-/*
-$conn = new mysqli("localhost", "root", "", "quanlykhoahoc");
-if ($conn->connect_error) {
-    die("<h1>Lỗi Kết Nối Cơ Sở Dữ Liệu</h1><p>Không thể kết nối đến máy chủ CSDL. Vui lòng kiểm tra lại cấu hình.</p>");
-}
-$conn->set_charset("utf8mb4");
-*/
-
-
 // --- HÀM HỖ TRỢ CHUYỂỂN HƯỚNG ---
 if (!function_exists('course_detail_redirect_to_current')) {
     function course_detail_redirect_to_current(string $anchor = ''): void
