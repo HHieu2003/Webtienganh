@@ -648,7 +648,7 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
                             <a class="nav-link" href="./index.php?nav=khoahoc">Khóa Học</a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link" href="#">Học Liệu & Thi Thử &nbsp<i class="fas fa-caret-down"></i></a>
+                            <a class="nav-link" href="#">Học Tập & Rèn Luyện &nbsp<i class="fas fa-caret-down"></i></a>
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="./index.php?nav=question">Trắc Nghiệm Online</a>
                                 <a class="dropdown-item" href="./index.php?nav=blog">Blog Kiến Thức</a>
@@ -705,7 +705,7 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
             <li><a href="./index.php?nav=khoahoc">Khóa Học</a></li>
             <li class="dropdown">
                 <a href="javascript:void(0);" class="dropdown-toggle" data-target="materials-submenu">
-                    Học Liệu & Thi Thử
+                    Học Tập & Rèn Luyện
                 </a>
                 <div id="materials-submenu" class="dropdown-menu">
                     <a class="dropdown-item" href="./index.php?nav=question">Trắc Nghiệm Online</a>

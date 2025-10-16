@@ -47,7 +47,7 @@ switch ($nav) {
     case 'ketquakiemtra':
         include("modules/ketquakiemtra.php");
         break;
-        
+
     // --- THÊM DÒNG NÀY VÀO ---
     case 'view_submission':
         include("modules/view_test_submission.php");
@@ -57,9 +57,18 @@ switch ($nav) {
     case 'thongbao':
         include("modules/thongbao.php");
         break;
-        
+
+case 'sua_bai_viet':
+        include("modules/sua_bai_viet.php");
+        break;
+    case 'viet_bai':
+        include("modules/viet_bai.php");
+        break;
+    case 'bai_viet_cua_toi':
+        include("modules/bai_viet_cua_toi.php");
+        break;
+
     default: // Nếu 'nav' không khớp hoặc rỗng, sẽ chạy trang chủ của dashboard
         include("modules/home.php");
         break;
 }
-?>

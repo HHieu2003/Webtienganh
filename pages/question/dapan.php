@@ -6,7 +6,7 @@ include('./config/config.php');
 
 // --- HÀM GỌI API CHẤM ĐIỂM CỦA AI ---
 function gradeEssayWithAI($question, $answer) {
-    $api_key = "AIzaSyBu3OOT0rNIc-1DDdFYW8EJh-s9sNzm_lc"; // API Key của bạn
+    $api_key = "AIzaSyCw79baxbVs0yJ8sxHH2PYUKQN3LDR2kQQ"; // API Key của bạn
 $api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$api_key}";
 
 

@@ -96,7 +96,7 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="user.css">
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             background-color: var(--light-gray-bg);
@@ -310,6 +310,7 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
                             <ul class="collapse list-unstyled <?php echo $is_account_active ? 'show' : ''; ?>" id="accountSubmenu">
                                 <li><a href="./dashboard.php?nav=thongtin" class="<?php echo ($nav == 'thongtin') ? 'active' : ''; ?>">Thông tin cá nhân</a></li>
                                 <li><a href="./dashboard.php?nav=lichsuthanhtoan" class="<?php echo ($nav == 'lichsuthanhtoan') ? 'active' : ''; ?>">Lịch sử giao dịch</a></li>
+                                <li><a href="./dashboard.php?nav=bai_viet_cua_toi" class="<?php echo ($nav == 'bai_viet_cua_toi' || $nav == 'viet_bai') ? 'active' : ''; ?>">Bài viết của tôi</a></li>
                             </ul>
                         </li>
                         <li class="nav-item">

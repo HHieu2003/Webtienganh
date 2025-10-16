@@ -34,13 +34,9 @@ CREATE TABLE `hocvien` (
   `email` VARCHAR(100),
   `so_dien_thoai` VARCHAR(15),
   `mat_khau` VARCHAR(255),
+   `trinh_do` VARCHAR(50) NULL DEFAULT NULL COMMENT 'Trình độ được phân loại sau bài test',
   `is_admin` BOOLEAN DEFAULT FALSE
 ) ENGINE=InnoDB;
-
-ALTER TABLE `hocvien` ADD `trinh_do` VARCHAR(50) NULL DEFAULT NULL COMMENT 'Trình độ được phân loại sau bài test' AFTER `mat_khau`;
--- --------------------------------------------------------
--- Bảng có tham chiếu đến các bảng trên
--- --------------------------------------------------------
 
 CREATE TABLE `khoahoc` (
   `id_khoahoc` INT PRIMARY KEY AUTO_INCREMENT,
@@ -132,6 +128,7 @@ CREATE TABLE `cauhoi` (
   `id_cauhoi` INT PRIMARY KEY AUTO_INCREMENT,
   `id_baitest` INT,
   `noi_dung` TEXT,
+  `loai_cauhoi` ENUM('trac_nghiem', 'tu_luan') NOT NULL DEFAULT 'trac_nghiem',
   FOREIGN KEY (`id_baitest`) REFERENCES `baitest`(`id_baitest`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
@@ -165,12 +162,11 @@ CREATE TABLE `thongbao` (
   `ngay_tao` DATE,
   `tu_dong` BOOLEAN,
   `tieu_de` TEXT,
+  `trang_thai` VARCHAR(50) NOT NULL DEFAULT 'chưa đọc',
   FOREIGN KEY (`id_hocvien`) REFERENCES `hocvien`(`id_hocvien`),
   FOREIGN KEY (`id_khoahoc`) REFERENCES `khoahoc`(`id_khoahoc`)
 ) ENGINE=InnoDB;
 ALTER TABLE `thongbao` CHANGE `ngay_tao` `ngay_tao` DATETIME NULL DEFAULT NULL;
-
-ALTER TABLE `thongbao` ADD `trang_thai` VARCHAR(50) NOT NULL DEFAULT 'chưa đọc' AFTER `tieu_de`;
 
 CREATE TABLE `danhgiakhoahoc` (
   `id_danhgia` INT PRIMARY KEY AUTO_INCREMENT,
@@ -237,23 +233,25 @@ CREATE TABLE `dapan_hocvien` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- Tạo bảng lưu lịch sử chat
+-- XÓA bảng cũ nếu có (để tạo lại với cấu trúc mới)
+DROP TABLE IF EXISTS `chat_history`;
+
+-- TẠO bảng mới với cấu trúc ĐÚNG
 CREATE TABLE `chat_history` (
-  `id_chat` INT PRIMARY KEY AUTO_INCREMENT,
-  `id_hocvien` INT NULL,
-  `session_id` VARCHAR(255) NOT NULL,
-  `message_type` ENUM('user', 'bot') NOT NULL,
-  `message_content` TEXT NOT NULL,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  INDEX `idx_session` (`session_id`),
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `id_hocvien` INT(11) DEFAULT 0 COMMENT 'ID học viên (0 = guest)',
+  `user_message` TEXT NOT NULL COMMENT 'Tin nhắn của user',
+  `bot_response` TEXT NOT NULL COMMENT 'Phản hồi của bot',
+  `chat_type` VARCHAR(50) DEFAULT 'general' COMMENT 'Loại chat: ai_teaching, database_advice, hybrid, general',
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Thời gian tạo',
+  PRIMARY KEY (`id`),
   INDEX `idx_hocvien` (`id_hocvien`),
-  FOREIGN KEY (`id_hocvien`) REFERENCES `hocvien`(`id_hocvien`) ON DELETE SET NULL
-) ENGINE=InnoDB;
+  INDEX `idx_created_at` (`created_at`),
+  INDEX `idx_chat_type` (`chat_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Lịch sử chat với AI chatbot';
 
 
--- Thêm cột 'loai_cauhoi' vào bảng 'cauhoi' để phân biệt câu hỏi trắc nghiệm và tự luận
-ALTER TABLE `cauhoi`
-ADD `loai_cauhoi` ENUM('trac_nghiem', 'tu_luan') NOT NULL DEFAULT 'trac_nghiem' AFTER `noi_dung`;
+
 
 -- Thêm các cột mới vào bảng 'dapan_hocvien' để lưu câu trả lời và kết quả chấm tự luận
 ALTER TABLE `dapan_hocvien`
@@ -265,6 +263,41 @@ ADD `trang_thai_cham` ENUM('da_cham', 'cho_cham', 'dang_cham') NOT NULL DEFAULT 
 -- Sửa đổi cột 'id_dapan_chon' để cho phép giá trị NULL, vì câu hỏi tự luận không có đáp án chọn sẵn
 ALTER TABLE `dapan_hocvien`
 MODIFY `id_dapan_chon` INT(11) NULL;
+
+
+
+--
+-- Table structure for table `bai_viet`
+--
+
+CREATE TABLE `bai_viet` (
+  `id_baiviet` INT PRIMARY KEY AUTO_INCREMENT,
+  `tieu_de` VARCHAR(255) NOT NULL,
+  `noi_dung` LONGTEXT NOT NULL,
+  `hinh_anh_tieu_de` VARCHAR(255) NULL,
+  `id_tac_gia` INT NULL,
+  `ngay_tao` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `ngay_duyet` DATETIME NULL,
+  `trang_thai` ENUM('cho_duyet', 'da_duyet', 'bi_tu_choi') DEFAULT 'cho_duyet',
+  `luot_xem` INT DEFAULT 0,
+  FOREIGN KEY (`id_tac_gia`) REFERENCES `hocvien`(`id_hocvien`) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+--
+-- Table structure for table `binh_luan`
+--
+
+CREATE TABLE `binh_luan` (
+  `id_binhluan` INT PRIMARY KEY AUTO_INCREMENT,
+  `id_baiviet` INT NOT NULL,
+  `id_hocvien` INT NULL,
+  `parent_id` INT NULL DEFAULT NULL COMMENT 'ID của bình luận cha',
+  `noi_dung` TEXT NOT NULL,
+  `ngay_tao` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`id_baiviet`) REFERENCES `bai_viet`(`id_baiviet`) ON DELETE CASCADE,
+  FOREIGN KEY (`id_hocvien`) REFERENCES `hocvien`(`id_hocvien`) ON DELETE SET NULL,
+  FOREIGN KEY (`parent_id`) REFERENCES `binh_luan`(`id_binhluan`) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 -- --------------------------------------------------------
 -- CÁC TRIGGER

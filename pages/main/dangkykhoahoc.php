@@ -33,15 +33,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt_check->execute();
     if ($stmt_check->get_result()->num_rows > 0) {
         $stmt_check->close();
-        // Nếu đã đăng ký, báo lỗi và quay lại trang trước
-        echo "<script>
-            alert('Bạn đã đăng ký và hoàn tất thanh toán cho khóa học này rồi!');
-            window.history.back();
-        </script>";
+        // Sử dụng SweetAlert2 để hiển thị thông báo đẹp hơn
+        echo "
+    <html>
+    <head>
+        <title>Thông báo</title>
+        <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+        <style>body { font-family: sans-serif; }</style>
+    </head>
+    <body>
+        <script>
+            Swal.fire({
+                title: 'Thông báo',
+                text: 'Bạn đã đăng ký và hoàn tất thanh toán cho khóa học này rồi!',
+                icon: 'warning', // Có thể đổi thành 'error', 'success', 'info'
+                confirmButtonText: 'Quay lại',
+                confirmButtonColor: '#3085d6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.history.back();
+                }
+            });
+        </script>
+    </body>
+    </html>";
         exit();
     }
     $stmt_check->close();
-     if ($id_lop) {
+    if ($id_lop) {
         // Lấy lịch học của lớp mới mà học viên muốn đăng ký
         $sql_new_schedule = "SELECT ngay_hoc, gio_bat_dau, gio_ket_thuc FROM lichhoc WHERE id_lop = ?";
         $stmt_new = $conn->prepare($sql_new_schedule);
@@ -85,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 break; // Thoát vòng lặp bên ngoài
             }
         }
-        
+
         // Nếu phát hiện trùng lặp, báo lỗi và dừng lại
         if ($conflict_found) {
             echo "<script>
@@ -95,11 +114,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             exit();
         }
     }
-
-
 }
 // Lấy thông tin học viên và khóa học
-$ten_hocvien = ''; $email = ''; $phone = ''; $course_name = ''; $course_fee = 0;
+$ten_hocvien = '';
+$email = '';
+$phone = '';
+$course_name = '';
+$course_fee = 0;
 
 $sql_hocvien = "SELECT ten_hocvien, email, so_dien_thoai FROM hocvien WHERE id_hocvien = ?";
 $stmt_hv = $conn->prepare($sql_hocvien);
@@ -127,6 +148,7 @@ $stmt_kh->close();
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -134,63 +156,67 @@ $stmt_kh->close();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="pages/main/thanhtoan/css/style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+
 <body>
 
-<div class="form-container">
-    <div class="container-inner">
-        <div class="info-side">
-            <a href="index.php" class="logo-link">
-                <img src="images/logo2.jpg" alt="Logo" class="logo">
-                <h3>Tiếng Anh Fighter</h3>
-            </a>
-            <h2>Xác nhận thông tin đăng ký</h2>
-            <p class="subtitle">Vui lòng kiểm tra kỹ thông tin khóa học và thông tin cá nhân của bạn trước khi chuyển đến bước thanh toán.</p>
+    <div class="form-container">
+        <div class="container-inner">
+            <div class="info-side">
+                <a href="index.php" class="logo-link">
+                    <img src="images/logo2.jpg" alt="Logo" class="logo">
+                    <h3>Tiếng Anh Fighter</h3>
+                </a>
+                <h2>Xác nhận thông tin đăng ký</h2>
+                <p class="subtitle">Vui lòng kiểm tra kỹ thông tin khóa học và thông tin cá nhân của bạn trước khi chuyển đến bước thanh toán.</p>
 
-            <div class="info-group">
-                <h5 class="group-title"><i class="fa-solid fa-book-open-reader"></i> Thông tin khóa học</h5>
-                <p><strong>Khóa học:</strong> <?php echo htmlspecialchars($course_name); ?></p>
-                <?php if ($ghi_chu): ?>
-                    <p><strong>Ghi chú nguyện vọng:</strong> <em class="text-primary fst-italic">"<?php echo nl2br(htmlspecialchars($ghi_chu)); ?>"</em></p>
-                <?php endif; ?>
-            </div>
-
-            <div class="info-group">
-                <h5 class="group-title"><i class="fa-solid fa-user"></i> Thông tin của bạn</h5>
-                <p><strong>Họ và tên:</strong> <?php echo htmlspecialchars($ten_hocvien); ?></p>
-                <p><strong>Email:</strong> <?php echo htmlspecialchars($email); ?></p>
-                <p><strong>Số điện thoại:</strong> <?php echo htmlspecialchars($phone); ?></p>
-            </div>
-        </div>
-
-        <div class="action-side">
-            <div class="summary-card">
-                <h4>Tóm tắt đơn hàng</h4>
-                <div class="summary-item">
-                    <span>Tên khóa học</span>
-                    <span class="item-value"><?php echo htmlspecialchars($course_name); ?></span>
-                </div>
-                <hr>
-                <div class="summary-item total">
-                    <span>Tổng thanh toán</span>
-                    <span class="item-value total-price"><?php echo number_format($course_fee); ?> VNĐ</span>
+                <div class="info-group">
+                    <h5 class="group-title"><i class="fa-solid fa-book-open-reader"></i> Thông tin khóa học</h5>
+                    <p><strong>Khóa học:</strong> <?php echo htmlspecialchars($course_name); ?></p>
+                    <?php if ($ghi_chu): ?>
+                        <p><strong>Ghi chú nguyện vọng:</strong> <em class="text-primary fst-italic">"<?php echo nl2br(htmlspecialchars($ghi_chu)); ?>"</em></p>
+                    <?php endif; ?>
                 </div>
 
-                <form method="POST" action="pages/main/thanhtoan/xuly_dangky.php" class="mt-4">
-                    <input type="hidden" name="id_khoahoc" value="<?php echo $id_khoahoc; ?>">
-                    <input type="hidden" name="id_lop" value="<?php echo $id_lop; ?>">
-                    <input type="hidden" name="ghi_chu" value="<?php echo htmlspecialchars($ghi_chu ?? ''); ?>">
-                    <button type="submit" class="btn-submit">
-                        Xác nhận & Thanh toán <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                </form>
-                 <div class="text-center mt-3">
-                    <a href="javascript:history.back()" class="back-link"><i class="fa-solid fa-arrow-left"></i> Quay lại</a>
+                <div class="info-group">
+                    <h5 class="group-title"><i class="fa-solid fa-user"></i> Thông tin của bạn</h5>
+                    <p><strong>Họ và tên:</strong> <?php echo htmlspecialchars($ten_hocvien); ?></p>
+                    <p><strong>Email:</strong> <?php echo htmlspecialchars($email); ?></p>
+                    <p><strong>Số điện thoại:</strong> <?php echo htmlspecialchars($phone); ?></p>
+                </div>
+            </div>
+
+            <div class="action-side">
+                <div class="summary-card">
+                    <h4>Tóm tắt đơn hàng</h4>
+                    <div class="summary-item">
+                        <span>Tên khóa học</span>
+                        <span class="item-value"><?php echo htmlspecialchars($course_name); ?></span>
+                    </div>
+                    <hr>
+                    <div class="summary-item total">
+                        <span>Tổng thanh toán</span>
+                        <span class="item-value total-price"><?php echo number_format($course_fee); ?> VNĐ</span>
+                    </div>
+
+                    <form method="POST" action="pages/main/thanhtoan/xuly_dangky.php" class="mt-4">
+                        <input type="hidden" name="id_khoahoc" value="<?php echo $id_khoahoc; ?>">
+                        <input type="hidden" name="id_lop" value="<?php echo $id_lop; ?>">
+                        <input type="hidden" name="ghi_chu" value="<?php echo htmlspecialchars($ghi_chu ?? ''); ?>">
+                        <button type="submit" class="btn-submit">
+                            Xác nhận & Thanh toán <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="javascript:history.back()" class="back-link"><i class="fa-solid fa-arrow-left"></i> Quay lại</a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 </body>
+
 </html>

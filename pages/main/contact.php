@@ -1,5 +1,6 @@
 <style>
     .contact-section {
+        padding: 50px 0;
     }
 
     .contact-info-box {

@@ -1,91 +1,84 @@
-.introduce-title {
-    text-align: center;
-    position: relative;
-    padding: 0 0 15px;
-    margin: 25px 0px 30px;
-    color: #d80027;
-    font-size: 30px;
-    margin-bottom: 20px;
+/* ==========================================================
+   MAIN STYLESHEET (pages/main.css) - UPDATED
+   ========================================================== */
+
+/* --- Import Google Font --- */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+
+/* --- Biến màu và cài đặt chung --- */
+:root {
+    --brand-color: #0db33b;
+    --brand-color-dark: #0a8a2c;
+    --accent-color: #ffc107;
+    --neutral-white: #FFFFFF;
+    --neutral-light: #F8F9FA;
+    --neutral-gray: #6C757D;
+    --text-dark: #212529;
+    --shadow-soft: 0 8px 25px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-.introduce-title:after {
-    content: "";
-    background: #f25862;
-    bottom: 0;
-    display: block;
-    height: 2px;
-    left: 50%;
-    margin-left: -30px;
+/* --- Thiết lập font chữ cho toàn bộ trang --- */
+body {
+}
+
+/* --- Style chung cho các Section --- */
+.section-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.section-wrapper--light-gray {
+    background-color: var(--neutral-light);
+}
+
+.section-wrapper--gradient {
+    background: linear-gradient(135deg, #f0fdf4 0%, #e7f7ec 100%);
+}
+
+
+/* --- Style chung cho tiêu đề Section --- */
+.section-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.introduce-title {
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--brand-color-dark);
+    margin-bottom: 15px;
+    position: relative;
+    display: inline-block;
+}
+
+.introduce-title::after {
+    content: '';
     position: absolute;
-    width: 60px;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--brand-color), var(--accent-color));
+    border-radius: 2px;
 }
 
 .section-subtitle {
-    font-size: 20px;
-    color: #666;
+    font-size: 18px;
+    color: var(--neutral-gray);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.7;
 }
 
-.section-p20 {
-    padding: 20px 0;
-}
-
-@media (max-width: 551px) {
-.introduce-title {
-    font-size: 25px;
-}
-    .section-subtitle {
-        font-size: 13px;
+@media (max-width: 768px) {
+    .section-wrapper {
     }
-}
-
-/* 
-.introduce-title {
-        font-size: 36px;
-        font-weight: 700;
-        color: #222;
-        margin-bottom: 10px;
-    }
-
-    .section-subtitle {
-        font-size: 18px;
-        color: #666;
-    }
-        
-    
-    .section-header .introduce-title {
-        font-size: 32px;
-        font-weight: 700;
-        color: #2c3e50;
-        margin-bottom: 15px;
-    }
-
-    .section-header .section-subtitle {
-        font-size: 16px;
-        color: #555;
-        line-height: 1.6;
-        max-width: 800px;
-        margin: 0 auto;
-    }
-
-
-
     .introduce-title {
-        text-align: center;
-        position: relative;
-        padding-bottom: 15px;
-        margin-bottom: 40px; 
-        font-size: 28px; 
+        font-size: 32px;
     }
-
-    .introduce-title:after {
-        content: "";
-        background: #0db33b; 
-        bottom: 0;
-        display: block;
-        height: 3px;
-        left: 50%;
-        transform: translateX(-50%); 
-        position: absolute;
-        width: 70px;
+    .section-subtitle {
+        font-size: 16px;
     }
-    */
+}

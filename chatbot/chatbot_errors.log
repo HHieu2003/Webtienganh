@@ -1,0 +1,63 @@
+[16-Oct-2025 15:16:18 Europe/Berlin] Get Courses Error: Unknown column 'ten_khoa_hoc' in 'field list'
+[16-Oct-2025 15:16:18 Europe/Berlin] logChatMessage error: Unknown column 'user_id' in 'field list'
+[16-Oct-2025 15:17:17 Europe/Berlin] logChatMessage error: Unknown column 'user_id' in 'field list'
+[16-Oct-2025 15:17:17 Europe/Berlin] Get Courses Error: Unknown column 'ten_khoa_hoc' in 'field list'
+[16-Oct-2025 15:17:17 Europe/Berlin] logChatMessage error: Unknown column 'user_id' in 'field list'
+[16-Oct-2025 15:17:32 Europe/Berlin] Get Courses Error: Unknown column 'ten_khoa_hoc' in 'field list'
+[16-Oct-2025 15:17:32 Europe/Berlin] logChatMessage error: Unknown column 'user_id' in 'field list'
+[16-Oct-2025 15:17:48 Europe/Berlin] logChatMessage error: Unknown column 'user_id' in 'field list'
+[16-Oct-2025 15:18:00 Europe/Berlin] logChatMessage error: Unknown column 'user_id' in 'field list'
+[16-Oct-2025 15:18:11 Europe/Berlin] logChatMessage error: Unknown column 'user_id' in 'field list'
+[16-Oct-2025 15:18:19 Europe/Berlin] logChatMessage error: Unknown column 'user_id' in 'field list'
+[16-Oct-2025 15:22:01 Europe/Berlin] logChatMessage error: Unknown column 'user_id' in 'field list'
+[16-Oct-2025 15:28:25 Europe/Berlin] logChatMessage error: Unknown column 'user_id' in 'field list'
+[16-Oct-2025 15:51:19 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 15:51:52 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 15:52:22 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 15:53:06 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 15:55:06 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 15:55:20 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 15:55:55 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 15:57:04 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 15:57:21 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 15:57:51 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 15:58:08 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 16:01:16 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 16:01:45 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 16:01:47 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 16:02:00 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 16:38:21 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 16:38:42 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 16:39:00 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 16:39:21 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 16:39:30 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 16:39:56 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 19:06:18 Europe/Berlin] PHP Fatal error:  Cannot redeclare logChatMessage() (previously declared in C:\xampp\htdocs\dahp2\chatbot\chat_handler.php:678) in C:\xampp\htdocs\dahp2\chatbot\config.php on line 103
+[16-Oct-2025 19:06:19 Europe/Berlin] PHP Fatal error:  Cannot redeclare logChatMessage() (previously declared in C:\xampp\htdocs\dahp2\chatbot\chat_handler.php:678) in C:\xampp\htdocs\dahp2\chatbot\config.php on line 103
+[16-Oct-2025 19:06:20 Europe/Berlin] PHP Fatal error:  Cannot redeclare logChatMessage() (previously declared in C:\xampp\htdocs\dahp2\chatbot\chat_handler.php:678) in C:\xampp\htdocs\dahp2\chatbot\config.php on line 103
+[16-Oct-2025 19:15:27 Europe/Berlin] PHP Fatal error:  Cannot redeclare logChatMessage() (previously declared in C:\xampp\htdocs\dahp2\chatbot\chat_handler.php:678) in C:\xampp\htdocs\dahp2\chatbot\config.php on line 103
+[16-Oct-2025 19:15:28 Europe/Berlin] PHP Fatal error:  Cannot redeclare logChatMessage() (previously declared in C:\xampp\htdocs\dahp2\chatbot\chat_handler.php:678) in C:\xampp\htdocs\dahp2\chatbot\config.php on line 103
+[16-Oct-2025 19:15:29 Europe/Berlin] PHP Fatal error:  Cannot redeclare logChatMessage() (previously declared in C:\xampp\htdocs\dahp2\chatbot\chat_handler.php:678) in C:\xampp\htdocs\dahp2\chatbot\config.php on line 103
+[16-Oct-2025 19:17:44 Europe/Berlin] PHP Deprecated:  htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\dahp2\chatbot\database_advisor.php on line 88
+[16-Oct-2025 19:17:44 Europe/Berlin] PHP Deprecated:  htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\dahp2\chatbot\database_advisor.php on line 88
+[16-Oct-2025 19:17:44 Europe/Berlin] PHP Deprecated:  htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\dahp2\chatbot\database_advisor.php on line 88
+[16-Oct-2025 19:17:44 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 19:18:02 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 19:18:21 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 19:18:56 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 19:19:33 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 19:19:54 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 19:20:59 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 19:21:27 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 19:22:06 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 19:22:38 Europe/Berlin] PHP Deprecated:  htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\dahp2\chatbot\database_advisor.php on line 88
+[16-Oct-2025 19:22:38 Europe/Berlin] PHP Deprecated:  htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\dahp2\chatbot\database_advisor.php on line 88
+[16-Oct-2025 19:22:38 Europe/Berlin] PHP Deprecated:  htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\dahp2\chatbot\database_advisor.php on line 88
+[16-Oct-2025 19:22:44 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 19:30:13 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 19:37:15 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 19:37:36 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 19:38:07 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 20:00:05 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 20:01:21 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'
+[16-Oct-2025 20:03:04 Europe/Berlin] logChatMessage error: Unknown column 'user_message' in 'field list'

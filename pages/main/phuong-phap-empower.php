@@ -134,7 +134,7 @@ body {
     position: relative;
     z-index: 2;
     text-align: center;
-    max-width: 900px;
+    max-width: 950px;
     margin: 0 auto;
 }
 
@@ -143,7 +143,6 @@ body {
     font-size: 4rem;
     font-weight: 900;
     letter-spacing: 5px;
-    margin-bottom: 1rem;
     background: linear-gradient(45deg, #fff, #ffd700);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -152,9 +151,8 @@ body {
 }
 
 .hero-title {
-    font-size: 3rem;
+    font-size: 2.8rem;
     font-weight: 800;
-    margin-bottom: 1.5rem;
     line-height: 1.2;
     animation: fadeInUp 1s ease-out 0.2s both;
 }

@@ -11,7 +11,7 @@
 
         // Đã loại bỏ JOIN với bảng giangvien
         $sql = "SELECT * FROM khoahoc";
-        
+
         if (!empty($search)) {
             // Chỉ tìm kiếm theo tên khóa học
             $sql .= " WHERE ten_khoahoc LIKE ?";
@@ -29,7 +29,7 @@
         if ($result->num_rows > 0) {
             $delay = 0; // Biến để tạo hiệu ứng xuất hiện nối tiếp
             while ($row = $result->fetch_assoc()) {
-               $chiphi = number_format($row['chi_phi'], 0, ',', '.');
+                $chiphi = number_format($row['chi_phi'], 0, ',', '.');
                 echo '<div class="course-card" data-aos="fade-up" data-aos-delay="' . $delay . '">     
                         <div class="course-image-container">
                             <a href="./index.php?nav=course_detail&course_id=' . $row["id_khoahoc"] . '">
@@ -56,7 +56,7 @@
                             <a class="btn-view-detail" href="./index.php?nav=course_detail&course_id=' . $row["id_khoahoc"] . '">Xem Chi Tiết</a>
                         </div>  
                    </div>';
-                $delay += 50; 
+                $delay += 50;
             }
         } else {
             echo '<p class="text-center col-12">Không tìm thấy khóa học nào phù hợp.</p>';
@@ -70,10 +70,10 @@
     .course-section {
         max-width: 1200px;
         margin: 0px auto;
-        padding: 20px;
+        padding: 40px;
         min-height: 418px;
     }
-    
+
     .section-header {
         text-align: center;
         margin-bottom: 50px;
@@ -84,10 +84,11 @@
         font-weight: 700;
         margin-bottom: 10px;
     }
+
     .course-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 20px; 
+        gap: 20px;
     }
 
     .course-card {
@@ -116,56 +117,96 @@
 
     .course-image {
         width: 100%;
-        height: 180px; 
+        height: 180px;
         object-fit: cover;
         transition: transform 0.4s ease, filter 0.4s ease;
     }
-    
+
     .course-card:hover .course-image {
         transform: scale(1.1);
         filter: brightness(1.05);
     }
 
     .badge {
-        position: absolute; top: 15px; left: 15px; padding: 6px 12px;
-        color: #fff; font-size: 13px; font-weight: bold; border-radius: 5px;
-        background-color: #dc3545; z-index: 2;
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        padding: 6px 12px;
+        color: #fff;
+        font-size: 13px;
+        font-weight: bold;
+        border-radius: 5px;
+        background-color: #dc3545;
+        z-index: 2;
     }
 
     .course-details {
-        padding: 15px; 
+        padding: 15px;
         flex-grow: 1;
     }
 
     .course-title {
-        font-size: 16px; 
-        font-weight: 600; color: #333; margin-bottom: 10px;
-        line-height: 1.4; min-height: 45px; 
-        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+        line-height: 1.4;
+        min-height: 45px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
         overflow: hidden;
     }
-    .course-title a { color: inherit; text-decoration: none; transition: color 0.3s ease; }
-    .course-card:hover .course-title a { color: #0db33b; }
 
-    .course-info {
-        display: flex; justify-content: space-between; align-items: center;
-        padding-top: 10px; border-top: 1px solid #f0f0f0; margin-top: 10px;
+    .course-title a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.3s ease;
     }
 
-    .price { color: #0db33b; font-weight: bold; font-size: 18px; }
-    .rating { color: #ffc107; font-size: 14px; }
-    
-    .course-card-footer { padding: 0 15px 15px 15px; }
+    .course-card:hover .course-title a {
+        color: #0db33b;
+    }
+
+    .course-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 10px;
+        border-top: 1px solid #f0f0f0;
+        margin-top: 10px;
+    }
+
+    .price {
+        color: #0db33b;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .rating {
+        color: #ffc107;
+        font-size: 14px;
+    }
+
+    .course-card-footer {
+        padding: 0 15px 15px 15px;
+    }
 
     .btn-view-detail {
-        display: block; width: 100%; text-align: center;
+        display: block;
+        width: 100%;
+        text-align: center;
         color: #fff;
-        padding: 12px; border: none; border-radius: 8px;
-        font-size: 16px; font-weight: bold; cursor: pointer;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
         text-decoration: none;
-        position: relative; 
+        position: relative;
         z-index: 1;
-        overflow: hidden; 
+        overflow: hidden;
         transition: color 0.4s ease;
     }
 
@@ -184,20 +225,34 @@
     }
 
     .btn-view-detail {
-        background-color: #f0f0f0; 
+        background-color: #f0f0f0;
         color: #333;
     }
 
     .btn-view-detail:hover::before {
         transform: scaleX(1);
     }
-    
+
     .btn-view-detail:hover {
         color: #fff;
     }
 
     /* Responsive */
-    @media (max-width: 1200px) { .course-card { width: calc(33.333% - 14px); } }
-    @media (max-width: 768px) { .course-card { width: calc(50% - 10px); } }
-    @media (max-width: 576px) { .course-card { width: 100%; } }
+    @media (max-width: 1200px) {
+        .course-card {
+            width: calc(33.333% - 14px);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .course-card {
+            width: calc(50% - 10px);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .course-card {
+            width: 100%;
+        }
+    }
 </style>

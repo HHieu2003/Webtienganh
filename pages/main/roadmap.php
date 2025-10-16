@@ -1,37 +1,40 @@
 <div class="roadmap-section">
     <div class="container">
-        <div class="section-header text-center">
+        <div class="section-header text-center" data-aos="fade-up">
             <h2 class="introduce-title">Lộ trình học chi tiết – Từng bước đạt mục tiêu IELTS</h2>
             <p class="section-subtitle">Chọn đúng trình độ, học đúng phương pháp giúp bạn tối ưu thời gian để chinh phục mục tiêu IELTS. Lộ trình học tại Vietop được cá nhân hóa theo trình độ, kết hợp với giảng viên giàu kinh nghiệm và phương pháp luyện thi hiệu quả, giúp bạn làm chủ kỹ năng làm bài IELTS và nâng band điểm nhanh chóng.</p>
         </div>
 
-        <div class="roadmap-container">
+        <div class="roadmap-container" data-aos="fade-up" data-aos-delay="200">
             <div class="roadmap-timeline">
                 <div class="tab-buttons">
-                    <button class="tab-button active" data-tab="tab1">
+                    <button class="tab-button active" data-tab="tab1" data-index="0">
                         <span class="stage">Chặng 1</span>
                         <span class="level">Basic grammar</span>
                     </button>
-                    <button class="tab-button" data-tab="tab2">
+                    <button class="tab-button" data-tab="tab2" data-index="1">
                         <span class="stage">Chặng 2</span>
                         <span class="level">Reflection 1</span>
                     </button>
-                    <button class="tab-button" data-tab="tab3">
+                    <button class="tab-button" data-tab="tab3" data-index="2">
                         <span class="stage">Chặng 3</span>
                         <span class="level">Foundation</span>
                     </button>
-                    <button class="tab-button" data-tab="tab4">
+                    <button class="tab-button" data-tab="tab4" data-index="3">
                         <span class="stage">Chặng 4</span>
                         <span class="level">IELTS 3.0 – 5.0</span>
                     </button>
-                    <button class="tab-button" data-tab="tab5">
+                    <button class="tab-button" data-tab="tab5" data-index="4">
                         <span class="stage">Chặng 5</span>
                         <span class="level">IELTS 5.0 – 6.5+</span>
                     </button>
-                    <button class="tab-button" data-tab="tab6">
+                    <button class="tab-button" data-tab="tab6" data-index="5">
                         <span class="stage">Chặng 6</span>
                         <span class="level">IELTS 7.0+</span>
                     </button>
+                </div>
+                 <div class="timeline-line">
+                    <div class="timeline-progress"></div>
                 </div>
             </div>
 
@@ -215,8 +218,8 @@
                 </div>
 
                 <div class="course-actions">
-                    <a href="#" class="btn btn-primary-custom">Xem chi tiết khóa học</a>
-                    <a href="#" class="link-secondary-custom">Chính sách đảm bảo đầu ra</a>
+                    <a href="./index.php?nav=khoahoc" class="btn btn-primary-custom">Xem tất cả khóa học</a>
+                    <a href="./index.php?nav=huongdandambaodaura" class="link-secondary-custom">Chính sách đảm bảo đầu ra</a>
                 </div>
 
                 <div class="mascot-image-wrapper">
@@ -228,291 +231,206 @@
 </div>
 
 <style>
+    /* --- Variables and Base Styles --- */
+    :root {
+        --brand-color: #0db33b;
+        --brand-color-dark: #0a8a2c;
+        --accent-color: #ffc107;
+        --neutral-white: #FFFFFF;
+        --neutral-light: #f8f9fa;
+        --neutral-gray: #6c757d;
+        --text-dark: #212529;
+    }
     .roadmap-section {
-        padding: 20px 0;
-        background-color: #d1f8e2;
+        padding: 40px 0;
+        background-color: #f0fdf4; /* Light green background */
     }
-
-    .section-header {
-        margin-bottom: 40px;
-    }
-
     .roadmap-container {
-        background: #fff;
+        background: var(--neutral-white);
         border-radius: 20px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
         padding: 40px;
         position: relative;
-        /* BẮT BUỘC: để làm gốc cho robot */
-        /* XÓA BỎ 'overflow: hidden;' nếu có */
-        width: 100%;
     }
 
     /* ---- Timeline Tabs ---- */
     .roadmap-timeline {
         padding-bottom: 30px;
         margin-bottom: 30px;
+        position: relative;
     }
-
     .tab-buttons {
         display: flex;
-        position: relative;
+        justify-content: space-between;
         gap: 15px;
-        /* THÊM DÒNG NÀY */
+        position: relative;
+        z-index: 2;
     }
-
-    /* Đường kẻ ngang của timeline */
-    .tab-buttons::before {
-        content: '';
-        position: absolute;
-        top: 60%;
-        /* Căn giữa theo chiều dọc của nút */
-        left: 5%;
-        right: 5%;
-        height: 2px;
-        background-color: #dbeafc;
-        transform: translateY(-50%);
-        z-index: 1;
-    }
-
+    
     .tab-button {
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
+        background-color: #f1f1f1;
+        border: 1px solid #e0e0e0;
         border-radius: 12px;
         padding: 10px 15px;
         text-align: center;
         cursor: pointer;
         transition: all 0.3s ease;
         position: relative;
-        z-index: 2;
-        /* Nằm trên đường kẻ */
         width: 15%;
-        /* Chia đều cho 6 nút */
-        color: #495057;
+        color: var(--neutral-gray);
+        font-weight: 600;
     }
-
-    /* Dấu chấm tròn của timeline */
-    .tab-button::after {
-        content: '';
-        position: absolute;
-        bottom: -28px;
-        /* Vị trí dưới nút */
-        left: 50%;
-        transform: translateX(-50%);
-        width: 12px;
-        height: 12px;
-        background-color: #dbeafc;
-        border: 2px solid #fff;
-        border-radius: 50%;
-        transition: all 0.3s ease;
+    .tab-button:hover {
+        background-color: #e7f7ec;
+        border-color: var(--brand-color);
     }
-
     .tab-button .stage {
         display: block;
         font-size: 14px;
         font-weight: 500;
         opacity: 0.8;
     }
-
     .tab-button .level {
         display: block;
         font-size: 16px;
-        font-weight: 600;
     }
-
     .tab-button.active {
-        background-color: #3fd54eff;
-        /* Màu xanh đậm khi active */
-        color: #fff;
-        border-color: #2c3e50;
+        background-color: var(--brand-color);
+        color: var(--neutral-white);
+        border-color: var(--brand-color-dark);
         transform: translateY(-5px);
-        box-shadow: 0 8px 15px rgba(44, 62, 80, 0.2);
+        box-shadow: 0 8px 15px rgba(13, 179, 59, 0.2);
     }
-
+    
+    /* --- Timeline Line and Progress --- */
+    .timeline-line {
+        position: absolute;
+        bottom: 12px;
+        left: 5%;
+        right: 5%;
+        height: 4px;
+        background-color: #e9ecef;
+        border-radius: 2px;
+        z-index: 1;
+    }
+    .timeline-progress {
+        position: absolute;
+        height: 100%;
+        background: var(--brand-color);
+        width: 0%; /* Controlled by JS */
+        border-radius: 2px;
+        transition: width 0.4s ease-in-out;
+    }
+    .tab-button::after {
+        content: '';
+        position: absolute;
+        bottom: -23px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 16px;
+        height: 16px;
+        background-color: #e9ecef;
+        border: 3px solid var(--neutral-white);
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        z-index: 3;
+    }
     .tab-button.active::after {
-        background-color: #00e717ff;
-        /* Màu dấu chấm khi active */
+        background-color: var(--brand-color);
         transform: translateX(-50%) scale(1.3);
     }
 
     /* ---- Tab Content ---- */
     .tab-content-wrapper {
         min-height: 250px;
-        /* Đảm bảo đủ không gian cho nội dung và robot */
     }
-
     .tab-content {
         display: none;
         animation: fadeIn 0.5s ease;
     }
-
     .tab-content.active {
         display: block;
     }
-
     @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
-
-    .content-columns {
-        display: flex;
-        gap: 30px;
-    }
-
-    .left-col {
-        flex: 0 0 45%;
-        /* Chiếm 45% chiều rộng */
-        padding-right: 30px;
-        border-right: 1px solid #e9ecef;
-        /* Gạch kẻ dọc */
-    }
-
-    .right-col {
-        flex: 1;
-        /* Chiếm phần còn lại */
-    }
-
-    .info-group {
-        margin-bottom: 25px;
-    }
-
+    .content-columns { display: flex; gap: 30px; }
+    .left-col { flex: 0 0 45%; padding-right: 30px; border-right: 1px solid #e9ecef; }
+    .right-col { flex: 1; }
+    .info-group { margin-bottom: 25px; }
     .info-group h6 {
-        font-weight: 600;
+        font-weight: 700;
         font-size: 16px;
-        color: #343a40;
+        color: var(--brand-color-dark);
         margin-bottom: 10px;
     }
-
     .info-group ul {
         padding-left: 20px;
         margin-bottom: 0;
         list-style-type: '✓  ';
-        /* Custom list bullet */
         color: #555;
     }
-
-    .info-group ul li {
-        margin-bottom: 8px;
-        line-height: 1.6;
-    }
+    .info-group ul li { margin-bottom: 8px; line-height: 1.6; }
 
     /* ---- Bottom content: Actions and Mascot ---- */
-    .bottom-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        position: absolute;
-        bottom: 40px;
-        left: 40px;
-        right: 40px;
-    }
-
     .course-actions {
+        margin-top: 30px;
         display: flex;
         gap: 20px;
         align-items: center;
     }
-
     .btn-primary-custom {
-        background-color: #20b427ff;
-        color: #fff;
+        background-color: var(--brand-color-dark);
+        color: var(--neutral-white);
         border: none;
         padding: 12px 25px;
-        border-radius: 8px;
+        border-radius: 50px;
         font-size: 15px;
         font-weight: 600;
         text-decoration: none;
         transition: all 0.3s ease;
     }
-
     .btn-primary-custom:hover {
-        background-color: #46627f;
+        background-color: var(--brand-color);
         transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(13, 179, 59, 0.2);
+        color: var(--neutral-white);
     }
-
     .link-secondary-custom {
-        color: #2c3e50;
+        color: var(--brand-color-dark);
         font-size: 15px;
-        font-weight: 500;
+        font-weight: 600;
         text-decoration: none;
     }
-
     .link-secondary-custom:hover {
         text-decoration: underline;
+        color: var(--brand-color);
     }
-
     .mascot-image-wrapper {
         position: absolute;
-        /* Định vị tuyệt đối */
-        z-index: 10;
-        /* Đảm bảo nó nổi lên trên */
-
-        /* Dùng giá trị âm để kéo robot ra ngoài container */
         bottom: -10px;
-        /* Kéo xuống dưới, ra khỏi viền container */
-        right: -50px;
-        /* Kéo sang phải, ra khỏi viền container */
+        right: -40px;
+        width: 110px;
+        transition: transform 0.4s ease-in-out;
     }
-
-    .mascot-image-wrapper img {
-        max-width: 100px;
-        height: auto;
-        display: block;
-        /* Thêm display block để tránh khoảng trống lạ dưới ảnh */
+    .roadmap-container:hover .mascot-image-wrapper {
+        transform: rotate(3deg) scale(1.05);
     }
-
+    .mascot-image-wrapper img { max-width: 100%; }
 
     /* ---- Responsive ---- */
     @media (max-width: 991px) {
-        .content-columns {
-            flex-direction: column;
-        }
-
-        .left-col {
-            border-right: none;
-            padding-right: 0;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #e9ecef;
-            padding-bottom: 20px;
-        }
-
-        .bottom-content {
-            position: static;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 30px;
-        }
-
-        .mascot-image-wrapper {
-            margin-top: 20px;
-        }
-
-        .tab-button .level {
-            font-size: 14px;
-        }
-
-        .tab-buttons {
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .tab-button {
-            width: 30%;
-        }
-
-        .tab-buttons::before,
-        .tab-button::after {
-            display: none;
-            /* Ẩn timeline trên mobile để đơn giản hóa */
-        }
+        .content-columns { flex-direction: column; }
+        .left-col { border-right: none; padding-right: 0; margin-bottom: 20px; border-bottom: 1px solid #e9ecef; padding-bottom: 20px; }
+        .mascot-image-wrapper { display: none; }
+        .tab-buttons { flex-wrap: wrap; gap: 10px; }
+        .tab-button { width: calc(50% - 5px); }
+        .timeline-line, .tab-button::after { display: none; }
+        .roadmap-timeline { padding-bottom: 0; }
+    }
+    @media (max-width: 576px) {
+        .tab-button { width: 100%; }
     }
 </style>
 
@@ -520,17 +438,26 @@
     document.addEventListener('DOMContentLoaded', function() {
         const tabs = document.querySelectorAll('.tab-button');
         const contents = document.querySelectorAll('.tab-content');
+        const progress = document.querySelector('.timeline-progress');
+        const numTabs = tabs.length;
 
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
-                // Xóa class 'active' khỏi tất cả các nút và nội dung
+                // Remove active class from all
                 tabs.forEach(item => item.classList.remove('active'));
                 contents.forEach(item => item.classList.remove('active'));
 
-                // Thêm class 'active' vào nút và nội dung được click
+                // Add active class to the clicked tab and content
                 tab.classList.add('active');
                 const contentId = tab.getAttribute('data-tab');
                 document.getElementById(contentId).classList.add('active');
+
+                // Update progress bar width
+                const index = parseInt(tab.getAttribute('data-index'));
+                if (numTabs > 1) {
+                    const progressPercentage = (index / (numTabs - 1)) * 100;
+                    progress.style.width = `${progressPercentage}%`;
+                }
             });
         });
     });

@@ -1,4 +1,4 @@
-<!-- Footer với AI Chatbot Hybrid + Speech Practice -->
+<!-- Footer với thiết kế gốc + AI Chatbot -->
 <footer class="footer-wrapper-light" data-aos="fade-up">
     <div class="container">
         <div class="footer-main">
@@ -14,10 +14,10 @@
                 
                 <!-- AI Assistant Info -->
                 <div class="ai-assistant-info">
-                    <h5><i class="fa-solid fa-brain"></i> AI Assistant 3-in-1</h5>
-                    <p><strong>Tư vấn</strong> + <strong>Dạy học</strong> + <strong>Luyện nói</strong></p>
+                    <h5><i class="fa-solid fa-brain"></i> Hybrid AI Assistant</h5>
+                    <p><strong>2-in-1:</strong> Tư vấn khóa học + Dạy tiếng Anh</p>
                     <button class="btn-chat-now" onclick="document.getElementById('chatbot-toggler').click();">
-                        <i class="fa-solid fa-robot"></i> Chat AI
+                        <i class="fa-solid fa-comment"></i> Chat Ngay
                     </button>
                 </div>
                 
@@ -47,14 +47,8 @@
                     <li><a href="./index.php?nav=lecturers">Đội ngũ giảng viên</a></li>
                 </ul>
                 
-                <!-- AI Features Links -->
-                <h4 style="margin-top: 25px;">🤖 AI FEATURES</h4>
-                <ul class="footer-links ai-features">
-                    <li><a href="javascript:void(0);" onclick="openChatWithMessage('📊 Xem thống kê trung tâm', 'customer_service')">📊 Thống kê realtime</a></li>
-                    <li><a href="javascript:void(0);" onclick="openChatWithMessage('📚 Danh sách khóa học', 'customer_service')">📚 Tư vấn khóa học</a></li>
-                    <li><a href="javascript:void(0);" onclick="openChatWithMessage('📖 Học ngữ pháp cơ bản', 'english_teacher')">📖 Học ngữ pháp</a></li>
-                    <li><a href="javascript:void(0);" onclick="openChatWithMessage('🎤 Luyện nói với AI', 'speech_practice')">🎤 Luyện phát âm</a></li>
-                </ul>
+                <img class="logo-footer-small" src="./images/logofooter.png" alt="Logo Bộ Công Thương">
+             
             </div>
 
             <div class="footer-content contact-info">
@@ -97,7 +91,6 @@
                     </div>
                 </div>
                 
-                <img class="logo-footer-small" src="./images/logofooter.png" alt="Logo Bộ Công Thương">
             </div>
         </div>
     </div>
@@ -120,190 +113,22 @@
     </div>
 </footer>
 
-<!-- HYBRID AI CHATBOT WITH SPEECH PRACTICE -->
-<div class="chatbot" id="chatbot">
-    <header>
-        <h2>🤖 English Fighter AI</h2>
-        <div class="header-controls">
-            <div class="current-mode-indicator">
-                <span id="current-mode-text">🏢 Customer Service</span>
-            </div>
-            <button id="expand-chatbot" title="Mở rộng chat">
-                <i class="fa-solid fa-expand"></i>
-            </button>
-            <button id="close-chatbot" title="Đóng chat">
-                <i class="fa-solid fa-times"></i>
-            </button>
-        </div>
-    </header>
-    
-    <!-- Speech Practice Panel -->
-    <div class="speech-practice-panel" id="speech-panel" style="display: none;">
-        <div class="speech-header">
-            <h4>🎤 Speech Practice with AI</h4>
-            <button class="close-speech" onclick="closeSpeechPanel()">
-                <i class="fa-solid fa-times"></i>
-            </button>
-        </div>
-        
-        <div class="speech-lesson" id="current-lesson">
-            <div class="lesson-info">
-                <div class="lesson-meta">
-                    <span class="lesson-level" id="lesson-level">Beginner</span>
-                    <span class="lesson-focus" id="lesson-focus">Basic pronunciation</span>
-                </div>
-                <h5 class="lesson-title" id="lesson-title">Self Introduction</h5>
-            </div>
-            
-            <div class="lesson-text">
-                <div class="target-text" id="target-text">
-                    [translate:Hello, my name is John. I am from Vietnam. Nice to meet you.]
-                </div>
-                <div class="vietnamese-text" id="vietnamese-text">
-                    Xin chào, tên tôi là John. Tôi đến từ Việt Nam. Rất vui được gặp bạn.
-                </div>
-            </div>
-            
-            <div class="speech-controls">
-                <button class="speech-btn primary" id="start-recording" onclick="startRecording()">
-                    <i class="fa-solid fa-microphone"></i> Bắt đầu nói
-                </button>
-                <button class="speech-btn secondary" id="stop-recording" onclick="stopRecording()" disabled>
-                    <i class="fa-solid fa-stop"></i> Dừng lại
-                </button>
-                <button class="speech-btn tertiary" id="play-sample" onclick="playSample()">
-                    <i class="fa-solid fa-volume-up"></i> Nghe mẫu
-                </button>
-                <button class="speech-btn quaternary" id="change-lesson" onclick="showLessonSelector()">
-                    <i class="fa-solid fa-book"></i> Đổi bài
-                </button>
-            </div>
-            
-            <div class="recording-indicator" id="recording-indicator" style="display: none;">
-                <div class="pulse-circle"></div>
-                <span>🎤 Đang ghi âm... (<span id="record-timer">0</span>s)</span>
-            </div>
-            
-            <div class="speech-results" id="speech-results" style="display: none;">
-                <h5>📊 Kết quả phân tích AI</h5>
-                <div class="score-grid">
-                    <div class="score-item">
-                        <div class="score-circle" id="pronunciation-score">0</div>
-                        <span>Pronunciation</span>
-                    </div>
-                    <div class="score-item">
-                        <div class="score-circle" id="fluency-score">0</div>
-                        <span>Fluency</span>
-                    </div>
-                    <div class="score-item">
-                        <div class="score-circle" id="accuracy-score">0</div>
-                        <span>Accuracy</span>
-                    </div>
-                </div>
-                <div class="ai-feedback" id="ai-feedback">
-                    <div class="feedback-loading">
-                        <i class="fa-solid fa-brain"></i> AI đang phân tích...
-                    </div>
-                </div>
-                <div class="speech-actions">
-                    <button class="speech-btn small" onclick="startRecording()">
-                        <i class="fa-solid fa-redo"></i> Thử lại
-                    </button>
-                    <button class="speech-btn small tertiary" onclick="showLessonSelector()">
-                        <i class="fa-solid fa-forward"></i> Bài tiếp theo
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="chat-body">
-        <!-- AI messages sẽ xuất hiện ở đây -->
-    </div>
-    
-    <form class="chat-form">
-        <!-- Mode Selector -->
-        <div class="mode-selector">
-            <button type="button" class="mode-btn active" data-mode="customer_service" title="Customer Service - Tư vấn khóa học">
-                <i class="fa-solid fa-headset"></i>
-            </button>
-            <button type="button" class="mode-btn" data-mode="english_teacher" title="English Teacher - Dạy tiếng Anh">
-                <i class="fa-solid fa-chalkboard-user"></i>
-            </button>
-            <button type="button" class="mode-btn speech-mode" data-mode="speech_practice" title="Speech Practice - Luyện nói">
-                <i class="fa-solid fa-microphone"></i>
-            </button>
-        </div>
-        
-        <!-- Input Group -->
-        <div class="input-group">
-            <input type="text" class="message-input" placeholder="🏢 Hỏi về khóa học, giá cả, thống kê..." required>
-            <button type="button" class="voice-input-btn" id="voice-input-btn" title="Nói thay vì gõ">
-                <i class="fa-solid fa-microphone-lines"></i>
-            </button>
-            <button type="submit" class="send-btn">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
-        </div>
-    </form>
-</div>
-
-<!-- Single Toggle Button -->
-<button id="chatbot-toggler">
-    <span><i class="fa-solid fa-brain"></i></span>
-    <span><i class="fa-solid fa-times"></i></span>
-</button>
-
-<!-- Overlay -->
-<div class="chatbot-overlay" id="chatbot-overlay"></div>
-
-<!-- Load Assets -->
-<link rel="stylesheet" href="./chatbot/style.css">
-<script src="./chatbot/script.js"></script>
-
 <!-- Dependencies -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 
 <script>
-    // Initialize AOS
+    // Initialize AOS Animation
     AOS.init({
         duration: 1000,
         once: true,
     });
 
-    // ==================================================
-    // FOOTER INTEGRATION
-    // ==================================================
-
-    // Hàm mở chat với mode cụ thể
-    window.openChatWithMessage = function(message, mode = 'customer_service') {
-        console.log(`🚀 Opening chat: "${message}" in ${mode} mode`);
-        
-        document.body.classList.add("show-chatbot");
-        
-        setTimeout(() => {
-            if (window.switchMode) {
-                window.switchMode(mode);
-            }
-            
-            setTimeout(() => {
-                const messageInput = document.querySelector('.message-input');
-                if (messageInput && mode !== 'speech_practice') {
-                    messageInput.value = message;
-                    messageInput.focus();
-                    
-                    setTimeout(() => {
-                        document.querySelector('.chat-form')?.dispatchEvent(new Event('submit'));
-                    }, 500);
-                }
-            }, 600);
-        }, 300);
-    };
-
-    // Load footer stats
+    // Load footer stats với animation
     async function loadFooterStats() {
+        console.log('📊 Loading footer stats...');
+        
         try {
             const response = await fetch('./chatbot/data_handler.php', {
                 method: 'POST',
@@ -313,17 +138,23 @@
             
             const data = await response.json();
             if (data.success) {
+                // Animate counters với delay
                 setTimeout(() => animateCounter('footer-total-courses', data.data.total_courses || 0), 500);
                 setTimeout(() => animateCounter('footer-total-students', data.data.total_students || 0), 700);
                 setTimeout(() => animateCounter('footer-total-teachers', data.data.total_teachers || 0), 900);
+                
+                console.log('✅ Footer stats loaded successfully');
             }
         } catch (error) {
+            console.log('❌ Footer stats loading failed:', error);
+            // Set placeholder values
             document.getElementById('footer-total-courses').textContent = '10+';
             document.getElementById('footer-total-students').textContent = '500+';
             document.getElementById('footer-total-teachers').textContent = '15+';
         }
     }
 
+    // Hiệu ứng đếm số với easing
     function animateCounter(elementId, targetValue, duration = 2000) {
         const element = document.getElementById(elementId);
         if (!element) return;
@@ -353,18 +184,34 @@
         requestAnimationFrame(updateCounter);
     }
 
-    // Initialize
+    // Initialize everything
     document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(loadFooterStats, 1000);
+        console.log('🚀 Initializing footer integration...');
+        
+        // Load footer stats
+        setTimeout(() => {
+            loadFooterStats();
+        }, 1000);
+        
+        console.log('✅ Footer integration complete');
     });
+
+    // Auto-refresh footer stats mỗi 5 phút
+    setInterval(() => {
+        if (!document.body.classList.contains('show-chatbot')) {
+            loadFooterStats();
+        }
+    }, 300000);
 </script>
 
 <style>
-    /* Footer CSS - Giữ nguyên thiết kế gốc */
+    /* ==================================================================
+       CSS GỐC CHO FOOTER - GIỮ NGUYÊN + AI INTEGRATION
+    ================================================================== */
+
     :root {
         --brand-color: #0db33b;
         --teacher-color: #3498db;
-        --speech-color: #9c27b0;
         --text-color-dark: #333;
         --text-color-light: #666;
         --background-light-gray: #f8f9fa;
@@ -374,7 +221,7 @@
     .footer-wrapper-light {
         background-color: var(--background-light-gray);
         color: var(--text-color-light);
-        padding-top: 50px;
+        padding-top: 30px;
         border-top: 1px solid var(--border-color-light);
     }
 
@@ -388,7 +235,7 @@
         display: grid;
         grid-template-columns: 2fr 1fr 1.5fr;
         gap: 40px;
-        padding-bottom: 40px;
+        padding-bottom: 10px;
     }
 
     .footer-content.about-us .footer-logo-link {
@@ -457,7 +304,7 @@
     }
 
     .btn-chat-now {
-        background: linear-gradient(135deg, var(--brand-color) 0%, var(--teacher-color) 50%, var(--speech-color) 100%);
+        background: linear-gradient(135deg, var(--brand-color) 0%, var(--teacher-color) 100%);
         color: white;
         border: none;
         padding: 10px 20px;
@@ -474,8 +321,10 @@
     .btn-chat-now:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 16px rgba(13, 179, 59, 0.3);
+        background: linear-gradient(135deg, #0a8f2e 0%, #2980b9 100%);
     }
 
+    /* Footer Content Styles */
     .footer-content h4 {
         font-size: 18px;
         margin-bottom: 20px;
@@ -618,6 +467,11 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
+    .quick-stats:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
     .quick-stats h5 {
         color: var(--brand-color);
         font-size: 15px;
@@ -640,9 +494,12 @@
         background: var(--background-light-gray);
         border-radius: 8px;
         transition: all 0.3s ease;
+        border: 1px solid transparent;
     }
 
     .stat-item:hover {
+        background: white;
+        border-color: var(--brand-color);
         transform: scale(1.05);
     }
 
@@ -667,6 +524,11 @@
         transition: all 0.3s ease;
     }
 
+    .logo-footer-small:hover {
+        transform: scale(1.05);
+    }
+
+    /* Footer Bar */
     .footer-bar {
         background-color: #0db33b;
         color: #ffffff;
@@ -698,71 +560,26 @@
         transform: translateY(-1px);
     }
 
-    /* CHATBOT POSITIONING */
-    .chatbot {
-        position: fixed !important;
-        right: 35px !important;
-        bottom: 90px !important;
-        width: 420px !important;
-        height: auto !important;
-        max-height: 500px !important;
-        background: white !important;
-        border-radius: 15px !important;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
-        overflow: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-        transform: scale(0.5) !important;
-        transform-origin: bottom right !important;
-        transition: all 0.3s ease !important;
-        z-index: 999998 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        top: auto !important;
-        left: auto !important;
-        margin: 0 !important;
-    }
-
-    body.show-chatbot .chatbot {
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        transform: scale(1) !important;
-    }
-
-    #chatbot-toggler {
-        position: fixed !important;
-        bottom: 30px !important;
-        right: 35px !important;
-        height: 50px !important;
-        width: 50px !important;
-        z-index: 999999 !important;
-        background: linear-gradient(135deg, var(--brand-color) 0%, var(--teacher-color) 50%, var(--speech-color) 100%) !important;
-        border: none !important;
-        border-radius: 50% !important;
-        color: white !important;
-        cursor: pointer !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        transition: all 0.3s ease !important;
-        animation: tripleColorPulse 4s infinite !important;
-    }
-
-    @keyframes tripleColorPulse {
+    
+    @keyframes hybridPulse {
         0%, 100% {
-            box-shadow: 0 4px 12px rgba(13, 179, 59, 0.4);
+            box-shadow: 0 4px 12px rgba(13, 179, 59, 0.3) !important;
         }
-        33% {
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
-        }
-        66% {
-            box-shadow: 0 8px 25px rgba(156, 39, 176, 0.6);
+        50% {
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5) !important;
         }
     }
 
     #chatbot-toggler:hover {
-        transform: scale(1.1) !important;
-        box-shadow: 0 8px 25px rgba(13, 179, 59, 0.6) !important;
+        transform: scale(1.05) !important;
+        box-shadow: 0 6px 20px rgba(13, 179, 59, 0.5) !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 991px) {
+        .footer-main {
+            grid-template-columns: 1fr 1fr;
+        }
     }
 
     @media (max-width: 768px) {
@@ -776,18 +593,61 @@
             text-align: center;
         }
 
+        .footer-bar .right a {
+            margin: 5px 10px;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .stat-number {
+            font-size: 16px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+        }
+
         .chatbot {
             right: 0 !important;
             bottom: 0 !important;
             left: 0 !important;
+            top: 0 !important;
             width: 100vw !important;
             height: 100vh !important;
+            max-height: 100vh !important;
             border-radius: 0 !important;
+            transform-origin: center !important;
         }
         
         #chatbot-toggler {
             right: 20px !important;
             bottom: 20px !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .footer-wrapper-light {
+            padding-top: 30px;
+        }
+
+        .footer-main {
+            gap: 25px;
+        }
+
+        .ai-assistant-info {
+            padding: 15px;
+        }
+
+        .quick-stats {
+            padding: 15px;
+        }
+
+        .btn-chat-now {
+            font-size: 12px;
+            padding: 8px 16px;
         }
     }
 </style>

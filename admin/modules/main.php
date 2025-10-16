@@ -39,7 +39,9 @@ if ($temp == 'courses') {
 } else if ($temp == 'hoclieu') {
     include("modules/hoclieu/manage_hoclieu.php");
 }
-
+ else if ($temp == 'baiviet') {
+    include("modules/baiviet/manage_posts.php");
+}
 else if ($temp == 'view_submission_admin') {
     include("modules/cauhoi/view_submission_admin.php"); 
 }
