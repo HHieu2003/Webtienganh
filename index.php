@@ -42,8 +42,8 @@ if (!isset($_SESSION['has_counted'])) {
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./pages/main.css">
     
-    <!-- ✅ THÊM CSS CHATBOT -->
-    <link rel="stylesheet" href="./chatbot/assets/chatbot.css">
+    <link rel="stylesheet" href="./pages/contact-icon/contact-widget.css">
+
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -77,9 +77,10 @@ if (!isset($_SESSION['has_counted'])) {
             <?php include('./pages/footer.php'); ?>
         </footer>
     </div>
-
     <!-- ✅ THÊM CHATBOT WIDGET -->
     <?php include('./chatbot/chatbot_widget.php'); ?>
+    <?php include(dirname(__FILE__) . '/pages/contact-icon/contact-widget.php'); ?>
+
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
@@ -88,9 +89,6 @@ if (!isset($_SESSION['has_counted'])) {
     <script>
         AOS.init();
     </script>
-
-    <!-- ✅ THÊM JAVASCRIPT CHATBOT -->
-    <script src="./chatbot/assets/chatbot.js"></script>
 
 </body>
 

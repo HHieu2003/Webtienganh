@@ -504,43 +504,7 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
             }
         }
 
-        .floating-icons {
-            display: none !important;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 1000;
-        }
-
-        .floating-icons a {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-decoration: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .floating-icons a:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .messenger-icon {
-            background-color: #f1e9e9ff;
-            font-size: 24px;
-        }
-
-        .phone-icon {
-            background-color: #2bfc5f;
-            font-size: 24px;
-        }
-
+    
         .badge {
             position: absolute;
             top: 5px;
@@ -651,6 +615,7 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
                             <a class="nav-link" href="#">Học Tập & Rèn Luyện &nbsp<i class="fas fa-caret-down"></i></a>
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="./index.php?nav=question">Trắc Nghiệm Online</a>
+                                <a class="dropdown-item" href="./index.php?nav=hoccungai">Học Cùng AI</a>
                                 <a class="dropdown-item" href="./index.php?nav=blog">Blog Kiến Thức</a>
                             </div>
                         </li>
@@ -709,6 +674,7 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
                 </a>
                 <div id="materials-submenu" class="dropdown-menu">
                     <a class="dropdown-item" href="./index.php?nav=question">Trắc Nghiệm Online</a>
+                    <a class="dropdown-item" href="./index.php?nav=hoccungai">Học Cùng AI</a>
                     <a class="dropdown-item" href="./index.php?nav=blog">Blog Kiến Thức</a>
                 </div>
             </li>
@@ -756,14 +722,6 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
                 </form>
             </div>
         </div>
-    </div>
-    <div class="floating-icons">
-        <a href="https://www.facebook.com/profile.php?id=100091706867917&mibextid=LQQJ4d" target="_blank" class="messenger-icon" title="Chat với chúng tôi qua Messenger">
-            <i class="fa-brands fa-facebook-messenger" style="color:#f448cf;"></i>
-        </a>
-        <a href="tel:+84123456789" class="phone-icon" title="Gọi điện cho chúng tôi">
-            <i class="fa-solid fa-phone fa-shake"></i>
-        </a>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

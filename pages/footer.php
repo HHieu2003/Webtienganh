@@ -1,4 +1,27 @@
-<!-- Footer với thiết kế gốc + AI Chatbot -->
+<?php
+// --- BẮT ĐẦU: LẤY DỮ LIỆU THỐNG KÊ CHO FOOTER ---
+// Đảm bảo biến $conn tồn tại từ file config.php
+if (isset($conn)) {
+    // 1. Lấy tổng lượt truy cập
+    $total_views_result = $conn->query("SELECT SUM(so_luot) AS total FROM luot_truy_cap");
+    $total_views = $total_views_result ? $total_views_result->fetch_assoc()['total'] : 0;
+
+    // 2. Lấy tổng số khóa học
+    $total_courses_result = $conn->query("SELECT COUNT(*) AS total FROM khoahoc");
+    $total_courses = $total_courses_result ? $total_courses_result->fetch_assoc()['total'] : 0;
+
+    // 3. Lấy tổng số học viên
+    $total_students_result = $conn->query("SELECT COUNT(*) AS total FROM hocvien WHERE is_admin = 0");
+    $total_students = $total_students_result ? $total_students_result->fetch_assoc()['total'] : 0;
+} else {
+    // Giá trị mặc định nếu không có kết nối CSDL
+    $total_views = 0;
+    $total_courses = 0;
+    $total_students = 0;
+}
+// --- KẾT THÚC: LẤY DỮ LIỆU ---
+?>
+
 <footer class="footer-wrapper-light" data-aos="fade-up">
     <div class="container">
         <div class="footer-main">
@@ -12,11 +35,10 @@
                 </a>
                 <p class="about-text">Nền tảng học Tiếng Anh toàn diện, giúp bạn tự tin chinh phục mọi mục tiêu học tập và sự nghiệp.</p>
                 
-                <!-- AI Assistant Info -->
                 <div class="ai-assistant-info">
                     <h5><i class="fa-solid fa-brain"></i> Hybrid AI Assistant</h5>
                     <p><strong>2-in-1:</strong> Tư vấn khóa học + Dạy tiếng Anh</p>
-                    <button class="btn-chat-now" onclick="document.getElementById('chatbot-toggler').click();">
+                    <button class="btn-chat-now" onclick="document.getElementById('chatbotFloatButton').click();">
                         <i class="fa-solid fa-comment"></i> Chat Ngay
                     </button>
                 </div>
@@ -72,21 +94,20 @@
                     </li>
                 </ul>
                 
-                <!-- Live Stats từ Database -->
                 <div class="quick-stats">
                     <h5><i class="fa-solid fa-chart-line"></i> Thống Kê Live</h5>
                     <div class="stats-grid">
                         <div class="stat-item">
-                            <span class="stat-number" id="footer-total-courses">--</span>
+                            <span class="stat-number" id="footer-total-views">0</span>
+                            <span class="stat-label">Lượt truy cập</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="footer-total-courses">0</span>
                             <span class="stat-label">Khóa học</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-number" id="footer-total-students">--</span>
+                            <span class="stat-number" id="footer-total-students">0</span>
                             <span class="stat-label">Học viên</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number" id="footer-total-teachers">--</span>
-                            <span class="stat-label">Giảng viên</span>
                         </div>
                     </div>
                 </div>
@@ -104,7 +125,7 @@
                 <div class="right">
                     <a href="./index.php?nav=huongdandangky">Điều khoản dịch vụ</a>
                     <a href="./index.php?nav=huongdandangky">Chính sách bảo mật</a>
-                    <a href="javascript:void(0);" onclick="document.getElementById('chatbot-toggler').click();">
+                    <a href="javascript:void(0);" onclick="document.getElementById('chatbotFloatButton').click();">
                         <i class="fa-solid fa-brain"></i> Hybrid AI
                     </a>
                 </div>
@@ -113,7 +134,6 @@
     </div>
 </footer>
 
-<!-- Dependencies -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
@@ -124,38 +144,9 @@
         duration: 1000,
         once: true,
     });
-
-    // Load footer stats với animation
-    async function loadFooterStats() {
-        console.log('📊 Loading footer stats...');
-        
-        try {
-            const response = await fetch('./chatbot/data_handler.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_website_stats' })
-            });
-            
-            const data = await response.json();
-            if (data.success) {
-                // Animate counters với delay
-                setTimeout(() => animateCounter('footer-total-courses', data.data.total_courses || 0), 500);
-                setTimeout(() => animateCounter('footer-total-students', data.data.total_students || 0), 700);
-                setTimeout(() => animateCounter('footer-total-teachers', data.data.total_teachers || 0), 900);
-                
-                console.log('✅ Footer stats loaded successfully');
-            }
-        } catch (error) {
-            console.log('❌ Footer stats loading failed:', error);
-            // Set placeholder values
-            document.getElementById('footer-total-courses').textContent = '10+';
-            document.getElementById('footer-total-students').textContent = '500+';
-            document.getElementById('footer-total-teachers').textContent = '15+';
-        }
-    }
-
+    
     // Hiệu ứng đếm số với easing
-    function animateCounter(elementId, targetValue, duration = 2000) {
+    function animateCounter(elementId, targetValue, duration = 1500) {
         const element = document.getElementById(elementId);
         if (!element) return;
         
@@ -172,12 +163,12 @@
             const easedProgress = easeOutCubic(progress);
             const currentValue = Math.floor(startValue + (targetValue - startValue) * easedProgress);
             
-            element.textContent = currentValue > 0 ? currentValue.toLocaleString() : '--';
+            element.textContent = currentValue.toLocaleString();
             
             if (progress < 1) {
                 requestAnimationFrame(updateCounter);
             } else {
-                element.textContent = targetValue.toLocaleString();
+                element.textContent = parseInt(targetValue).toLocaleString();
             }
         }
         
@@ -186,29 +177,25 @@
 
     // Initialize everything
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 Initializing footer integration...');
+        console.log('🚀 Initializing footer stats...');
         
-        // Load footer stats
-        setTimeout(() => {
-            loadFooterStats();
-        }, 1000);
+        // Lấy dữ liệu từ các biến PHP đã được truy vấn ở đầu file
+        const totalViews = <?php echo (int)$total_views; ?>;
+        const totalCourses = <?php echo (int)$total_courses; ?>;
+        const totalStudents = <?php echo (int)$total_students; ?>;
+
+        // Khởi chạy animation
+        animateCounter('footer-total-views', totalViews);
+        animateCounter('footer-total-courses', totalCourses);
+        animateCounter('footer-total-students', totalStudents);
         
-        console.log('✅ Footer integration complete');
+        console.log('✅ Footer stats loaded');
     });
 
-    // Auto-refresh footer stats mỗi 5 phút
-    setInterval(() => {
-        if (!document.body.classList.contains('show-chatbot')) {
-            loadFooterStats();
-        }
-    }, 300000);
 </script>
 
 <style>
-    /* ==================================================================
-       CSS GỐC CHO FOOTER - GIỮ NGUYÊN + AI INTEGRATION
-    ================================================================== */
-
+    /* CSS gốc của bạn không cần thay đổi, tôi giữ nguyên ở đây */
     :root {
         --brand-color: #0db33b;
         --teacher-color: #3498db;

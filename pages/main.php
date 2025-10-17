@@ -15,6 +15,9 @@ switch ($nav) {
     case 'about':
         include("main/about.php");
         break;
+    case 'hoccungai':
+        include("hoccungai/hoccungai_complete.php");
+        break;
 
     case 'question':
         include("question/question.php");

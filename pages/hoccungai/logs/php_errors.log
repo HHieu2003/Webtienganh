@@ -1,0 +1,170 @@
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(pages/hoccungai/listening_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 198
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/listening_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 198
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(pages/hoccungai/speaking_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 201
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/speaking_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 201
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(pages/hoccungai/reading_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 204
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/reading_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 204
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(pages/hoccungai/writing_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 207
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/writing_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 207
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(pages/hoccungai/vocabulary_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 210
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/vocabulary_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 210
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(pages/hoccungai/grammar_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 213
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/grammar_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 213
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(pages/hoccungai/pronunciation_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 216
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/pronunciation_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 216
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(pages/hoccungai/communication_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 219
+[18-Oct-2025 00:01:22 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/communication_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 219
+[18-Oct-2025 00:01:22 Europe/Berlin] 🔍 Session ID: 2klqh56guj2mknah11nj1er96g
+[18-Oct-2025 00:01:22 Europe/Berlin] 🔍 Session data: Array
+(
+    [has_counted] => 1
+    [user] => Trần Hữu Hiếu
+    [email] => hieutran170626@gmail.com
+    [id_hocvien] => 1
+    [is_admin] => 1
+    [csrf_token] => 7513c1b1c4f272b0b5a53ee64c0fc218a66d6086232029ea1fa88d0bcbba146f
+)
+
+[18-Oct-2025 00:01:22 Europe/Berlin] ✅ User logged in - ID: 1, Name: User
+[18-Oct-2025 00:02:11 Europe/Berlin] PHP Warning:  include(pages/hoccungai/listening_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 198
+[18-Oct-2025 00:02:11 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/listening_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 198
+[18-Oct-2025 00:02:11 Europe/Berlin] PHP Warning:  include(pages/hoccungai/speaking_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 201
+[18-Oct-2025 00:02:11 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/speaking_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 201
+[18-Oct-2025 00:02:11 Europe/Berlin] PHP Warning:  include(pages/hoccungai/reading_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 204
+[18-Oct-2025 00:02:11 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/reading_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 204
+[18-Oct-2025 00:02:11 Europe/Berlin] PHP Warning:  include(pages/hoccungai/vocabulary_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 210
+[18-Oct-2025 00:02:11 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/vocabulary_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 210
+[18-Oct-2025 00:02:11 Europe/Berlin] PHP Warning:  include(pages/hoccungai/grammar_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 213
+[18-Oct-2025 00:02:11 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/grammar_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 213
+[18-Oct-2025 00:02:11 Europe/Berlin] PHP Warning:  include(pages/hoccungai/pronunciation_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 216
+[18-Oct-2025 00:02:11 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/pronunciation_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 216
+[18-Oct-2025 00:02:11 Europe/Berlin] PHP Warning:  include(pages/hoccungai/communication_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 219
+[18-Oct-2025 00:02:11 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/communication_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 219
+[18-Oct-2025 00:02:11 Europe/Berlin] 🔍 Session ID: 2klqh56guj2mknah11nj1er96g
+[18-Oct-2025 00:02:11 Europe/Berlin] 🔍 Session data: Array
+(
+    [has_counted] => 1
+    [user] => Trần Hữu Hiếu
+    [email] => hieutran170626@gmail.com
+    [id_hocvien] => 1
+    [is_admin] => 1
+    [csrf_token] => 7513c1b1c4f272b0b5a53ee64c0fc218a66d6086232029ea1fa88d0bcbba146f
+)
+
+[18-Oct-2025 00:02:11 Europe/Berlin] ✅ User logged in - ID: 1, Name: User
+[18-Oct-2025 00:04:08 Europe/Berlin] PHP Warning:  include(pages/hoccungai/listening_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 198
+[18-Oct-2025 00:04:08 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/listening_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 198
+[18-Oct-2025 00:04:08 Europe/Berlin] PHP Warning:  include(pages/hoccungai/speaking_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 201
+[18-Oct-2025 00:04:08 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/speaking_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 201
+[18-Oct-2025 00:04:08 Europe/Berlin] PHP Warning:  include(pages/hoccungai/reading_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 204
+[18-Oct-2025 00:04:08 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/reading_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 204
+[18-Oct-2025 00:04:08 Europe/Berlin] PHP Warning:  include(pages/hoccungai/vocabulary_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 210
+[18-Oct-2025 00:04:08 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/vocabulary_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 210
+[18-Oct-2025 00:04:08 Europe/Berlin] PHP Warning:  include(pages/hoccungai/grammar_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 213
+[18-Oct-2025 00:04:08 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/grammar_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 213
+[18-Oct-2025 00:04:08 Europe/Berlin] PHP Warning:  include(pages/hoccungai/pronunciation_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 216
+[18-Oct-2025 00:04:08 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/pronunciation_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 216
+[18-Oct-2025 00:04:08 Europe/Berlin] PHP Warning:  include(pages/hoccungai/communication_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 219
+[18-Oct-2025 00:04:08 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/communication_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 219
+[18-Oct-2025 00:04:08 Europe/Berlin] 🔍 Session ID: 2klqh56guj2mknah11nj1er96g
+[18-Oct-2025 00:04:08 Europe/Berlin] 🔍 Session data: Array
+(
+    [has_counted] => 1
+    [user] => Trần Hữu Hiếu
+    [email] => hieutran170626@gmail.com
+    [id_hocvien] => 1
+    [is_admin] => 1
+    [csrf_token] => 7513c1b1c4f272b0b5a53ee64c0fc218a66d6086232029ea1fa88d0bcbba146f
+)
+
+[18-Oct-2025 00:04:08 Europe/Berlin] ✅ User logged in - ID: 1, Name: User
+[18-Oct-2025 00:05:46 Europe/Berlin] PHP Warning:  include(pages/hoccungai/listening_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 198
+[18-Oct-2025 00:05:46 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/listening_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 198
+[18-Oct-2025 00:05:46 Europe/Berlin] PHP Warning:  include(pages/hoccungai/speaking_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 201
+[18-Oct-2025 00:05:46 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/speaking_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 201
+[18-Oct-2025 00:05:46 Europe/Berlin] PHP Warning:  include(pages/hoccungai/reading_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 204
+[18-Oct-2025 00:05:46 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/reading_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 204
+[18-Oct-2025 00:05:46 Europe/Berlin] PHP Warning:  include(pages/hoccungai/vocabulary_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 210
+[18-Oct-2025 00:05:46 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/vocabulary_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 210
+[18-Oct-2025 00:05:46 Europe/Berlin] PHP Warning:  include(pages/hoccungai/grammar_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 213
+[18-Oct-2025 00:05:46 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/grammar_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 213
+[18-Oct-2025 00:05:46 Europe/Berlin] PHP Warning:  include(pages/hoccungai/pronunciation_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 216
+[18-Oct-2025 00:05:46 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/pronunciation_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 216
+[18-Oct-2025 00:05:46 Europe/Berlin] PHP Warning:  include(pages/hoccungai/communication_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 219
+[18-Oct-2025 00:05:46 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/communication_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 219
+[18-Oct-2025 00:05:46 Europe/Berlin] 🔍 Session ID: 2klqh56guj2mknah11nj1er96g
+[18-Oct-2025 00:05:46 Europe/Berlin] 🔍 Session data: Array
+(
+    [has_counted] => 1
+    [user] => Trần Hữu Hiếu
+    [email] => hieutran170626@gmail.com
+    [id_hocvien] => 1
+    [is_admin] => 1
+    [csrf_token] => 7513c1b1c4f272b0b5a53ee64c0fc218a66d6086232029ea1fa88d0bcbba146f
+)
+
+[18-Oct-2025 00:05:46 Europe/Berlin] ✅ User logged in - ID: 1, Name: User
+[18-Oct-2025 00:06:51 Europe/Berlin] PHP Warning:  include(pages/hoccungai/listening_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 198
+[18-Oct-2025 00:06:51 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/listening_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 198
+[18-Oct-2025 00:06:51 Europe/Berlin] PHP Warning:  include(pages/hoccungai/speaking_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 201
+[18-Oct-2025 00:06:51 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/speaking_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 201
+[18-Oct-2025 00:06:51 Europe/Berlin] PHP Warning:  include(pages/hoccungai/reading_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 204
+[18-Oct-2025 00:06:51 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/reading_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 204
+[18-Oct-2025 00:06:51 Europe/Berlin] PHP Warning:  include(pages/hoccungai/vocabulary_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 210
+[18-Oct-2025 00:06:51 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/vocabulary_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 210
+[18-Oct-2025 00:06:51 Europe/Berlin] PHP Warning:  include(pages/hoccungai/grammar_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 213
+[18-Oct-2025 00:06:51 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/grammar_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 213
+[18-Oct-2025 00:06:51 Europe/Berlin] PHP Warning:  include(pages/hoccungai/pronunciation_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 216
+[18-Oct-2025 00:06:51 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/pronunciation_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 216
+[18-Oct-2025 00:06:51 Europe/Berlin] PHP Warning:  include(pages/hoccungai/communication_content_ui.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 219
+[18-Oct-2025 00:06:51 Europe/Berlin] PHP Warning:  include(): Failed opening 'pages/hoccungai/communication_content_ui.php' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\dahp2\pages\hoccungai\hoccungai_complete.php on line 219
+[18-Oct-2025 00:06:51 Europe/Berlin] 🔍 Session ID: 2klqh56guj2mknah11nj1er96g
+[18-Oct-2025 00:06:51 Europe/Berlin] 🔍 Session data: Array
+(
+    [has_counted] => 1
+    [user] => Trần Hữu Hiếu
+    [email] => hieutran170626@gmail.com
+    [id_hocvien] => 1
+    [is_admin] => 1
+    [csrf_token] => 7513c1b1c4f272b0b5a53ee64c0fc218a66d6086232029ea1fa88d0bcbba146f
+)
+
+[18-Oct-2025 00:06:51 Europe/Berlin] ✅ User logged in - ID: 1, Name: User
+[18-Oct-2025 00:10:13 Europe/Berlin] 🔍 Session ID: 2klqh56guj2mknah11nj1er96g
+[18-Oct-2025 00:10:13 Europe/Berlin] 🔍 Session data: Array
+(
+    [has_counted] => 1
+    [user] => Trần Hữu Hiếu
+    [email] => hieutran170626@gmail.com
+    [id_hocvien] => 1
+    [is_admin] => 1
+    [csrf_token] => 7513c1b1c4f272b0b5a53ee64c0fc218a66d6086232029ea1fa88d0bcbba146f
+    [rate_limit_writing_api] => Array
+        (
+            [count] => 4
+            [reset_time] => 1760742417
+        )
+
+)
+
+[18-Oct-2025 00:10:13 Europe/Berlin] ✅ User logged in - ID: 1, Name: User
+[18-Oct-2025 00:12:43 Europe/Berlin] 🔍 Session ID: 2klqh56guj2mknah11nj1er96g
+[18-Oct-2025 00:12:43 Europe/Berlin] 🔍 Session data: Array
+(
+    [has_counted] => 1
+    [user] => Trần Hữu Hiếu
+    [email] => hieutran170626@gmail.com
+    [id_hocvien] => 1
+    [is_admin] => 1
+    [csrf_token] => 7513c1b1c4f272b0b5a53ee64c0fc218a66d6086232029ea1fa88d0bcbba146f
+    [rate_limit_writing_api] => Array
+        (
+            [count] => 7
+            [reset_time] => 1760742417
+        )
+
+)
+
+[18-Oct-2025 00:12:43 Europe/Berlin] ✅ User logged in - ID: 1, Name: User
+[18-Oct-2025 00:12:54 Europe/Berlin] PHP Warning:  preg_replace(): Compilation failed: unmatched closing parenthesis at offset 3 in C:\xampp\htdocs\dahp2\pages\hoccungai\writing_handler.php on line 412
+[18-Oct-2025 00:12:54 Europe/Berlin] PHP Deprecated:  preg_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in C:\xampp\htdocs\dahp2\pages\hoccungai\writing_handler.php on line 413
