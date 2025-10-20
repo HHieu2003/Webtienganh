@@ -1128,7 +1128,7 @@ CREATE TABLE `diem_danh` (
   `id_lop` varchar(50) NOT NULL,
   `id_lichhoc` int(11) NOT NULL,
   `trang_thai` enum('co mat','vang','muon') DEFAULT 'co mat',
-  `ngay_diemdanh` date DEFAULT curdate(),
+  `ngay_diemdanh` date DEFAULT CURDATE(),
   `ghi_chu` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
