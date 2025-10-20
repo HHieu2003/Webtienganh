@@ -1,139 +1,146 @@
-<!-- ============================================ -->
-<!-- GRAMMAR CONTENT -->
-<!-- ============================================ -->
-<div id="grammar-content" class="skill-content">
-    <div class="skill-header">
-        <h2><i class="fas fa-book"></i> Ngữ Pháp (Grammar)</h2>
-        <p>Nắm vững các quy tắc ngữ pháp tiếng Anh</p>
-    </div>
-
-    <!-- Grammar Topics -->
-    <div class="grammar-topics">
-        <div class="topic-grid">
-            <div class="topic-card" data-topic="tenses">
-                <i class="fas fa-clock"></i>
-                <h3>Thì (Tenses)</h3>
-                <p>12 thì trong tiếng Anh</p>
-                <span class="lesson-count">24 bài học</span>
-            </div>
-
-            <div class="topic-card" data-topic="conditionals">
-                <i class="fas fa-question"></i>
-                <h3>Câu điều kiện</h3>
-                <p>4 loại câu điều kiện</p>
-                <span class="lesson-count">8 bài học</span>
-            </div>
-
-            <div class="topic-card" data-topic="passive-voice">
-                <i class="fas fa-exchange-alt"></i>
-                <h3>Câu bị động</h3>
-                <p>Passive Voice</p>
-                <span class="lesson-count">6 bài học</span>
-            </div>
-
-            <div class="topic-card" data-topic="reported-speech">
-                <i class="fas fa-quote-left"></i>
-                <h3>Câu gián tiếp</h3>
-                <p>Reported Speech</p>
-                <span class="lesson-count">5 bài học</span>
-            </div>
-
-            <div class="topic-card" data-topic="modal-verbs">
-                <i class="fas fa-language"></i>
-                <h3>Modal Verbs</h3>
-                <p>Can, Could, Must, Should...</p>
-                <span class="lesson-count">10 bài học</span>
-            </div>
-
-            <div class="topic-card" data-topic="articles">
-                <i class="fas fa-font"></i>
-                <h3>Mạo từ</h3>
-                <p>A, An, The</p>
-                <span class="lesson-count">4 bài học</span>
-            </div>
-
-            <div class="topic-card" data-topic="prepositions">
-                <i class="fas fa-map-marker-alt"></i>
-                <h3>Giới từ</h3>
-                <p>Prepositions</p>
-                <span class="lesson-count">12 bài học</span>
-            </div>
-
-            <div class="topic-card" data-topic="adjectives">
-                <i class="fas fa-adjust"></i>
-                <h3>Tính từ & Trạng từ</h3>
-                <p>Adjectives & Adverbs</p>
-                <span class="lesson-count">8 bài học</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Grammar Lesson Detail -->
-    <div id="grammar-lesson-detail" class="grammar-lesson-detail" style="display: none;">
-        <button id="back-to-topics" class="btn-back">
-            <i class="fas fa-arrow-left"></i> Quay lại
-        </button>
-
-        <div class="lesson-content">
-            <div class="lesson-title">
-                <h3 id="grammar-lesson-title">Present Simple Tense</h3>
-                <span class="difficulty-badge">Beginner</span>
-            </div>
-
-            <!-- Theory Section -->
-            <div class="theory-section">
-                <h4><i class="fas fa-book-open"></i> Lý thuyết</h4>
-                <div id="grammar-theory" class="theory-content">
-                    <!-- Theory content will be loaded here -->
-                </div>
-            </div>
-
-            <!-- Examples Section -->
-            <div class="examples-section">
-                <h4><i class="fas fa-lightbulb"></i> Ví dụ</h4>
-                <div id="grammar-examples" class="examples-list">
-                    <!-- Examples will be loaded here -->
-                </div>
-            </div>
-
-            <!-- Practice Section -->
-            <div class="practice-section">
-                <h4><i class="fas fa-pen"></i> Bài tập thực hành</h4>
-                <div id="grammar-exercises" class="exercises-container">
-                    <!-- Exercises will be loaded here -->
-                </div>
-                
-                <button id="check-grammar-exercises" class="btn-primary">
-                    <i class="fas fa-check-circle"></i> Kiểm tra bài tập
-                </button>
-            </div>
-
-            <!-- Results -->
-            <div id="grammar-results" class="grammar-results" style="display: none;">
-                <!-- Results will be displayed here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Grammar Check -->
-    <div class="quick-check-section">
-        <h3><i class="fas fa-spell-check"></i> Kiểm tra ngữ pháp nhanh</h3>
-        <p>Nhập câu tiếng Anh để AI kiểm tra ngữ pháp</p>
-        
-        <div class="grammar-check-box">
-            <textarea 
-                id="grammar-check-input" 
-                placeholder="Enter your sentence here...&#10;Example: I goes to school everyday."
-                rows="4"
-            ></textarea>
-            
-            <button id="check-grammar-btn" class="btn-primary">
-                <i class="fas fa-check"></i> Kiểm tra
+<!-- GRAMMAR SECTION -->
+<section id="grammar-section" class="skill-content-section">
+    <div class="ai-card">
+        <div class="ai-card-header">
+            <h2 class="ai-card-title">
+                <i class="fas fa-book"></i>
+                Luyện Ngữ Pháp (Grammar)
+            </h2>
+            <button class="btn btn-primary btn-sm" id="grammar-generate-btn">
+                <i class="fas fa-plus"></i> Tạo bài mới
             </button>
         </div>
+        <div class="ai-card-body">
+            <p class="mb-3">Củng cố kiến thức ngữ pháp tiếng Anh.</p>
+            
+            <div class="form-group">
+                <label class="form-label">Chủ đề ngữ pháp:</label>
+                <select id="grammar-topic" class="form-control">
+                    <option value="tenses">Tenses (Thì)</option>
+                    <option value="conditionals">Conditionals (Câu điều kiện)</option>
+                    <option value="passive">Passive Voice (Câu bị động)</option>
+                    <option value="reported">Reported Speech (Câu gián tiếp)</option>
+                    <option value="modals">Modal Verbs (Động từ khuyết thiếu)</option>
+                    <option value="articles">Articles (Mạo từ)</option>
+                </select>
+            </div>
 
-        <div id="grammar-check-result" class="grammar-check-result" style="display: none;">
-            <!-- Grammar check result will be displayed here -->
+            <div id="grammar-exercise-container" class="mt-4" style="display: none;">
+                <div id="grammar-content"></div>
+                <div class="text-center mt-4">
+                    <button class="btn btn-success btn-lg" id="grammar-submit-btn">
+                        <i class="fas fa-check"></i> Nộp bài
+                    </button>
+                </div>
+                <div id="grammar-results" class="mt-4" style="display: none;"></div>
+            </div>
         </div>
     </div>
-</div>
+</section>
+
+<script>
+document.addEventListener('skillSectionInit', (e) => {
+    if (e.detail.skill === 'grammar') {
+        initGrammarSection();
+    }
+});
+
+function initGrammarSection() {
+    const generateBtn = document.getElementById('grammar-generate-btn');
+    const submitBtn = document.getElementById('grammar-submit-btn');
+    let currentExercise = null;
+
+    generateBtn?.addEventListener('click', async () => {
+        const topic = document.getElementById('grammar-topic').value;
+        Utils.showLoading('Đang tạo bài tập ngữ pháp...');
+
+        try {
+            const result = await Utils.apiRequest('grammar_api.php', {
+                action: 'generate',
+                topic: topic
+            });
+
+            if (result.success) {
+                currentExercise = result.data;
+                displayGrammarExercise(currentExercise);
+                Utils.showToast('Đã tạo bài tập!', 'success');
+            } else {
+                Utils.showToast('Lỗi: ' + result.message, 'error');
+            }
+        } catch (error) {
+            Utils.showToast('Không thể tạo bài tập', 'error');
+        } finally {
+            Utils.hideLoading();
+        }
+    });
+
+    submitBtn?.addEventListener('click', async () => {
+        if (!currentExercise) return;
+        const answers = collectGrammarAnswers();
+
+        Utils.showLoading('Đang chấm bài...');
+
+        try {
+            const result = await Utils.apiRequest('grammar_api.php', {
+                action: 'check',
+                exercise: JSON.stringify(currentExercise),
+                answers: JSON.stringify(answers)
+            });
+
+            if (result.success) {
+                displayGrammarResults(result.data);
+                Utils.showToast('Đã chấm bài!', 'success');
+            } else {
+                Utils.showToast('Lỗi: ' + result.message, 'error');
+            }
+        } catch (error) {
+            Utils.showToast('Không thể chấm bài', 'error');
+        } finally {
+            Utils.hideLoading();
+        }
+    });
+
+    function displayGrammarExercise(exercise) {
+        document.getElementById('grammar-exercise-container').style.display = 'block';
+        const content = document.getElementById('grammar-content');
+        content.innerHTML = '';
+        
+        exercise.questions.forEach((q, i) => {
+            const qDiv = document.createElement('div');
+            qDiv.className = 'ai-card mb-3';
+            qDiv.innerHTML = `<h4>Câu ${i+1}: ${q.question}</h4>` +
+                q.options.map((opt, j) => `
+                    <div class="mb-2">
+                        <label style="display: flex; align-items: center; cursor: pointer; padding: 0.75rem; background: var(--bg-secondary); border-radius: var(--border-radius-sm);">
+                            <input type="radio" name="grammar-q${i}" value="${j}" style="margin-right: 0.75rem;">
+                            <span>${opt}</span>
+                        </label>
+                    </div>
+                `).join('');
+            content.appendChild(qDiv);
+        });
+    }
+
+    function collectGrammarAnswers() {
+        const answers = [];
+        if (currentExercise) {
+            currentExercise.questions.forEach((q, i) => {
+                const selected = document.querySelector(`input[name="grammar-q${i}"]:checked`);
+                answers.push(selected ? parseInt(selected.value) : -1);
+            });
+        }
+        return answers;
+    }
+
+    function displayGrammarResults(results) {
+        const resultsDiv = document.getElementById('grammar-results');
+        resultsDiv.style.display = 'block';
+        resultsDiv.innerHTML = `
+            <div class="ai-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <h3><i class="fas fa-trophy"></i> Kết quả: ${results.correct_count}/${results.total_count} đúng</h3>
+                <div style="font-size: 1.5rem;">Điểm: ${results.score.toFixed(1)}/10</div>
+            </div>
+        `;
+    }
+}
+</script>

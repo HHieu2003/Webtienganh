@@ -1,162 +1,156 @@
 <?php
 /**
- * HỌC CÙNG AI - CONFIGURATION FILE
- * Version: 3.0
- * Updated: 2025
+ * Configuration file for Hoc Cung AI
+ * Gemini AI Integration
  */
 
-// Error reporting
-error_reporting(E_ALL);
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/logs/php_errors.log');
-
-// Session configuration
+// Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
-    session_start([
-        'cookie_lifetime' => 86400,
-        'cookie_httponly' => true,
-        'cookie_secure' => isset($_SERVER['HTTPS']),
-        'cookie_samesite' => 'Strict'
-    ]);
+    session_start();
 }
 
-// Database configuration (if needed)
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'fighter_english');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_CHARSET', 'utf8mb4');
-
-// Gemini API Configuration - ⚠️ THAY API KEY CỦA BẠN
-define('GEMINI_API_KEY', 'AIzaSyCw79baxbVs0yJ8sxHH2PYUKQN3LDR2kQQ'); // THAY ĐỔI NÀY
-define('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent');
-define('GEMINI_TIMEOUT', 60);
-define('GEMINI_MAX_RETRIES', 3);
-
-// Application settings
+// Application Configuration
 define('APP_NAME', 'Học Cùng AI');
-define('APP_VERSION', '3.0');
-define('BASE_URL', '/fighter/'); // Adjust according to your setup
+define('APP_VERSION', '3.1');
 
-/**
- * Security Helper Class
- */
+// Gemini AI API Configuration
+define('GEMINI_API_KEY', 'AIzaSyCw79baxbVs0yJ8sxHH2PYUKQN3LDR2kQQ'); // Thay bằng API key thực của bạn
+define('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent');
+define('GEMINI_VISION_API_URL', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent');
+
+// Security Settings
+define('CSRF_TOKEN_NAME', 'csrf_token');
+define('CSRF_TOKEN_EXPIRE', 3600); // 1 hour
+
+// Rate Limiting
+define('API_RATE_LIMIT', 100); // requests per hour
+define('API_RATE_WINDOW', 3600); // 1 hour in seconds
+
+// Error Reporting (set to false in production)
+define('DEBUG_MODE', true);
+
+// Helper Classes
 class SecurityHelper {
-    // Sanitize input data
-    public static function sanitize($data) {
-        if (is_array($data)) {
-            return array_map([self::class, 'sanitize'], $data);
+    public static function generateCSRFToken() {
+        if (!isset($_SESSION[CSRF_TOKEN_NAME]) || 
+            !isset($_SESSION[CSRF_TOKEN_NAME . '_time']) ||
+            (time() - $_SESSION[CSRF_TOKEN_NAME . '_time']) > CSRF_TOKEN_EXPIRE) {
+            
+            $_SESSION[CSRF_TOKEN_NAME] = bin2hex(random_bytes(32));
+            $_SESSION[CSRF_TOKEN_NAME . '_time'] = time();
         }
-        return htmlspecialchars(trim(stripslashes($data)), ENT_QUOTES, 'UTF-8');
+        return $_SESSION[CSRF_TOKEN_NAME];
     }
 
-    // Validate text length
-    public static function validateLength($text, $min = 1, $max = 5000) {
-        $length = mb_strlen($text, 'UTF-8');
-        return $length >= $min && $length <= $max;
+    public static function verifyCSRFToken($token) {
+        if (!isset($_SESSION[CSRF_TOKEN_NAME])) {
+            return false;
+        }
+        
+        if ((time() - $_SESSION[CSRF_TOKEN_NAME . '_time']) > CSRF_TOKEN_EXPIRE) {
+            return false;
+        }
+        
+        return hash_equals($_SESSION[CSRF_TOKEN_NAME], $token);
     }
 
-    // Simple rate limiting using session
-    public static function checkRateLimit($action = 'api_call', $limit = 30, $window = 3600) {
-        $key = 'rate_limit_' . $action;
+    public static function sanitizeInput($data) {
+        if (is_array($data)) {
+            return array_map([self::class, 'sanitizeInput'], $data);
+        }
+        $data = trim($data);
+        $data = stripslashes($data);
+        $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
+        return $data;
+    }
+}
+
+class Logger {
+    public static function log($level, $message, $context = []) {
+        if (!DEBUG_MODE && $level === 'DEBUG') {
+            return;
+        }
+        
+        $logEntry = [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'level' => $level,
+            'message' => $message,
+            'context' => $context,
+            'user_id' => $_SESSION['id_hocvien'] ?? null
+        ];
+        
+        error_log(json_encode($logEntry, JSON_UNESCAPED_UNICODE));
+    }
+
+    public static function info($message, $context = []) {
+        self::log('INFO', $message, $context);
+    }
+
+    public static function error($message, $context = []) {
+        self::log('ERROR', $message, $context);
+    }
+
+    public static function debug($message, $context = []) {
+        self::log('DEBUG', $message, $context);
+    }
+}
+
+class RateLimiter {
+    public static function checkLimit($userId) {
+        $key = 'api_requests_' . $userId;
         
         if (!isset($_SESSION[$key])) {
             $_SESSION[$key] = [
                 'count' => 0,
-                'reset_time' => time() + $window
+                'reset_time' => time() + API_RATE_WINDOW
             ];
         }
-
-        // Reset if window expired
+        
         if (time() > $_SESSION[$key]['reset_time']) {
             $_SESSION[$key] = [
                 'count' => 0,
-                'reset_time' => time() + $window
+                'reset_time' => time() + API_RATE_WINDOW
             ];
         }
-
-        // Check limit
-        if ($_SESSION[$key]['count'] >= $limit) {
-            return false;
-        }
-
-        // Increment counter
-        $_SESSION[$key]['count']++;
-        return true;
-    }
-
-    // Generate CSRF Token
-    public static function generateCSRFToken() {
-        if (!isset($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
-        return $_SESSION['csrf_token'];
-    }
-
-    // Verify CSRF Token
-    public static function verifyCSRFToken($token) {
-        return isset($_SESSION['csrf_token']) && 
-               hash_equals($_SESSION['csrf_token'], $token);
-    }
-}
-
-/**
- * Simple Logger (File-based)
- */
-class Logger {
-    public static function log($level, $message, $context = []) {
-        $logDir = __DIR__ . '/logs';
-        if (!file_exists($logDir)) {
-            @mkdir($logDir, 0755, true);
-        }
-
-        $logFile = $logDir . '/app_' . date('Y-m-d') . '.log';
-        $timestamp = date('Y-m-d H:i:s');
-        $contextStr = !empty($context) ? json_encode($context) : '';
         
-        $logEntry = sprintf(
-            "[%s] %s: %s %s\n",
-            $timestamp,
-            strtoupper($level),
-            $message,
-            $contextStr
-        );
-
-        @file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
+        $_SESSION[$key]['count']++;
+        
+        return $_SESSION[$key]['count'] <= API_RATE_LIMIT;
     }
-
-    public static function error($message, $context = []) {
-        self::log('error', $message, $context);
-    }
-
-    public static function info($message, $context = []) {
-        self::log('info', $message, $context);
-    }
-}
-
-// Create necessary directories
-$dirs = ['logs', 'uploads', 'uploads/audio'];
-foreach ($dirs as $dir) {
-    $path = __DIR__ . '/' . $dir;
-    if (!file_exists($path)) {
-        @mkdir($path, 0755, true);
-    }
-}
-
-// Database connection (if needed)
-try {
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-    $conn->set_charset(DB_CHARSET);
     
-    if ($conn->connect_error) {
-        Logger::error('Database connection failed', ['error' => $conn->connect_error]);
-        $conn = null;
+    public static function getRemainingRequests($userId) {
+        $key = 'api_requests_' . $userId;
+        
+        if (!isset($_SESSION[$key])) {
+            return API_RATE_LIMIT;
+        }
+        
+        return max(0, API_RATE_LIMIT - $_SESSION[$key]['count']);
     }
-} catch (Exception $e) {
-    Logger::error('Database exception', ['error' => $e->getMessage()]);
-    $conn = null;
 }
 
-Logger::info('Config loaded successfully');
-?>
+// Response Helper
+class ResponseHelper {
+    public static function json($data, $statusCode = 200) {
+        http_response_code($statusCode);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        exit;
+    }
+
+    public static function success($data = [], $message = 'Success') {
+        self::json([
+            'success' => true,
+            'message' => $message,
+            'data' => $data
+        ]);
+    }
+
+    public static function error($message = 'Error', $statusCode = 400, $errors = []) {
+        self::json([
+            'success' => false,
+            'message' => $message,
+            'errors' => $errors
+        ], $statusCode);
+    }
+}

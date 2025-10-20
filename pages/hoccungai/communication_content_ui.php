@@ -1,211 +1,206 @@
-<!-- ============================================ -->
-<!-- COMMUNICATION CONTENT -->
-<!-- ============================================ -->
-<div id="communication-content" class="skill-content">
-    <div class="skill-header">
-        <h2><i class="fas fa-comments"></i> Giao Tiếp (Communication)</h2>
-        <p>Rèn luyện kỹ năng giao tiếp thực tế với AI</p>
-    </div>
+<!-- COMMUNICATION SECTION -->
+<section id="communication-section" class="skill-content-section">
+    <div class="ai-card">
+        <div class="ai-card-header">
+            <h2 class="ai-card-title">
+                <i class="fas fa-comments"></i>
+                Luyện Giao Tiếp (Communication)
+            </h2>
+        </div>
+        <div class="ai-card-body">
+            <p class="mb-3">Thực hành giao tiếp tiếng Anh qua các tình huống thực tế với AI chatbot.</p>
+            
+            <div class="form-group">
+                <label class="form-label">Chọn tình huống:</label>
+                <select id="communication-scenario" class="form-control">
+                    <option value="shopping">Shopping (Mua sắm)</option>
+                    <option value="restaurant">At Restaurant (Nhà hàng)</option>
+                    <option value="hotel">Hotel Check-in (Khách sạn)</option>
+                    <option value="airport">At Airport (Sân bay)</option>
+                    <option value="interview">Job Interview (Phỏng vấn)</option>
+                    <option value="phone">Phone Call (Điện thoại)</option>
+                    <option value="meeting">Business Meeting (Họp)</option>
+                </select>
+            </div>
 
-    <!-- Communication Scenarios -->
-    <div class="scenario-selector">
-        <h3><i class="fas fa-sitemap"></i> Chọn tình huống giao tiếp</h3>
+            <div class="text-center mb-4">
+                <button class="btn btn-primary btn-lg" id="communication-start-btn">
+                    <i class="fas fa-play"></i> Bắt đầu hội thoại
+                </button>
+            </div>
+
+            <div id="communication-chat-container" style="display: none;">
+                <div class="ai-card" style="background: var(--bg-secondary); min-height: 400px; max-height: 500px; overflow-y: auto; margin-bottom: 1rem;" id="communication-messages">
+                    <div class="text-center" style="padding: 2rem; color: var(--text-secondary);">
+                        <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <p>Cuộc hội thoại sẽ bắt đầu ở đây...</p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <input type="text" id="communication-input" class="form-control" placeholder="Nhập tin nhắn của bạn..." style="flex: 1;">
+                    <button class="btn btn-primary" id="communication-send-btn">
+                        <i class="fas fa-paper-plane"></i> Gửi
+                    </button>
+                </div>
+
+                <div class="text-center mt-3">
+                    <button class="btn btn-success" id="communication-feedback-btn">
+                        <i class="fas fa-chart-line"></i> Xem đánh giá
+                    </button>
+                    <button class="btn btn-outline" id="communication-reset-btn">
+                        <i class="fas fa-redo"></i> Bắt đầu lại
+                    </button>
+                </div>
+
+                <div id="communication-results" class="mt-4" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('skillSectionInit', (e) => {
+    if (e.detail.skill === 'communication') {
+        initCommunicationSection();
+    }
+});
+
+function initCommunicationSection() {
+    const startBtn = document.getElementById('communication-start-btn');
+    const sendBtn = document.getElementById('communication-send-btn');
+    const input = document.getElementById('communication-input');
+    const feedbackBtn = document.getElementById('communication-feedback-btn');
+    const resetBtn = document.getElementById('communication-reset-btn');
+    
+    let conversationHistory = [];
+
+    startBtn?.addEventListener('click', async () => {
+        const scenario = document.getElementById('communication-scenario').value;
+        Utils.showLoading('Đang khởi tạo cuộc hội thoại...');
+
+        try {
+            const result = await Utils.apiRequest('communication_api.php', {
+                action: 'start',
+                scenario: scenario
+            });
+
+            if (result.success) {
+                document.getElementById('communication-chat-container').style.display = 'block';
+                conversationHistory = [];
+                addMessage('AI', result.data.greeting);
+                Utils.showToast('Cuộc hội thoại đã bắt đầu!', 'success');
+            } else {
+                Utils.showToast('Lỗi: ' + result.message, 'error');
+            }
+        } catch (error) {
+            Utils.showToast('Không thể bắt đầu', 'error');
+        } finally {
+            Utils.hideLoading();
+        }
+    });
+
+    sendBtn?.addEventListener('click', sendMessage);
+    input?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    async function sendMessage() {
+        const message = input.value.trim();
+        if (!message) return;
+
+        addMessage('You', message);
+        input.value = '';
+        conversationHistory.push({role: 'user', text: message});
+
+        Utils.showLoading('AI đang trả lời...');
+
+        try {
+            const result = await Utils.apiRequest('communication_api.php', {
+                action: 'reply',
+                message: message,
+                history: JSON.stringify(conversationHistory)
+            });
+
+            if (result.success) {
+                addMessage('AI', result.data.reply);
+                conversationHistory.push({role: 'ai', text: result.data.reply});
+            } else {
+                Utils.showToast('Lỗi: ' + result.message, 'error');
+            }
+        } catch (error) {
+            Utils.showToast('Không thể nhận phản hồi', 'error');
+        } finally {
+            Utils.hideLoading();
+        }
+    }
+
+    feedbackBtn?.addEventListener('click', async () => {
+        if (conversationHistory.length === 0) {
+            Utils.showToast('Chưa có cuộc hội thoại nào', 'warning');
+            return;
+        }
+
+        Utils.showLoading('Đang phân tích cuộc hội thoại...');
+
+        try {
+            const result = await Utils.apiRequest('communication_api.php', {
+                action: 'feedback',
+                history: JSON.stringify(conversationHistory)
+            });
+
+            if (result.success) {
+                displayCommunicationFeedback(result.data);
+                Utils.showToast('Đã tạo đánh giá!', 'success');
+            } else {
+                Utils.showToast('Lỗi: ' + result.message, 'error');
+            }
+        } catch (error) {
+            Utils.showToast('Không thể tạo đánh giá', 'error');
+        } finally {
+            Utils.hideLoading();
+        }
+    });
+
+    resetBtn?.addEventListener('click', () => {
+        conversationHistory = [];
+        document.getElementById('communication-messages').innerHTML = '<div class="text-center" style="padding: 2rem;"><p>Cuộc hội thoại đã được đặt lại.</p></div>';
+        document.getElementById('communication-results').style.display = 'none';
+    });
+
+    function addMessage(sender, text) {
+        const messagesDiv = document.getElementById('communication-messages');
+        if (messagesDiv.querySelector('.text-center')) {
+            messagesDiv.innerHTML = '';
+        }
+
+        const msgDiv = document.createElement('div');
+        msgDiv.style.marginBottom = '1rem';
+        msgDiv.style.padding = '1rem';
+        msgDiv.style.borderRadius = 'var(--border-radius-sm)';
+        msgDiv.style.background = sender === 'You' ? '#e0e7ff' : 'white';
+        msgDiv.style.marginLeft = sender === 'You' ? '20%' : '0';
+        msgDiv.style.marginRight = sender === 'You' ? '0' : '20%';
         
-        <div class="scenario-grid">
-            <div class="scenario-card" data-scenario="introduction">
-                <i class="fas fa-handshake"></i>
-                <h4>Giới thiệu bản thân</h4>
-                <p>Tự giới thiệu trong các tình huống khác nhau</p>
-                <button class="btn-primary">Bắt đầu</button>
+        msgDiv.innerHTML = `<strong style="color: var(--primary-color);">${sender}:</strong><div style="margin-top: 0.5rem;">${text}</div>`;
+        messagesDiv.appendChild(msgDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function displayCommunicationFeedback(data) {
+        const resultsDiv = document.getElementById('communication-results');
+        resultsDiv.style.display = 'block';
+        
+        resultsDiv.innerHTML = `
+            <div class="ai-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <h3><i class="fas fa-trophy"></i> Đánh giá cuộc hội thoại</h3>
+                <div style="font-size: 1.5rem; margin-top: 1rem;">Điểm: ${data.score || 7}/10</div>
             </div>
-
-            <div class="scenario-card" data-scenario="small-talk">
-                <i class="fas fa-coffee"></i>
-                <h4>Small Talk</h4>
-                <p>Trò chuyện phím về thời tiết, công việc...</p>
-                <button class="btn-primary">Bắt đầu</button>
+            <div class="ai-card mt-3">
+                <h4><i class="fas fa-comments"></i> Nhận xét</h4>
+                <div style="line-height: 1.8;">${(data.feedback || 'Bạn giao tiếp tốt!').replace(/\n/g, '<br>')}</div>
             </div>
-
-            <div class="scenario-card" data-scenario="shopping">
-                <i class="fas fa-shopping-cart"></i>
-                <h4>Mua sắm</h4>
-                <p>Giao tiếp tại cửa hàng, siêu thị</p>
-                <button class="btn-primary">Bắt đầu</button>
-            </div>
-
-            <div class="scenario-card" data-scenario="restaurant">
-                <i class="fas fa-utensils"></i>
-                <h4>Nhà hàng</h4>
-                <p>Đặt món, thanh toán tại nhà hàng</p>
-                <button class="btn-primary">Bắt đầu</button>
-            </div>
-
-            <div class="scenario-card" data-scenario="hotel">
-                <i class="fas fa-hotel"></i>
-                <h4>Khách sạn</h4>
-                <p>Check-in, yêu cầu dịch vụ</p>
-                <button class="btn-primary">Bắt đầu</button>
-            </div>
-
-            <div class="scenario-card" data-scenario="airport">
-                <i class="fas fa-plane"></i>
-                <h4>Sân bay</h4>
-                <p>Làm thủ tục, hỏi thông tin</p>
-                <button class="btn-primary">Bắt đầu</button>
-            </div>
-
-            <div class="scenario-card" data-scenario="doctor">
-                <i class="fas fa-stethoscope"></i>
-                <h4>Bác sĩ</h4>
-                <p>Mô tả triệu chứng, khám bệnh</p>
-                <button class="btn-primary">Bắt đầu</button>
-            </div>
-
-            <div class="scenario-card" data-scenario="job-interview">
-                <i class="fas fa-briefcase"></i>
-                <h4>Phỏng vấn việc làm</h4>
-                <p>Trả lời câu hỏi phỏng vấn</p>
-                <button class="btn-primary">Bắt đầu</button>
-            </div>
-
-            <div class="scenario-card" data-scenario="phone-call">
-                <i class="fas fa-phone"></i>
-                <h4>Điện thoại</h4>
-                <p>Gọi điện chuyên nghiệp</p>
-                <button class="btn-primary">Bắt đầu</button>
-            </div>
-
-            <div class="scenario-card" data-scenario="complaint">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h4>Khiếu nại</h4>
-                <p>Phàn nàn, yêu cầu giải quyết</p>
-                <button class="btn-primary">Bắt đầu</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Role Play Area -->
-    <div id="roleplay-area" class="roleplay-area" style="display: none;">
-        <button id="back-to-scenarios" class="btn-back">
-            <i class="fas fa-arrow-left"></i> Chọn tình huống khác
-        </button>
-
-        <div class="roleplay-container">
-            <div class="roleplay-header">
-                <h3 id="roleplay-title">Scenario: At the Restaurant</h3>
-                <div class="roleplay-info">
-                    <span class="your-role">Vai của bạn: <strong id="user-role">Customer</strong></span>
-                    <span class="ai-role">AI đóng vai: <strong id="ai-role">Waiter</strong></span>
-                </div>
-            </div>
-
-            <div class="scenario-description">
-                <i class="fas fa-info-circle"></i>
-                <p id="scenario-description">
-                    Bạn đang ở nhà hàng và muốn gọi món. Hãy tương tác với nhân viên phục vụ.
-                </p>
-            </div>
-
-            <div class="useful-phrases">
-                <h4><i class="fas fa-lightbulb"></i> Cụm từ hữu ích</h4>
-                <div id="phrases-list" class="phrases-list">
-                    <span class="phrase-chip">"Can I see the menu?"</span>
-                    <span class="phrase-chip">"I'd like to order..."</span>
-                    <span class="phrase-chip">"Could you recommend something?"</span>
-                    <span class="phrase-chip">"Can I have the bill, please?"</span>
-                </div>
-            </div>
-
-            <div class="conversation-display">
-                <div id="conversation-thread" class="conversation-thread">
-                    <div class="message ai-message">
-                        <div class="message-avatar">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <div class="message-bubble">
-                            <strong>Waiter:</strong>
-                            <p>Good evening! Welcome to our restaurant. How many people?</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="response-options">
-                <button id="speak-response-comm" class="response-btn voice-btn">
-                    <i class="fas fa-microphone"></i> Nói
-                </button>
-                <button id="type-response-comm" class="response-btn type-btn">
-                    <i class="fas fa-keyboard"></i> Gõ
-                </button>
-                <button id="hint-btn" class="response-btn hint-btn">
-                    <i class="fas fa-question-circle"></i> Gợi ý
-                </button>
-            </div>
-
-            <div id="text-input-area" class="text-input-area" style="display: none;">
-                <textarea 
-                    id="user-response-text" 
-                    placeholder="Type your response here..."
-                    rows="3"
-                ></textarea>
-                <button id="send-text-response" class="btn-primary">
-                    <i class="fas fa-paper-plane"></i> Gửi
-                </button>
-            </div>
-
-            <div id="hint-display" class="hint-display" style="display: none;">
-                <i class="fas fa-lightbulb"></i>
-                <p id="hint-content"></p>
-            </div>
-
-            <div class="conversation-controls">
-                <button id="restart-conversation" class="btn-secondary">
-                    <i class="fas fa-redo"></i> Bắt đầu lại
-                </button>
-                <button id="end-conversation" class="btn-danger">
-                    <i class="fas fa-times"></i> Kết thúc
-                </button>
-            </div>
-        </div>
-
-        <!-- Conversation Summary -->
-        <div id="conversation-summary" class="conversation-summary" style="display: none;">
-            <h3><i class="fas fa-chart-bar"></i> Đánh giá cuộc hội thoại</h3>
-            <div id="summary-content">
-                <!-- AI will provide feedback here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Chat with AI -->
-    <div class="quick-chat-section">
-        <h3><i class="fas fa-robot"></i> Chat nhanh với AI</h3>
-        <p>Trò chuyện tự do bằng tiếng Anh với trợ lý AI</p>
-
-        <div class="quick-chat-box">
-            <div id="quick-chat-messages" class="chat-messages">
-                <div class="chat-message ai">
-                    <i class="fas fa-robot"></i>
-                    <div class="message-text">
-                        Hello! I'm your English learning assistant. Feel free to chat with me in English. I'm here to help you practice!
-                    </div>
-                </div>
-            </div>
-
-            <div class="chat-input-area">
-                <input 
-                    type="text" 
-                    id="quick-chat-input" 
-                    placeholder="Type your message in English..."
-                    class="chat-input"
-                >
-                <button id="send-quick-chat" class="send-btn">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-                <button id="voice-quick-chat" class="voice-btn">
-                    <i class="fas fa-microphone"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+        `;
+    }
+}
+</script>

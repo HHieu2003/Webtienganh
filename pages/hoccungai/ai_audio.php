@@ -7,7 +7,7 @@
 header('Content-Type: application/json; charset=utf-8');
 
 // Gemini API Config
-define('GEMINI_API_KEY', 'AIzaSyDVG3S9JK4gvOEfW8h5mKZXx7YqN2pLrTs'); // Thay bằng API key thật
+define('GEMINI_API_KEY', 'AIzaSyCw79baxbVs0yJ8sxHH2PYUKQN3LDR2kQQ'); // Thay bằng API key thật
 define('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent');
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';

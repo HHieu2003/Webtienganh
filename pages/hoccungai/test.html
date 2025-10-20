@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Hệ Thống Học Cùng AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #4f46e5;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Hệ Thống Học Cùng AI</h1>
+    
+    <div class="test-card">
+        <h2>1. Kiểm tra file cấu hình</h2>
+        <button onclick="testConfig()">Test Config</button>
+        <div id="config-result"></div>
+    </div>
+
+    <div class="test-card">
+        <h2>2. Kiểm tra Gemini API</h2>
+        <button onclick="testGeminiAPI()">Test Gemini API</button>
+        <div id="api-result"></div>
+    </div>
+
+    <div class="test-card">
+        <h2>3. Kiểm tra Speech Recognition</h2>
+        <button onclick="testSpeechRecognition()">Test Speech Recognition</button>
+        <div id="speech-result"></div>
+    </div>
+
+    <div class="test-card">
+        <h2>4. Kiểm tra Text-to-Speech</h2>
+        <button onclick="testTextToSpeech()">Test Text-to-Speech</button>
+        <div id="tts-result"></div>
+    </div>
+
+    <div class="test-card">
+        <h2>5. Test tất cả API endpoints</h2>
+        <button onclick="testAllAPIs()">Test All APIs</button>
+        <div id="all-apis-result"></div>
+    </div>
+
+    <script>
+        function showResult(elementId, success, message) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="test-result ${success ? 'success' : 'error'}">${success ? '✓' : '✗'} ${message}</div>`;
+        }
+
+        async function testConfig() {
+            try {
+                const response = await fetch('config.php');
+                if (response.ok) {
+                    showResult('config-result', true, 'File config.php tồn tại và có thể truy cập');
+                } else {
+                    showResult('config-result', false, 'Không thể truy cập config.php');
+                }
+            } catch (error) {
+                showResult('config-result', false, 'Lỗi: ' + error.message);
+            }
+        }
+
+        async function testGeminiAPI() {
+            try {
+                // Test simple API call
+                const formData = new FormData();
+                formData.append('action', 'test');
+                formData.append('csrf_token', document.querySelector('meta[name="csrf-token"]')?.content || '');
+
+                const response = await fetch('api_handler.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    showResult('api-result', true, 'API Handler hoạt động tốt');
+                } else {
+                    showResult('api-result', false, 'API Handler có vấn đề (có thể do chưa đăng nhập)');
+                }
+            } catch (error) {
+                showResult('api-result', false, 'Lỗi kết nối API: ' + error.message);
+            }
+        }
+
+        function testSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (SpeechRecognition) {
+                showResult('speech-result', true, 'Trình duyệt HỖ TRỢ Speech Recognition! 🎤');
+            } else {
+                showResult('speech-result', false, 'Trình duyệt KHÔNG hỗ trợ Speech Recognition. Vui lòng dùng Chrome hoặc Edge.');
+            }
+        }
+
+        function testTextToSpeech() {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance('Hello, this is a test.');
+                utterance.lang = 'en-US';
+                window.speechSynthesis.speak(utterance);
+                showResult('tts-result', true, 'Trình duyệt HỖ TRỢ Text-to-Speech! 🔊 (Đã phát audio test)');
+            } else {
+                showResult('tts-result', false, 'Trình duyệt KHÔNG hỗ trợ Text-to-Speech.');
+            }
+        }
+
+        async function testAllAPIs() {
+            const apis = [
+                'listening_api.php',
+                'speaking_api.php',
+                'reading_api.php',
+                'writing_api.php',
+                'vocabulary_api.php',
+                'grammar_api.php',
+                'pronunciation_api.php',
+                'communication_api.php'
+            ];
+
+            let results = '<h3>Kết quả kiểm tra:</h3>';
+            
+            for (const api of apis) {
+                try {
+                    const response = await fetch(api, {
+                        method: 'HEAD'
+                    });
+                    
+                    const status = response.ok ? '✓' : '✗';
+                    const statusClass = response.ok ? 'success' : 'error';
+                    results += `<div class="test-result ${statusClass}">${status} ${api}</div>`;
+                } catch (error) {
+                    results += `<div class="test-result error">✗ ${api} - ${error.message}</div>`;
+                }
+            }
+
+            document.getElementById('all-apis-result').innerHTML = results;
+        }
+
+        // Auto-run basic tests on load
+        window.onload = function() {
+            console.log('🧪 Hệ thống Học Cùng AI - Test Suite');
+            console.log('Kiểm tra tự động...');
+            testSpeechRecognition();
+            testTextToSpeech();
+        };
+    </script>
+</body>
+</html>
