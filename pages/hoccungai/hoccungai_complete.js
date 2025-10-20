@@ -296,14 +296,39 @@ class AudioPlayer {
 // Speech Recognition Helper
 class SpeechRecognitionHelper {
     constructor() {
+        this.recognition = null;
+        this.isRecording = false;
+        this.initRecognition();
+    }
+
+    initRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
-            this.recognition = new SpeechRecognition();
-            this.recognition.lang = 'en-US';
-            this.recognition.continuous = false;
-            this.recognition.interimResults = false;
+            try {
+                this.recognition = new SpeechRecognition();
+                this.recognition.lang = 'en-US';
+                this.recognition.continuous = false;
+                this.recognition.interimResults = false;
+                this.recognition.maxAlternatives = 1;
+                
+                // Add event listeners
+                this.recognition.onstart = () => {
+                    console.log('Speech recognition started');
+                    this.isRecording = true;
+                };
+                
+                this.recognition.onend = () => {
+                    console.log('Speech recognition ended');
+                    this.isRecording = false;
+                };
+                
+                console.log('Speech Recognition initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize Speech Recognition:', error);
+                this.recognition = null;
+            }
         } else {
-            this.recognition = null;
+            console.warn('Speech Recognition not supported in this browser');
         }
     }
 
@@ -313,26 +338,123 @@ class SpeechRecognitionHelper {
 
     async startRecording() {
         if (!this.isSupported()) {
-            throw new Error('Trình duyệt không hỗ trợ nhận dạng giọng nói');
+            throw new Error('Trình duyệt không hỗ trợ nhận dạng giọng nói. Vui lòng sử dụng Chrome hoặc Edge.');
+        }
+
+        if (this.isRecording) {
+            throw new Error('Đang ghi âm rồi!');
         }
 
         return new Promise((resolve, reject) => {
+            let timeoutId = null;
+
             this.recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                resolve(transcript);
+                if (timeoutId) clearTimeout(timeoutId);
+                
+                try {
+                    const transcript = event.results[0][0].transcript;
+                    console.log('Transcript received:', transcript);
+                    this.isRecording = false;
+                    resolve(transcript);
+                } catch (error) {
+                    console.error('Error processing transcript:', error);
+                    reject(new Error('Không thể xử lý bản ghi âm'));
+                }
             };
 
             this.recognition.onerror = (event) => {
-                reject(new Error('Lỗi nhận dạng giọng nói: ' + event.error));
+                if (timeoutId) clearTimeout(timeoutId);
+                
+                console.error('Speech recognition error:', event.error);
+                this.isRecording = false;
+                
+                let errorMessage = 'Lỗi nhận dạng giọng nói';
+                switch(event.error) {
+                    case 'no-speech':
+                        errorMessage = 'Không nghe thấy giọng nói!\n\n📌 Hãy thử:\n✓ Nói NGAY sau khi thấy "Đang ghi âm..."\n✓ Nói rõ và đủ lớn\n✓ Kiểm tra mic có bật không\n✓ Đưa mic gần miệng hơn';
+                        break;
+                    case 'audio-capture':
+                        errorMessage = 'Không thể truy cập microphone!\n\n📌 Kiểm tra:\n✓ Mic có cắm/bật không?\n✓ Windows có tắt mic không?\n✓ App khác có đang dùng mic không?';
+                        break;
+                    case 'not-allowed':
+                        errorMessage = 'Quyền truy cập microphone bị từ chối!\n\n📌 Cách sửa:\n1. Click biểu tượng 🔒 trên thanh địa chỉ\n2. Cho phép Microphone\n3. Tải lại trang (F5)';
+                        break;
+                    case 'network':
+                        errorMessage = 'Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet.';
+                        break;
+                    case 'aborted':
+                        errorMessage = 'Ghi âm bị hủy. Vui lòng thử lại.';
+                        break;
+                    default:
+                        errorMessage = 'Lỗi: ' + event.error;
+                }
+                
+                reject(new Error(errorMessage));
             };
 
-            this.recognition.start();
+            // Timeout after 60 seconds (tăng từ 30s lên 60s)
+            timeoutId = setTimeout(() => {
+                console.log('Speech recognition timeout');
+                this.stopRecording();
+                reject(new Error('Hết thời gian ghi âm (60 giây). Vui lòng thử lại.'));
+            }, 60000);
+
+            try {
+                console.log('Starting speech recognition...');
+                
+                // Phát âm thanh beep để báo hiệu bắt đầu
+                this.playBeep();
+                
+                this.recognition.start();
+            } catch (error) {
+                if (timeoutId) clearTimeout(timeoutId);
+                console.error('Failed to start recognition:', error);
+                
+                if (error.name === 'InvalidStateError') {
+                    // Recognition is already started, stop it and try again
+                    this.stopRecording();
+                    setTimeout(() => {
+                        this.recognition.start();
+                    }, 100);
+                } else {
+                    reject(new Error('Không thể khởi động ghi âm: ' + error.message));
+                }
+            }
         });
     }
 
     stopRecording() {
-        if (this.recognition) {
-            this.recognition.stop();
+        if (this.recognition && this.isRecording) {
+            try {
+                console.log('Stopping speech recognition...');
+                this.recognition.stop();
+                this.isRecording = false;
+            } catch (error) {
+                console.error('Error stopping recognition:', error);
+            }
+        }
+    }
+
+    // Phát âm thanh beep để báo hiệu
+    playBeep() {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800; // Tần số 800Hz
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        } catch (error) {
+            console.warn('Cannot play beep sound:', error);
         }
     }
 }
