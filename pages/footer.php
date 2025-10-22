@@ -251,7 +251,7 @@ if (isset($conn)) {
     }
 
     .footer-content.about-us .about-text {
-        font-size: 15px;
+        font-size: 18px;
         line-height: 1.7;
         margin-bottom: 20px;
     }
@@ -371,7 +371,7 @@ if (isset($conn)) {
         color: var(--text-color-light);
         text-decoration: none;
         transition: all 0.3s ease;
-        font-size: 14px;
+        font-size: 18px;
         display: inline-flex;
         align-items: center;
     }
@@ -417,7 +417,7 @@ if (isset($conn)) {
         display: flex;
         align-items: flex-start;
         margin-bottom: 15px;
-        font-size: 14px;
+        font-size: 18px;
         transition: all 0.3s ease;
     }
 

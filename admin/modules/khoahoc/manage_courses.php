@@ -1,25 +1,28 @@
 <?php
 // Xử lý tìm kiếm
-$search_term = $_POST['search'] ?? $_GET['search'] ?? '';
+$search_term = $_POST['search'] ?? $_GET['search'] ?? ''; // Ưu tiên POST rồi đến GET
 $sql_search = "";
 $params = [];
 $types = "";
 
 if (!empty($search_term)) {
-    // Chỉ tìm kiếm theo tên khóa học
-    $sql_search = " WHERE ten_khoahoc LIKE ?";
+    // Tìm kiếm theo tên khóa học HOẶC cấp độ
+    $sql_search = " WHERE ten_khoahoc LIKE ? OR cap_do LIKE ?";
     $search_param = "%" . $search_term . "%";
-    $params = [$search_param];
-    $types = "s";
+    // Cần 2 tham số giống nhau cho LIKE
+    $params = [$search_param, $search_param];
+    $types = "ss"; // Hai tham số kiểu string
 }
 
+// Thêm cột cap_do vào câu SELECT
 $sql = "
-    SELECT id_khoahoc, ten_khoahoc, thoi_gian, chi_phi 
+    SELECT id_khoahoc, ten_khoahoc, cap_do, thoi_gian, chi_phi, hinh_anh, danh_gia_tb
     FROM khoahoc
 " . $sql_search . " ORDER BY id_khoahoc DESC";
 
 $stmt = $conn->prepare($sql);
 if (!empty($params)) {
+    // Dùng toán tử `...` (spread operator) để truyền mảng tham số
     $stmt->bind_param($types, ...$params);
 }
 $stmt->execute();
@@ -31,244 +34,369 @@ $result = $stmt->get_result();
         <div class="d-flex justify-content-between align-items-center">
             <h4 class="mb-0"><i class="fa-solid fa-book-open me-2"></i>Quản lý Khóa học</h4>
             <div class="d-flex">
-                <form method="POST" action="./admin.php?nav=courses" class="d-flex me-2">
-                    <input type="text" name="search" class="form-control" placeholder="Tìm kiếm tên khóa học..." value="<?php echo htmlspecialchars($search_term); ?>">
-                    <button type="submit" class="btn btn-primary ms-2"><i class="fa-solid fa-magnifying-glass"></i></button>
+                <form method="GET" action="./admin.php" class="d-flex me-2">
+                    <input type="hidden" name="nav" value="courses"> <input type="text" name="search" class="form-control form-control-sm" placeholder="Tìm tên hoặc cấp độ..." value="<?php echo htmlspecialchars($search_term); ?>">
+                    <button type="submit" class="btn btn-secondary btn-sm ms-1"><i class="fas fa-search"></i></button>
+                    <?php if (!empty($search_term)): ?>
+                         <a href="./admin.php?nav=courses" class="btn btn-warning btn-sm ms-1"><i class="fas fa-times"></i> Xóa tìm</a>
+                    <?php endif; ?>
                 </form>
-                <button data-bs-toggle="modal" data-bs-target="#addCourseModal" class="btn btn-success"><i class="fa-solid fa-plus"></i> Thêm Khóa học</a>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                    <i class="fa-solid fa-plus me-1"></i> Thêm Khóa Học
+                </button>
             </div>
         </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-bordered table-hover align-middle">
                 <thead class="table-dark">
                     <tr>
-                        <th>ID</th>
-                        <th style="width: 50%;">Tên Khóa học</th>
-                        <th class="text-center">Thời gian (buổi)</th>
-                        <th>Học phí (VNĐ)</th>
-                        <th class="text-center">Hành động</th>
+                        <th class="text-center">ID</th>
+                      
+                        <th>Tên Khóa Học</th>
+                        <th>Cấp Độ</th> <th class="text-center">Thời Gian (Buổi)</th>
+                        <th class="text-end">Chi Phí (VNĐ)</th>
+                        <th class="text-center">Đánh Giá</th>
+                        <th class="text-center">Hành Động</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
-                    $index = 0;
-                    while ($row = $result->fetch_assoc()):
-                    ?>
-                        <tr id="course-row-<?php echo $row['id_khoahoc']; ?>" class="animated-row" style="animation-delay: <?php echo $index * 50; ?>ms;">
-                            <td><?php echo $row['id_khoahoc']; ?></td>
-                            <td><?php echo htmlspecialchars($row['ten_khoahoc']); ?></td>
-                            <td class="text-center"><?php echo htmlspecialchars($row['thoi_gian']); ?></td>
-                            <td><?php echo number_format($row['chi_phi'], 0, ',', '.'); ?></td>
-                            <td class="text-center">
-                                <button onclick="openEditModal(<?php echo $row['id_khoahoc']; ?>)" class="btn btn-primary btn-sm">
-                                    <i class="fa-solid fa-pen-to-square"></i> Sửa
-                                </button>
-                                <button onclick="deleteCourse(<?php echo $row['id_khoahoc']; ?>)" class="btn btn-danger btn-sm">
-                                    <i class="fa-solid fa-trash"></i> Xóa
-                                </button>
-                            </td>
-                        </tr>
-                    <?php
-                        $index++;
-                    endwhile;
+                    if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                          
+
+                            echo "<tr>";
+                            echo "<td class='text-center'>" . $row['id_khoahoc'] . "</td>";
+                          
+                            echo "<td>" . htmlspecialchars($row['ten_khoahoc']) . "</td>";
+                            echo "<td>" . ($row['cap_do'] ? htmlspecialchars($row['cap_do']) : "<span class='text-muted fst-italic'>Chưa có</span>") . "</td>"; // Hiển thị cấp độ
+                            echo "<td class='text-center'>" . ($row['thoi_gian'] ? htmlspecialchars($row['thoi_gian']) : "<span class='text-muted fst-italic'>0</span>") . "</td>";
+                            echo "<td class='text-end'>" . number_format($row['chi_phi'], 0, ',', '.') . "</td>";
+                            echo "<td class='text-center'>" . ($row['danh_gia_tb'] !== null ? number_format($row['danh_gia_tb'], 1) . "/5 <i class='fa-solid fa-star text-warning'></i>" : "<span class='text-muted fst-italic'>Chưa có</span>") . "</td>";
+                            echo "<td class='text-center'>";
+                            // Nút Sửa: gọi hàm JavaScript editCourse
+                            echo "<button class='btn btn-warning btn-sm me-1' onclick='editCourse(" . $row['id_khoahoc'] . ")'><i class='fa-solid fa-pen-to-square'></i></button>";
+                            // Nút Xóa: gọi hàm JavaScript deleteCourse
+                            echo "<button class='btn btn-danger btn-sm' onclick='deleteCourse(" . $row['id_khoahoc'] . ")'><i class='fa-solid fa-trash-can'></i></button>";
+                            echo "</td>";
+                            echo "</tr>";
+                        }
+                    } else {
+                        // Cập nhật colspan thành 8
+                        echo "<tr><td colspan='8' class='text-center text-muted'>Không tìm thấy khóa học nào" . (!empty($search_term) ? " phù hợp với tìm kiếm '" . htmlspecialchars($search_term) . "'" : "") . ".</td></tr>";
+                    }
+                    $stmt->close();
+                    // Không đóng $conn ở đây nếu file này được include vào admin.php
                     ?>
                 </tbody>
             </table>
         </div>
-    </div>
+        </div>
 </div>
 
-<div class="modal fade" id="addCourseModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fa-solid fa-plus-circle me-2"></i>Thêm Khóa Học Mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="addCourseModalLabel">Thêm Khóa Học Mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="addCourseForm" enctype="multipart/form-data">
-                <div class="modal-body">
-                    <div class="form-floating mb-3">
-                        <input type="text" name="ten_khoahoc" class="form-control" placeholder="Tên Khóa Học" required>
-                        <label>Tên Khóa Học *</label>
+            <div class="modal-body">
+                <form id="addCourseForm" method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="add_ten_khoahoc" class="form-label">Tên Khóa Học <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="add_ten_khoahoc" name="ten_khoahoc" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                             <label for="add_cap_do" class="form-label">Cấp Độ</label>
+                             <input type="text" class="form-control" id="add_cap_do" name="cap_do" placeholder="Ví dụ: Beginner, IELTS 5.0+">
+                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Mô Tả</label>
-                        <textarea name="mo_ta" id="add_mo_ta" class="form-control"></textarea>
+                     <div class="mb-3">
+                        <label for="add_mo_ta" class="form-label">Mô Tả</label>
+                        <textarea class="form-control" id="add_mo_ta" name="mo_ta" rows="5"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <div class="form-floating"><input type="number" name="thoi_gian" class="form-control" placeholder="Thời Gian"><label>Thời Gian (số buổi)</label></div>
-                        </div>
+                             <label for="add_thoi_gian" class="form-label">Thời Gian (Số buổi)</label>
+                             <input type="number" class="form-control" id="add_thoi_gian" name="thoi_gian" min="0">
+                         </div>
                         <div class="col-md-6 mb-3">
-                            <div class="form-floating"><input type="number" name="chi_phi" class="form-control" placeholder="Học phí" required><label>Học phí (VNĐ) *</label></div>
+                            <label for="add_chi_phi" class="form-label">Chi Phí (VNĐ) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="add_chi_phi" name="chi_phi" min="0" required>
                         </div>
                     </div>
-                    <div class="mb-3"><label class="form-label">Hình Ảnh</label><input type="file" name="hinh_anh" class="form-control" accept="image/*"></div>
-                </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-primary">Thêm Khóa học</button></div>
-            </form>
+                    <div class="mb-3">
+                        <label for="add_hinh_anh" class="form-label">Hình Ảnh</label>
+                        <input type="file" class="form-control" id="add_hinh_anh" name="hinh_anh" accept="image/*">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" name="add_course" class="btn btn-primary">Thêm Khóa Học</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="editCourseModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal fade" id="editCourseModal" tabindex="-1" aria-labelledby="editCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh Sửa Khóa Học</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="editCourseModalLabel">Chỉnh Sửa Khóa Học</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="editCourseForm" enctype="multipart/form-data">
-                <input type="hidden" name="id_khoahoc" id="edit_id_khoahoc">
-                <input type="hidden" name="hinh_anh_hien_tai" id="edit_hinh_anh_hien_tai">
-                <div class="modal-body">
-                    <div class="form-floating mb-3">
-                        <input type="text" name="ten_khoahoc" id="edit_ten_khoahoc" class="form-control" placeholder="Tên Khóa Học" required>
-                        <label>Tên Khóa Học *</label>
-                    </div>
+            <div class="modal-body">
+                <form id="editCourseForm" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="id_khoahoc" id="edit_id_khoahoc">
+                    <input type="hidden" name="hinh_anh_hien_tai" id="edit_hinh_anh_hien_tai">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                             <label for="edit_ten_khoahoc" class="form-label">Tên Khóa Học <span class="text-danger">*</span></label>
+                             <input type="text" class="form-control" id="edit_ten_khoahoc" name="ten_khoahoc" required>
+                         </div>
+                         <div class="col-md-6 mb-3">
+                             <label for="edit_cap_do" class="form-label">Cấp Độ</label>
+                             <input type="text" class="form-control" id="edit_cap_do" name="cap_do">
+                         </div>
+                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Mô Tả</label>
-                        <textarea name="mo_ta" id="edit_mo_ta" class="form-control"></textarea>
+                        <label for="edit_mo_ta" class="form-label">Mô Tả</label>
+                        <textarea class="form-control" id="edit_mo_ta" name="mo_ta" rows="5"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <div class="form-floating"><input type="number" name="thoi_gian" id="edit_thoi_gian" class="form-control" placeholder="Thời Gian"><label>Thời Gian (số buổi)</label></div>
+                            <label for="edit_thoi_gian" class="form-label">Thời Gian (Số buổi)</label>
+                            <input type="number" class="form-control" id="edit_thoi_gian" name="thoi_gian" min="0">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <div class="form-floating"><input type="number" name="chi_phi" id="edit_chi_phi" class="form-control" placeholder="Học phí" required><label>Học phí (VNĐ) *</label></div>
+                            <label for="edit_chi_phi" class="form-label">Chi Phí (VNĐ) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="edit_chi_phi" name="chi_phi" min="0" required>
                         </div>
                     </div>
-                    <div class="mb-3"><label class="form-label">Tải ảnh mới (để trống nếu không đổi)</label><input type="file" name="hinh_anh" class="form-control" accept="image/*"></div>
-                </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-primary">Lưu thay đổi</button></div>
-            </form>
+                    <div class="mb-3">
+                        <label for="edit_hinh_anh" class="form-label">Hình Ảnh Mới (Để trống nếu không đổi)</label>
+                        <input type="file" class="form-control" id="edit_hinh_anh" name="hinh_anh" accept="image/*">
+                        <div class="mt-2">
+                            <small>Ảnh hiện tại:</small><br>
+                            <img id="current_image" src="" alt="Ảnh khóa học" style="max-width: 150px; height: auto; margin-top: 5px; display: none;">
+                            <span id="no_current_image" class="text-muted" style="display: none;">Không có ảnh</span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" name="edit_course" class="btn btn-primary">Lưu Thay Đổi</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script>
 
 <script>
-    let addCourseModal, editCourseModal;
-    let addEditor, editEditor;
+    let addEditor, editEditor; // Biến toàn cục cho CKEditor instances
+    let addCourseModal, editCourseModal; // Biến cho Bootstrap Modals
 
-    // Hàm mở modal Sửa
-    async function openEditModal(courseId) {
-        try {
-            const response = await fetch(`./modules/khoahoc/get_course_info.php?id=${courseId}`);
-            const data = await response.json();
-            if (data.error) {
-                Swal.fire('Lỗi!', data.error, 'error');
-                return;
-            }
-            document.getElementById('edit_id_khoahoc').value = data.id_khoahoc;
-            document.getElementById('edit_ten_khoahoc').value = data.ten_khoahoc;
-            document.getElementById('edit_thoi_gian').value = data.thoi_gian;
-            document.getElementById('edit_chi_phi').value = data.chi_phi;
-            document.getElementById('edit_hinh_anh_hien_tai').value = data.hinh_anh;
+    document.addEventListener('DOMContentLoaded', function() {
+        // Khởi tạo CKEditor cho textarea thêm mới
+        addEditor = CKEDITOR.replace('add_mo_ta');
+        // Khởi tạo CKEditor cho textarea sửa (sẽ cập nhật nội dung khi modal mở)
+        editEditor = CKEDITOR.replace('edit_mo_ta');
 
-            if (editEditor) {
-                editEditor.setData(data.mo_ta || '');
-            }
-
-            editCourseModal.show();
-        } catch (error) {
-            Swal.fire('Lỗi!', 'Không thể lấy dữ liệu khóa học.', 'error');
+        // Lấy đối tượng modal của Bootstrap
+        const addModalEl = document.getElementById('addCourseModal');
+        const editModalEl = document.getElementById('editCourseModal');
+        if (addModalEl) {
+             addCourseModal = new bootstrap.Modal(addModalEl);
         }
+        if (editModalEl) {
+             editCourseModal = new bootstrap.Modal(editModalEl);
+
+             // Xử lý sự kiện khi modal sửa được hiển thị
+             editModalEl.addEventListener('shown.bs.modal', function () {
+                 // Lấy nội dung hiện tại của textarea (đã được JS đổ vào từ AJAX)
+                 const currentContent = document.getElementById('edit_mo_ta').value;
+                 // Set nội dung cho CKEditor
+                 if (editEditor) {
+                     editEditor.setData(currentContent);
+                 }
+             });
+        }
+
+        // Xử lý submit form thêm mới
+        const addForm = document.getElementById('addCourseForm');
+        if(addForm) {
+            addForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                addEditor.updateElement(); // Cập nhật textarea từ CKEditor trước khi gửi
+                const formData = new FormData(this);
+
+                fetch('./modules/khoahoc/add_course.php', { // Đường dẫn tới file xử lý PHP
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            if (addCourseModal) addCourseModal.hide(); // Đóng modal
+                            Swal.fire({
+                                    icon: 'success',
+                                    title: 'Thành công!',
+                                    text: data.message,
+                                    timer: 1500, // Tự đóng sau 1.5 giây
+                                    showConfirmButton: false
+                                })
+                                .then(() => {
+                                    location.reload(); // Tải lại trang để cập nhật danh sách
+                                });
+                        } else {
+                            Swal.fire('Lỗi!', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Lỗi!', 'Có lỗi xảy ra, vui lòng thử lại.', 'error');
+                    });
+            });
+        }
+
+
+        // Xử lý submit form sửa
+        const editForm = document.getElementById('editCourseForm');
+         if(editForm) {
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                editEditor.updateElement(); // Cập nhật textarea từ CKEditor
+                const formData = new FormData(this);
+
+                fetch('./modules/khoahoc/edit_course.php', { // Đường dẫn tới file xử lý PHP
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            if (editCourseModal) editCourseModal.hide();
+                            Swal.fire({
+                                    icon: 'success',
+                                    title: 'Thành công!',
+                                    text: data.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                })
+                                .then(() => {
+                                    location.reload();
+                                });
+                        } else {
+                            Swal.fire('Lỗi!', data.message, 'error');
+                        }
+                    })
+                     .catch(error => {
+                         console.error('Error:', error);
+                         Swal.fire('Lỗi!', 'Có lỗi xảy ra khi cập nhật.', 'error');
+                     });
+            });
+        }
+
+    }); // End DOMContentLoaded
+
+    // Hàm mở modal sửa và load dữ liệu
+    function editCourse(id) {
+        fetch(`./modules/khoahoc/get_course_info.php?id=${id}`) // Đường dẫn tới file lấy thông tin
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    Swal.fire('Lỗi!', data.error, 'error');
+                } else {
+                    // Đổ dữ liệu vào form sửa
+                    document.getElementById('edit_id_khoahoc').value = data.id_khoahoc;
+                    document.getElementById('edit_ten_khoahoc').value = data.ten_khoahoc;
+                    document.getElementById('edit_cap_do').value = data.cap_do || ''; // Đổ cấp độ
+                    document.getElementById('edit_thoi_gian').value = data.thoi_gian || '';
+                    document.getElementById('edit_chi_phi').value = data.chi_phi;
+                    document.getElementById('edit_hinh_anh_hien_tai').value = data.hinh_anh || '';
+
+                    // Cập nhật giá trị cho textarea ẩn để CKEditor lấy khi modal mở
+                     document.getElementById('edit_mo_ta').value = data.mo_ta || '';
+
+                    // Hiển thị ảnh hiện tại
+                    const currentImageElement = document.getElementById('current_image');
+                    const noCurrentImageElement = document.getElementById('no_current_image');
+                    if (data.hinh_anh) {
+                        currentImageElement.src = '../' + data.hinh_anh + '?t=' + new Date().getTime(); // Thêm ../ và cache busting
+                        currentImageElement.style.display = 'block';
+                        noCurrentImageElement.style.display = 'none';
+                    } else {
+                        currentImageElement.style.display = 'none';
+                        noCurrentImageElement.style.display = 'inline';
+                    }
+
+                    // Reset trường input file
+                    document.getElementById('edit_hinh_anh').value = '';
+
+                    // Mở modal sửa
+                    if (editCourseModal) editCourseModal.show();
+                     // CKEditor sẽ tự cập nhật nội dung khi modal 'shown.bs.modal'
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching course info:', error);
+                Swal.fire('Lỗi!', 'Không thể tải thông tin khóa học.', 'error');
+            });
     }
 
-    // Hàm mở modal Xóa (sử dụng SweetAlert)
-    function deleteCourse(courseId) {
+    // Hàm xóa khóa học
+    function deleteCourse(id) {
         Swal.fire({
             title: 'Bạn có chắc chắn?',
-            text: "Xóa khóa học này sẽ xóa tất cả dữ liệu liên quan (lớp học, đăng ký,...) và không thể khôi phục!",
+            text: "Bạn sẽ không thể hoàn tác hành động này!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Chắc chắn xóa!',
+            confirmButtonText: 'Xóa khóa học!',
             cancelButtonText: 'Hủy'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch('./modules/khoahoc/delete_course.php', {
+                // Gửi yêu cầu xóa bằng Fetch API
+                fetch('./modules/khoahoc/delete_course.php', { // Đường dẫn tới file xử lý PHP
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
+                            'Content-Type': 'application/x-www-form-urlencoded',
                         },
-                        body: `delete_id=${courseId}`
+                        body: 'delete_id=' + id
                     })
-                    .then(response => response.text())
-                    .then(res => {
-                        if (res.trim() === "Xóa thành công") {
-                            Swal.fire('Đã xóa!', 'Khóa học đã được xóa thành công.', 'success')
-                                .then(() => location.reload());
+                    .then(response => response.text()) // Nhận phản hồi dạng text
+                    .then(textData => {
+                         // Kiểm tra nội dung phản hồi thay vì JSON status
+                         if (textData.includes('Xóa thành công')) {
+                            Swal.fire(
+                                'Đã xóa!',
+                                'Khóa học đã được xóa thành công.',
+                                'success'
+                            ).then(() => {
+                                location.reload(); // Tải lại trang
+                            });
                         } else {
-                            Swal.fire('Lỗi!', 'Không thể xóa khóa học. ' + res, 'error');
+                             // Nếu có lỗi, textData sẽ chứa thông báo lỗi từ PHP
+                             Swal.fire(
+                                'Lỗi!',
+                                textData || 'Có lỗi xảy ra khi xóa khóa học.', // Hiển thị lỗi từ PHP hoặc thông báo chung
+                                'error'
+                            );
                         }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Lỗi!', 'Có lỗi xảy ra, vui lòng thử lại.', 'error');
                     });
             }
-        })
+        });
     }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        addCourseModal = new bootstrap.Modal(document.getElementById('addCourseModal'));
-        editCourseModal = new bootstrap.Modal(document.getElementById('editCourseModal'));
-
-        CKEDITOR.replace('add_mo_ta');
-        CKEDITOR.replace('edit_mo_ta');
-        addEditor = CKEDITOR.instances.add_mo_ta;
-        editEditor = CKEDITOR.instances.edit_mo_ta;
-
-        document.getElementById('addCourseForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            addEditor.updateElement();
-            const formData = new FormData(this);
-
-            fetch('./modules/khoahoc/add_course.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        addCourseModal.hide();
-                        Swal.fire({
-                                icon: 'success',
-                                title: 'Thành công!',
-                                text: data.message,
-                                timer: 1500,
-                                showConfirmButton: false
-                            })
-                            .then(() => location.reload());
-                    } else {
-                        Swal.fire('Lỗi!', data.message, 'error');
-                    }
-                });
-        });
-
-        document.getElementById('editCourseForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            editEditor.updateElement();
-            const formData = new FormData(this);
-
-            fetch('./modules/khoahoc/edit_course.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        editCourseModal.hide();
-                        Swal.fire({
-                                icon: 'success',
-                                title: 'Thành công!',
-                                text: data.message,
-                                timer: 1500,
-                                showConfirmButton: false
-                            })
-                            .then(() => location.reload());
-                    } else {
-                        Swal.fire('Lỗi!', data.message, 'error');
-                    }
-                });
-        });
-    });
 </script>

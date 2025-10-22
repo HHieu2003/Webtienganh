@@ -43,6 +43,7 @@ CREATE TABLE `khoahoc` (
   `ten_khoahoc` VARCHAR(100),
   `mo_ta` TEXT,
   `thoi_gian` DATE,
+  `cap_do` varchar(50) DEFAULT NULL COMMENT 'Cấp độ của khóa học (Beginner, Intermediate, IELTS 5.0+,...)',
   `chi_phi` INT,
   `hinh_anh` VARCHAR(255),
   `danh_gia_tb` DECIMAL(3, 2)
