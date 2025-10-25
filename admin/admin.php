@@ -94,6 +94,34 @@ $is_teacher = $_SESSION['is_teacher'] ?? false;
             if (overlay) {
                 overlay.addEventListener('click', closeSidebar);
             }
+
+            // Detect if menu is scrollable and add fade effect
+            const adminNav = document.querySelector('.admin-nav');
+            if (adminNav) {
+                function checkScrollable() {
+                    if (adminNav.scrollHeight > adminNav.clientHeight) {
+                        adminNav.classList.add('has-scroll');
+                    } else {
+                        adminNav.classList.remove('has-scroll');
+                    }
+                }
+                
+                // Check on load
+                checkScrollable();
+                
+                // Check on resize
+                window.addEventListener('resize', checkScrollable);
+                
+                // Update fade effect on scroll
+                adminNav.addEventListener('scroll', function() {
+                    const isAtBottom = adminNav.scrollHeight - adminNav.scrollTop <= adminNav.clientHeight + 10;
+                    if (isAtBottom) {
+                        adminNav.classList.remove('has-scroll');
+                    } else {
+                        adminNav.classList.add('has-scroll');
+                    }
+                });
+            }
         });
     </script>
 </body>

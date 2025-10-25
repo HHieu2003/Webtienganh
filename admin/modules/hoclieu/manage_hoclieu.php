@@ -77,7 +77,7 @@ $materials = $result_materials->fetch_all(MYSQLI_ASSOC);
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle">
-                <thead class="table-light"><tr><th>Tiêu đề</th><th>Phạm vi</th><th>Khóa học</th><th class="text-center">Loại file</th><th class="text-center">Ngày đăng</th><th class="text-center">Hành động</th></tr></thead>
+                <thead class="table-dark"><tr><th>Tiêu đề</th><th>Phạm vi</th><th>Khóa học</th><th class="text-center">Loại file</th><th class="text-center">Ngày đăng</th><th class="text-center">Hành động</th></tr></thead>
                 <tbody>
                     <?php if (!empty($materials)) : foreach ($materials as $material) : ?>
                         <tr id="material-row-<?php echo $material['id_hoclieu']; ?>">
