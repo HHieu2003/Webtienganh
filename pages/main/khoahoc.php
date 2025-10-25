@@ -81,20 +81,43 @@
         <?php
         // File này được include từ index.php nên biến $conn đã có sẵn.
         $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+        
+        // Pagination settings
+        $items_per_page = 12; // Số khóa học mỗi trang
+        $current_page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+        $offset = ($current_page - 1) * $items_per_page;
 
-        // Đã loại bỏ JOIN với bảng giangvien
+        // Count total courses for pagination
+        $count_sql = "SELECT COUNT(*) as total FROM khoahoc";
+        if (!empty($search)) {
+            $count_sql .= " WHERE ten_khoahoc LIKE ?";
+        }
+        
+        $count_stmt = $conn->prepare($count_sql);
+        if (!empty($search)) {
+            $like_search = '%' . $search . '%';
+            $count_stmt->bind_param("s", $like_search);
+        }
+        $count_stmt->execute();
+        $count_result = $count_stmt->get_result();
+        $total_courses = $count_result->fetch_assoc()['total'];
+        $total_pages = ceil($total_courses / $items_per_page);
+
+        // Fetch courses with LIMIT
         $sql = "SELECT * FROM khoahoc";
 
         if (!empty($search)) {
             // Chỉ tìm kiếm theo tên khóa học
             $sql .= " WHERE ten_khoahoc LIKE ?";
         }
-        $sql .= " ORDER BY id_khoahoc DESC";
+        $sql .= " ORDER BY id_khoahoc DESC LIMIT ? OFFSET ?";
 
         $stmt = $conn->prepare($sql);
         if (!empty($search)) {
             $like_search = '%' . $search . '%';
-            $stmt->bind_param("s", $like_search);
+            $stmt->bind_param("sii", $like_search, $items_per_page, $offset);
+        } else {
+            $stmt->bind_param("ii", $items_per_page, $offset);
         }
         $stmt->execute();
         $result = $stmt->get_result();
@@ -147,6 +170,102 @@
         }
         ?>
     </div>
+
+    <!-- Pagination -->
+    <?php if ($total_pages > 1): ?>
+    <div class="pagination-container" data-aos="fade-up">
+        <div class="pagination">
+            <?php
+            // Previous button
+            if ($current_page > 1):
+                $prev_page = $current_page - 1;
+                $prev_url = "index.php?nav=khoahoc&page=$prev_page";
+                if (!empty($search)) {
+                    $prev_url .= "&search=" . urlencode($search);
+                }
+            ?>
+                <a href="<?php echo $prev_url; ?>" class="pagination-btn pagination-prev">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Trước</span>
+                </a>
+            <?php else: ?>
+                <span class="pagination-btn pagination-prev disabled">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Trước</span>
+                </span>
+            <?php endif; ?>
+
+            <!-- Page numbers -->
+            <div class="pagination-numbers">
+                <?php
+                $range = 2; // Show 2 pages before and after current page
+                $start = max(1, $current_page - $range);
+                $end = min($total_pages, $current_page + $range);
+
+                // First page
+                if ($start > 1):
+                    $url = "index.php?nav=khoahoc&page=1";
+                    if (!empty($search)) $url .= "&search=" . urlencode($search);
+                ?>
+                    <a href="<?php echo $url; ?>" class="pagination-number">1</a>
+                    <?php if ($start > 2): ?>
+                        <span class="pagination-dots">...</span>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <?php for ($i = $start; $i <= $end; $i++): 
+                    $url = "index.php?nav=khoahoc&page=$i";
+                    if (!empty($search)) $url .= "&search=" . urlencode($search);
+                ?>
+                    <a href="<?php echo $url; ?>" 
+                       class="pagination-number <?php echo $i == $current_page ? 'active' : ''; ?>">
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+
+                <!-- Last page -->
+                <?php if ($end < $total_pages): ?>
+                    <?php if ($end < $total_pages - 1): ?>
+                        <span class="pagination-dots">...</span>
+                    <?php endif; ?>
+                    <?php
+                    $url = "index.php?nav=khoahoc&page=$total_pages";
+                    if (!empty($search)) $url .= "&search=" . urlencode($search);
+                    ?>
+                    <a href="<?php echo $url; ?>" class="pagination-number"><?php echo $total_pages; ?></a>
+                <?php endif; ?>
+            </div>
+
+            <!-- Next button -->
+            <?php
+            if ($current_page < $total_pages):
+                $next_page = $current_page + 1;
+                $next_url = "index.php?nav=khoahoc&page=$next_page";
+                if (!empty($search)) {
+                    $next_url .= "&search=" . urlencode($search);
+                }
+            ?>
+                <a href="<?php echo $next_url; ?>" class="pagination-btn pagination-next">
+                    <span>Sau</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            <?php else: ?>
+                <span class="pagination-btn pagination-next disabled">
+                    <span>Sau</span>
+                    <i class="fas fa-chevron-right"></i>
+                </span>
+            <?php endif; ?>
+        </div>
+
+        <!-- Page info -->
+        <div class="pagination-info">
+            <i class="fas fa-info-circle"></i>
+            Trang <strong><?php echo $current_page; ?></strong> / <strong><?php echo $total_pages; ?></strong>
+            <span class="separator">•</span>
+            Tổng <strong><?php echo $total_courses; ?></strong> khóa học
+        </div>
+    </div>
+    <?php endif; ?>
 </div>
 
 <style>
@@ -154,7 +273,8 @@
     .course-section {
         max-width: 1200px;
         margin: 0px auto;
-        padding: 40px;
+        padding-top: 40px;
+        padding-bottom: 10px;
         min-height: 418px;
     }
 
@@ -614,6 +734,182 @@
         font-size: 18px;
         color: #666;
     }
+
+    /* Pagination Styles */
+    .pagination-container {
+        margin-top: 25px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .pagination {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        background: linear-gradient(135deg, #66eabaff 0%, #4ba254ff 100%);
+        padding: 10px 20px;
+        border-radius: 50px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .pagination-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #667eea;
+        border: none;
+        border-radius: 25px;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .pagination-btn:hover:not(.disabled) {
+        background: #fff;
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        color: #764ba2;
+    }
+
+    .pagination-btn.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .pagination-numbers {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 10px;
+    }
+
+    .pagination-number {
+        min-width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        font-size: 16px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .pagination-number:hover {
+        background: rgba(255, 255, 255, 0.95);
+        color: #667eea;
+        border-color: rgba(255,255,255,0.8);
+        transform: translateY(-3px) scale(1.15);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .pagination-number.active {
+        background: #fff;
+        color: #764ba2;
+        border-color: #fff;
+        transform: scale(1.2);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        animation: pageActive 0.5s ease;
+    }
+
+    @keyframes pageActive {
+        0%, 100% { transform: scale(1.2); }
+        50% { transform: scale(1.3); }
+    }
+
+    .pagination-dots {
+        color: rgba(255,255,255,0.6);
+        font-weight: bold;
+        padding: 0 5px;
+    }
+
+    .pagination-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 15px 30px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 30px;
+        color: #667eea;
+        font-size: 15px;
+        font-weight: 600;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .pagination-info i {
+        font-size: 18px;
+    }
+
+    .pagination-info strong {
+        color: #764ba2;
+        font-size: 17px;
+    }
+
+    .pagination-info .separator {
+        margin: 0 5px;
+        color: rgba(102, 126, 234, 0.3);
+    }
+
+    /* Pagination Responsive */
+    @media (max-width: 768px) {
+        .pagination {
+            padding: 15px 20px;
+            border-radius: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .pagination-btn {
+            padding: 5px 8px;
+            font-size: 14px;
+        }
+
+        .pagination-btn span {
+            display: none;
+        }
+
+        .pagination-number {
+            min-width: 40px;
+            height: 40px;
+            font-size: 14px;
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            padding: 7px 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .pagination-numbers {
+            gap: 5px;
+            margin: 0 5px;
+        }
+
+        .pagination-number {
+            min-width: 35px;
+            height: 35px;
+            font-size: 13px;
+        }
+    }
 </style>
 
 <script>
@@ -682,6 +978,25 @@
         
         // Update result count with animation
         updateResultCount(filteredCards.length);
+        
+        // Hide pagination when filtering
+        const paginationContainer = document.querySelector('.pagination-container');
+        if (paginationContainer) {
+            const hasActiveFilter = sortValue !== '' || priceValue !== '' || levelValue !== '';
+            if (hasActiveFilter) {
+                paginationContainer.style.opacity = '0';
+                paginationContainer.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    paginationContainer.style.display = 'none';
+                }, 300);
+            } else {
+                paginationContainer.style.display = 'flex';
+                setTimeout(() => {
+                    paginationContainer.style.opacity = '1';
+                    paginationContainer.style.transform = 'translateY(0)';
+                }, 100);
+            }
+        }
         
         // Fade out all cards first
         courseCards.forEach(card => {
@@ -797,6 +1112,21 @@
         // Initial count
         const totalCourses = document.querySelectorAll('.course-card').length;
         updateResultCount(totalCourses);
+        
+        // Smooth scroll to top when clicking pagination
+        const paginationLinks = document.querySelectorAll('.pagination-number, .pagination-btn');
+        paginationLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Don't prevent default - let the link work
+                // But add smooth scroll
+                setTimeout(() => {
+                    const courseSection = document.querySelector('.course-section');
+                    if (courseSection) {
+                        courseSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 100);
+            });
+        });
         
         // Add change listeners with debounce for smooth performance
         let filterTimeout;

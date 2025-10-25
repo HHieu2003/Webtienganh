@@ -193,3 +193,125 @@ $result_payments = $stmt->get_result();
         updateDeleteButtonState();
     });
 </script>
+
+<style>
+/* Responsive Design for lichsu_thanhtoan.php */
+@media (max-width: 768px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .card-header .d-flex form {
+        width: 100%;
+    }
+    
+    .card-header .d-flex form input[type="text"] {
+        min-width: 100% !important;
+    }
+    
+    .card-header .d-flex .btn {
+        width: 100%;
+    }
+    
+    .mb-3.text-end {
+        text-align: center !important;
+    }
+    
+    #delete-selected-btn {
+        width: 100%;
+    }
+    
+    /* Make table scrollable on mobile */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Hide less important columns on mobile */
+    .table thead th:nth-child(2),
+    .table tbody td:nth-child(2) {
+        display: none;
+    }
+    
+    .table thead th:nth-child(6),
+    .table tbody td:nth-child(6) {
+        display: none;
+    }
+    
+    /* Stack action buttons in the last column */
+    .table tbody td:last-child .d-flex {
+        flex-direction: column !important;
+        gap: 5px;
+    }
+    
+    .table tbody td:last-child .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-header h4 {
+        font-size: 1rem;
+    }
+    
+    .card-header h4 i {
+        font-size: 0.9rem;
+    }
+    
+    .card-header form .form-control {
+        font-size: 0.85rem;
+        padding: 0.5rem;
+    }
+    
+    .card-header form .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .card-header .btn i {
+        margin-right: 0 !important;
+    }
+    
+    .card-header .btn .fa-file-excel + text {
+        display: none;
+    }
+    
+    #delete-selected-btn {
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .table thead th:nth-child(1),
+    .table tbody td:nth-child(1) {
+        width: 10%;
+    }
+    
+    /* Hide "Xuất Excel" text, keep only icon */
+    .btn-info .fa-file-excel ~ text {
+        display: none;
+    }
+    
+    .btn-sm {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+    
+    .fw-bold {
+        font-size: 0.8rem !important;
+    }
+    
+    small {
+        font-size: 0.7rem !important;
+    }
+}
+</style>

@@ -1,51 +1,149 @@
 <?php
-// Xử lý tìm kiếm
-$search_term = $_POST['search'] ?? $_GET['search'] ?? ''; // Ưu tiên POST rồi đến GET
+// Pagination variables
+$courses_per_page = 10;
+$current_page = isset($_GET['course_page']) ? max(1, intval($_GET['course_page'])) : 1;
+$offset = ($current_page - 1) * $courses_per_page;
+
+// Xử lý tìm kiếm và lọc
+$search_term = $_POST['search'] ?? $_GET['search'] ?? '';
+$filter_level = $_GET['filter_level'] ?? '';
+
 $sql_search = "";
 $params = [];
 $types = "";
 
-if (!empty($search_term)) {
-    // Tìm kiếm theo tên khóa học HOẶC cấp độ
+if (!empty($search_term) && !empty($filter_level)) {
+    // Cả tìm kiếm và lọc
+    $sql_search = " WHERE (ten_khoahoc LIKE ? OR cap_do LIKE ?) AND cap_do = ?";
+    $search_param = "%" . $search_term . "%";
+    $params = [$search_param, $search_param, $filter_level];
+    $types = "sss";
+} elseif (!empty($search_term)) {
+    // Chỉ tìm kiếm
     $sql_search = " WHERE ten_khoahoc LIKE ? OR cap_do LIKE ?";
     $search_param = "%" . $search_term . "%";
-    // Cần 2 tham số giống nhau cho LIKE
     $params = [$search_param, $search_param];
-    $types = "ss"; // Hai tham số kiểu string
+    $types = "ss";
+} elseif (!empty($filter_level)) {
+    // Chỉ lọc
+    $sql_search = " WHERE cap_do = ?";
+    $params = [$filter_level];
+    $types = "s";
 }
 
-// Thêm cột cap_do vào câu SELECT
+// Get all distinct levels for filter
+$sql_levels = "SELECT DISTINCT cap_do FROM khoahoc WHERE cap_do IS NOT NULL AND cap_do != '' ORDER BY cap_do";
+$levels_result = $conn->query($sql_levels);
+$available_levels = [];
+while ($level_row = $levels_result->fetch_assoc()) {
+    $available_levels[] = $level_row['cap_do'];
+}
+
+// Count total courses
+$sql_count = "SELECT COUNT(*) as total FROM khoahoc" . $sql_search;
+$stmt_count = $conn->prepare($sql_count);
+if (!empty($params)) {
+    $stmt_count->bind_param($types, ...$params);
+}
+$stmt_count->execute();
+$total_courses = $stmt_count->get_result()->fetch_assoc()['total'];
+$total_pages = ceil($total_courses / $courses_per_page);
+
+// Main query with pagination
 $sql = "
     SELECT id_khoahoc, ten_khoahoc, cap_do, thoi_gian, chi_phi, hinh_anh, danh_gia_tb
     FROM khoahoc
-" . $sql_search . " ORDER BY id_khoahoc DESC";
+" . $sql_search . " ORDER BY id_khoahoc DESC LIMIT ? OFFSET ?";
 
 $stmt = $conn->prepare($sql);
+
 if (!empty($params)) {
-    // Dùng toán tử `...` (spread operator) để truyền mảng tham số
+    $params[] = $courses_per_page;
+    $params[] = $offset;
+    $types .= "ii";
     $stmt->bind_param($types, ...$params);
+} else {
+    $stmt->bind_param("ii", $courses_per_page, $offset);
 }
+
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
 
 <div class="card animated-card">
     <div class="card-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h4 class="mb-0"><i class="fa-solid fa-book-open me-2"></i>Quản lý Khóa học</h4>
-            <div class="d-flex">
-                <form method="GET" action="./admin.php" class="d-flex me-2">
-                    <input type="hidden" name="nav" value="courses"> <input type="text" name="search" class="form-control form-control-sm" placeholder="Tìm tên hoặc cấp độ..." value="<?php echo htmlspecialchars($search_term); ?>">
-                    <button type="submit" class="btn btn-secondary btn-sm ms-1"><i class="fas fa-search"></i></button>
-                    <?php if (!empty($search_term)): ?>
-                         <a href="./admin.php?nav=courses" class="btn btn-warning btn-sm ms-1"><i class="fas fa-times"></i> Xóa tìm</a>
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <h4 class="mb-2 mb-md-0"><i class="fa-solid fa-book-open me-2"></i>Quản lý Khóa học</h4>
+            <div class="d-flex flex-wrap gap-2">
+                <form method="GET" action="./admin.php" class="d-flex">
+                    <input type="hidden" name="nav" value="courses">
+                    <?php if (!empty($filter_level)): ?>
+                        <input type="hidden" name="filter_level" value="<?php echo htmlspecialchars($filter_level); ?>">
                     <?php endif; ?>
+                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Tìm tên hoặc cấp độ..." value="<?php echo htmlspecialchars($search_term); ?>" style="min-width: 200px;">
+                    <button type="submit" class="btn btn-secondary btn-sm ms-1"><i class="fas fa-search"></i></button>
                 </form>
+
+                <!-- Filter Dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-success dropdown-toggle" type="button" id="levelFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-filter me-1"></i>
+                        <?php echo !empty($filter_level) ? htmlspecialchars($filter_level) : 'Lọc cấp độ'; ?>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="levelFilterDropdown">
+                        <li>
+                            <a class="dropdown-item <?php echo empty($filter_level) ? 'active' : ''; ?>" 
+                               href="./admin.php?nav=courses<?php echo !empty($search_term) ? '&search=' . urlencode($search_term) : ''; ?>">
+                                <i class="fa-solid fa-list me-2"></i>Tất cả cấp độ
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <?php foreach ($available_levels as $level): ?>
+                            <li>
+                                <a class="dropdown-item <?php echo $filter_level === $level ? 'active' : ''; ?>" 
+                                   href="./admin.php?nav=courses&filter_level=<?php echo urlencode($level); ?><?php echo !empty($search_term) ? '&search=' . urlencode($search_term) : ''; ?>">
+                                    <?php echo htmlspecialchars($level); ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+
+                <?php if (!empty($search_term) || !empty($filter_level)): ?>
+                    <a href="./admin.php?nav=courses" class="btn btn-warning btn-sm">
+                        <i class="fas fa-times"></i> Xóa lọc
+                    </a>
+                <?php endif; ?>
+                
                 <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCourseModal">
                     <i class="fa-solid fa-plus me-1"></i> Thêm Khóa Học
                 </button>
             </div>
         </div>
+
+        <!-- Filter Statistics -->
+        <?php if (!empty($filter_level) || !empty($search_term)): ?>
+        <div class="mt-3">
+            <div class="d-flex gap-2 flex-wrap">
+                <span class="badge bg-light text-dark border">
+                    <i class="fa-solid fa-book-open me-1"></i>
+                    Tổng: <strong><?php echo $total_courses; ?></strong> khóa học
+                </span>
+                <?php if (!empty($filter_level)): ?>
+                    <span class="badge" style="background: linear-gradient(135deg, #0db33b 0%, #0a8a2c 100%);">
+                        <i class="fa-solid fa-filter me-1"></i>
+                        Cấp độ: <strong><?php echo htmlspecialchars($filter_level); ?></strong>
+                    </span>
+                <?php endif; ?>
+                <?php if (!empty($search_term)): ?>
+                    <span class="badge bg-info">
+                        <i class="fa-solid fa-search me-1"></i>
+                        Tìm kiếm: <strong><?php echo htmlspecialchars($search_term); ?></strong>
+                    </span>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -65,36 +163,255 @@ $result = $stmt->get_result();
                     <?php
                     if ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
-                          
-
                             echo "<tr>";
                             echo "<td class='text-center'>" . $row['id_khoahoc'] . "</td>";
-                          
                             echo "<td>" . htmlspecialchars($row['ten_khoahoc']) . "</td>";
-                            echo "<td>" . ($row['cap_do'] ? htmlspecialchars($row['cap_do']) : "<span class='text-muted fst-italic'>Chưa có</span>") . "</td>"; // Hiển thị cấp độ
+                            echo "<td>" . ($row['cap_do'] ? htmlspecialchars($row['cap_do']) : "<span class='text-muted fst-italic'>Chưa có</span>") . "</td>";
                             echo "<td class='text-center'>" . ($row['thoi_gian'] ? htmlspecialchars($row['thoi_gian']) : "<span class='text-muted fst-italic'>0</span>") . "</td>";
                             echo "<td class='text-end'>" . number_format($row['chi_phi'], 0, ',', '.') . "</td>";
                             echo "<td class='text-center'>" . ($row['danh_gia_tb'] !== null ? number_format($row['danh_gia_tb'], 1) . "/5 <i class='fa-solid fa-star text-warning'></i>" : "<span class='text-muted fst-italic'>Chưa có</span>") . "</td>";
                             echo "<td class='text-center'>";
-                            // Nút Sửa: gọi hàm JavaScript editCourse
                             echo "<button class='btn btn-warning btn-sm me-1' onclick='editCourse(" . $row['id_khoahoc'] . ")'><i class='fa-solid fa-pen-to-square'></i></button>";
-                            // Nút Xóa: gọi hàm JavaScript deleteCourse
                             echo "<button class='btn btn-danger btn-sm' onclick='deleteCourse(" . $row['id_khoahoc'] . ")'><i class='fa-solid fa-trash-can'></i></button>";
                             echo "</td>";
                             echo "</tr>";
                         }
                     } else {
-                        // Cập nhật colspan thành 8
-                        echo "<tr><td colspan='8' class='text-center text-muted'>Không tìm thấy khóa học nào" . (!empty($search_term) ? " phù hợp với tìm kiếm '" . htmlspecialchars($search_term) . "'" : "") . ".</td></tr>";
+                        $empty_message = "Không tìm thấy khóa học nào";
+                        if (!empty($search_term) && !empty($filter_level)) {
+                            $empty_message .= " với từ khóa '<strong>" . htmlspecialchars($search_term) . "</strong>' và cấp độ '<strong>" . htmlspecialchars($filter_level) . "</strong>'";
+                        } elseif (!empty($search_term)) {
+                            $empty_message .= " phù hợp với tìm kiếm '<strong>" . htmlspecialchars($search_term) . "</strong>'";
+                        } elseif (!empty($filter_level)) {
+                            $empty_message .= " ở cấp độ '<strong>" . htmlspecialchars($filter_level) . "</strong>'";
+                        }
+                        echo "<tr><td colspan='7' class='text-center text-muted py-4'>";
+                        echo "<i class='fa-solid fa-book-open fa-3x mb-3 d-block'></i>";
+                        echo "<p class='mb-0'>" . $empty_message . "</p>";
+                        echo "</td></tr>";
                     }
                     $stmt->close();
-                    // Không đóng $conn ở đây nếu file này được include vào admin.php
                     ?>
                 </tbody>
             </table>
         </div>
+
+        <?php if ($total_pages > 1): ?>
+        <!-- Pagination -->
+        <div class="course-pagination-container">
+            <div class="course-pagination">
+                <?php
+                $query_params = [];
+                if (!empty($search_term)) $query_params[] = 'search=' . urlencode($search_term);
+                if (!empty($filter_level)) $query_params[] = 'filter_level=' . urlencode($filter_level);
+                $query_string = !empty($query_params) ? '&' . implode('&', $query_params) : '';
+                
+                // Previous button
+                if ($current_page > 1):
+                    $prev_link = "./admin.php?nav=courses&course_page=" . ($current_page - 1) . $query_string;
+                ?>
+                    <a href="<?php echo $prev_link; ?>" class="course-pagination-btn">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span class="btn-text">Trước</span>
+                    </a>
+                <?php else: ?>
+                    <span class="course-pagination-btn disabled">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span class="btn-text">Trước</span>
+                    </span>
+                <?php endif; ?>
+
+                <!-- Page numbers -->
+                <?php
+                $start_page = max(1, $current_page - 2);
+                $end_page = min($total_pages, $current_page + 2);
+
+                if ($start_page > 1):
+                    $first_link = "./admin.php?nav=courses&course_page=1" . $query_string;
+                ?>
+                    <a href="<?php echo $first_link; ?>" class="course-pagination-number">1</a>
+                    <?php if ($start_page > 2): ?>
+                        <span class="course-pagination-dots">...</span>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                    <?php
+                    $page_link = "./admin.php?nav=courses&course_page=" . $i . $query_string;
+                    $active_class = ($i == $current_page) ? ' active' : '';
+                    ?>
+                    <a href="<?php echo $page_link; ?>" class="course-pagination-number<?php echo $active_class; ?>">
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+
+                <?php if ($end_page < $total_pages): ?>
+                    <?php if ($end_page < $total_pages - 1): ?>
+                        <span class="course-pagination-dots">...</span>
+                    <?php endif; ?>
+                    <?php $last_link = "./admin.php?nav=courses&course_page=" . $total_pages . $query_string; ?>
+                    <a href="<?php echo $last_link; ?>" class="course-pagination-number"><?php echo $total_pages; ?></a>
+                <?php endif; ?>
+
+                <!-- Next button -->
+                <?php if ($current_page < $total_pages):
+                    $next_link = "./admin.php?nav=courses&course_page=" . ($current_page + 1) . $query_string;
+                ?>
+                    <a href="<?php echo $next_link; ?>" class="course-pagination-btn">
+                        <span class="btn-text">Sau</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                <?php else: ?>
+                    <span class="course-pagination-btn disabled">
+                        <span class="btn-text">Sau</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </span>
+                <?php endif; ?>
+            </div>
+
+            <!-- Pagination info -->
+            <div class="course-pagination-info">
+                <?php
+                $start_item = $offset + 1;
+                $end_item = min($offset + $courses_per_page, $total_courses);
+                ?>
+                Hiển thị <?php echo $start_item; ?>-<?php echo $end_item; ?> / <?php echo $total_courses; ?> khóa học
+            </div>
+        </div>
+        <?php endif; ?>
         </div>
 </div>
+
+<style>
+/* Course Pagination Styles */
+.course-pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.course-pagination {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: linear-gradient(135deg, #0db33b 0%, #0a8a2c 100%);
+    padding: 6px 12px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(13, 179, 59, 0.2);
+}
+
+.course-pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 9px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+}
+
+.course-pagination-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    transform: translateY(-1px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.course-pagination-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.course-pagination-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    text-decoration: none;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.course-pagination-number:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    transform: translateY(-1px) scale(1.05);
+}
+
+.course-pagination-number.active {
+    background: white;
+    color: #0db33b;
+    transform: scale(1.08);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    border-color: white;
+}
+
+.course-pagination-dots {
+    color: white;
+    padding: 0 4px;
+    font-weight: bold;
+    opacity: 0.6;
+}
+
+.course-pagination-info {
+    background: var(--brand-color-light, #e7f7ec);
+    color: var(--brand-color, #0db33b);
+    padding: 8px 18px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(13, 179, 59, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .course-pagination-container {
+        justify-content: center;
+    }
+    
+    .course-pagination-btn .btn-text {
+        display: none;
+    }
+    
+    .course-pagination-btn {
+        padding: 6px 10px;
+    }
+    
+    .course-pagination-info {
+        order: -1;
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .course-pagination-number {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+    
+    .course-pagination-btn {
+        padding: 5px 8px;
+    }
+}
+</style>
 
 <div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -177,10 +494,24 @@ $result = $stmt->get_result();
                             <label for="edit_chi_phi" class="form-label">Chi Phí (VNĐ) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="edit_chi_phi" name="chi_phi" min="0" required>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_hinh_anh" class="form-label">Hình Ảnh Mới (Để trống nếu không đổi)</label>
-                        <input type="file" class="form-control" id="edit_hinh_anh" name="hinh_anh" accept="image/*">
+            }
+        });
+    }
+
+    // Smooth scroll for pagination
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.course-pagination-number, .course-pagination-btn').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const container = document.querySelector('.card.animated-card');
+                if (container) {
+                    setTimeout(() => {
+                        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                }
+            });
+        });
+    });
+</script>               <input type="file" class="form-control" id="edit_hinh_anh" name="hinh_anh" accept="image/*">
                         <div class="mt-2">
                             <small>Ảnh hiện tại:</small><br>
                             <img id="current_image" src="" alt="Ảnh khóa học" style="max-width: 150px; height: auto; margin-top: 5px; display: none;">

@@ -5,19 +5,43 @@ if (!isset($_SESSION['is_teacher']) || !$_SESSION['is_teacher']) die("Truy cập
 
 $id_giangvien = $_SESSION['id_giangvien'];
 
-// --- XỬ LÝ TÌM KIẾM ---
+// --- XỬ LÝ TÌM KIẾM VÀ LỌC ---
 $search_term = $_GET['search'] ?? '';
+$status_filter = $_GET['status'] ?? '';
+
 $sql_search = "";
 $params = [$id_giangvien];
 $types = "i";
 
 if (!empty($search_term)) {
-    $sql_search = " AND (lh.ten_lop LIKE ? OR kh.ten_khoahoc LIKE ?)";
+    $sql_search .= " AND (lh.ten_lop LIKE ? OR kh.ten_khoahoc LIKE ?)";
     $search_param = "%" . $search_term . "%";
     array_push($params, $search_param, $search_param);
     $types .= "ss";
 }
-// --- KẾT THÚC XỬ LÝ TÌM KIẾM ---
+
+if (!empty($status_filter)) {
+    $sql_search .= " AND lh.trang_thai = ?";
+    array_push($params, $status_filter);
+    $types .= "s";
+}
+// --- KẾT THÚC XỬ LÝ TÌM KIẾM VÀ LỌC ---
+
+// --- COUNT STATISTICS ---
+$count_sql = "
+    SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN lh.trang_thai = 'dang hoc' THEN 1 ELSE 0 END) as active_count,
+        SUM(CASE WHEN lh.trang_thai = 'da xong' THEN 1 ELSE 0 END) as completed_count
+    FROM lop_hoc lh
+    JOIN khoahoc kh ON lh.id_khoahoc = kh.id_khoahoc
+    WHERE lh.id_giangvien = ?
+";
+$stmt_count = $conn->prepare($count_sql);
+$stmt_count->bind_param("i", $id_giangvien);
+$stmt_count->execute();
+$stats = $stmt_count->get_result()->fetch_assoc();
+$stmt_count->close();
 
 $sql = "
     SELECT lh.id_lop, lh.ten_lop, kh.ten_khoahoc, lh.so_luong_hoc_vien, lh.trang_thai
@@ -41,6 +65,63 @@ $result = $stmt->get_result();
     .animated-item {
         opacity: 0;
         animation: fadeInUp 0.5s ease-out forwards;
+    }
+
+    /* Search & Filter Bar */
+    .search-filter-bar {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid #dee2e6;
+    }
+
+    .search-filter-bar .form-control,
+    .search-filter-bar .form-select {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+
+    .search-filter-bar .btn {
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-weight: 600;
+    }
+
+    .filter-stats {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .filter-stats .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 15px;
+        background: #e7f7ec;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #0a8a2c;
+    }
+
+    .filter-stats .stat-item i {
+        font-size: 14px;
+        color: #0db33b;
+    }
+
+    .filter-stats .stat-item.active-filter {
+        background: #0db33b;
+        color: white;
+    }
+
+    .filter-stats .stat-item.active-filter i {
+        color: white;
     }
 
     /* Giao diện thẻ lớp học mới */
@@ -145,17 +226,74 @@ $result = $stmt->get_result();
 </style>
 
 <div class="container-fluid">
-    <div class="card animated-card">
-        <div class="card-header">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                 <h4 class="mb-0"><i class="fa-solid fa-school me-2"></i>Lớp học của tôi</h4>
-                 <form method="GET" action="./admin.php" class="d-flex">
-                    <input type="hidden" name="nav" value="teacher_classes">
-                    <input type="text" name="search" class="form-control" placeholder="Tìm tên lớp, khóa học..." value="<?php echo htmlspecialchars($search_term); ?>" style="min-width: 200px;">
-                    <button type="submit" class="btn btn-primary ms-2"><i class="fa-solid fa-magnifying-glass"></i></button>
-                </form>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h1 class="title-color mb-0" style="border:none; padding-bottom: 0;"><i class="fa-solid fa-school me-2"></i>Lớp học của tôi</h1>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="search-filter-bar">
+        <form method="GET" class="row g-3 align-items-end">
+            <input type="hidden" name="nav" value="teacher_classes">
+            
+            <div class="col-md-5">
+                <label for="search" class="form-label"><i class="fas fa-search me-1"></i> Tìm kiếm</label>
+                <input type="text" name="search" id="search" class="form-control" 
+                       placeholder="Nhập tên lớp hoặc khóa học..." 
+                       value="<?php echo htmlspecialchars($search_term); ?>">
             </div>
+
+            <div class="col-md-3">
+                <label for="status" class="form-label"><i class="fas fa-filter me-1"></i> Trạng thái</label>
+                <select name="status" id="status" class="form-select">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="dang hoc" <?php echo ($status_filter == 'dang hoc') ? 'selected' : ''; ?>>Đang dạy</option>
+                    <option value="da xong" <?php echo ($status_filter == 'da xong') ? 'selected' : ''; ?>>Đã hoàn thành</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-1"></i> Tìm kiếm
+                </button>
+            </div>
+
+            <div class="col-md-2">
+                <a href="?nav=teacher_classes" class="btn btn-outline-secondary w-100">
+                    <i class="fas fa-redo me-1"></i> Đặt lại
+                </a>
+            </div>
+        </form>
+
+        <!-- Filter Stats -->
+        <div class="filter-stats">
+            <span class="stat-item">
+                <i class="fas fa-school"></i>
+                Tổng: <?php echo $stats['total']; ?> lớp
+            </span>
+            <span class="stat-item">
+                <i class="fas fa-chalkboard-teacher"></i>
+                Đang dạy: <?php echo $stats['active_count']; ?>
+            </span>
+            <span class="stat-item">
+                <i class="fas fa-check-circle"></i>
+                Hoàn thành: <?php echo $stats['completed_count']; ?>
+            </span>
+            <?php if (!empty($search_term)): ?>
+                <span class="stat-item active-filter">
+                    <i class="fas fa-search"></i>
+                    "<?php echo htmlspecialchars($search_term); ?>"
+                </span>
+            <?php endif; ?>
+            <?php if (!empty($status_filter)): ?>
+                <span class="stat-item active-filter">
+                    <i class="fas fa-filter"></i>
+                    <?php echo ($status_filter == 'dang hoc') ? 'Đang dạy' : 'Đã hoàn thành'; ?>
+                </span>
+            <?php endif; ?>
         </div>
+    </div>
+
+    <div class="card animated-card">
         <div class="card-body">
             
             <?php if ($result->num_rows > 0): ?>
@@ -203,12 +341,29 @@ $result = $stmt->get_result();
                     <?php endwhile; ?>
                 </div>
             <?php else: ?>
-                <div class="alert alert-light text-center">
+                <div class="alert alert-light text-center py-5">
                     <i class="fa-solid fa-school-circle-xmark fa-3x mb-3 text-muted"></i>
-                    <?php if (!empty($search_term)): ?>
-                        <p class="mb-0">Không tìm thấy lớp học nào phù hợp với từ khóa "<strong><?php echo htmlspecialchars($search_term); ?></strong>".</p>
-                    <?php else: ?>
-                        <p class="mb-0">Bạn chưa được phân công lớp học nào.</p>
+                    <h5 class="mb-2">Không tìm thấy lớp học</h5>
+                    <p class="mb-3 text-muted">
+                        <?php 
+                        if (!empty($search_term) && !empty($status_filter)): 
+                            $status_text = ($status_filter == 'dang hoc') ? 'đang dạy' : 'đã hoàn thành';
+                        ?>
+                            Không tìm thấy lớp học nào với từ khóa "<strong><?php echo htmlspecialchars($search_term); ?></strong>" ở trạng thái <strong><?php echo $status_text; ?></strong>.
+                        <?php elseif (!empty($search_term)): ?>
+                            Không tìm thấy lớp học nào với từ khóa "<strong><?php echo htmlspecialchars($search_term); ?></strong>".
+                        <?php elseif (!empty($status_filter)): 
+                            $status_text = ($status_filter == 'dang hoc') ? 'đang dạy' : 'đã hoàn thành';
+                        ?>
+                            Bạn không có lớp học nào ở trạng thái <strong><?php echo $status_text; ?></strong>.
+                        <?php else: ?>
+                            Bạn chưa được phân công lớp học nào.
+                        <?php endif; ?>
+                    </p>
+                    <?php if (!empty($search_term) || !empty($status_filter)): ?>
+                        <a href="?nav=teacher_classes" class="btn btn-outline-primary">
+                            <i class="fas fa-redo me-2"></i>Xem tất cả lớp học
+                        </a>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>

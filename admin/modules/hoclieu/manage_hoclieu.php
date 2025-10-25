@@ -221,3 +221,130 @@ function deleteMaterial(materialId) {
     });
 }
 </script>
+
+<style>
+/* Responsive Design for manage_hoclieu.php */
+@media (max-width: 768px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .filter-section .row {
+        row-gap: 1rem;
+    }
+    
+    .filter-section .d-flex {
+        flex-direction: column;
+    }
+    
+    .filter-section .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .d-flex.justify-content-between h5 {
+        margin-bottom: 0;
+    }
+    
+    .d-flex.justify-content-between .btn {
+        width: 100%;
+    }
+    
+    /* Make table scrollable on mobile */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Hide less important columns on mobile */
+    .table thead th:nth-child(3),
+    .table tbody td:nth-child(3) {
+        display: none;
+    }
+    
+    .table thead th:nth-child(4),
+    .table tbody td:nth-child(4) {
+        display: none;
+    }
+    
+    /* Stack action buttons vertically on smaller screens */
+    .table tbody td:last-child {
+        white-space: normal;
+    }
+    
+    .table tbody td:last-child .btn {
+        margin-bottom: 0.25rem;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-header h4 {
+        font-size: 1rem;
+    }
+    
+    .card-header h4 i {
+        font-size: 0.9rem;
+    }
+    
+    .filter-section {
+        padding: 1rem !important;
+    }
+    
+    .filter-section label {
+        font-size: 0.85rem;
+    }
+    
+    .filter-section .form-control,
+    .filter-section .form-select,
+    .filter-section .btn {
+        font-size: 0.85rem;
+    }
+    
+    h5 {
+        font-size: 1rem;
+    }
+    
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .btn-sm {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+    }
+    
+    /* Modal adjustments */
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-body .form-label {
+        font-size: 0.85rem;
+    }
+    
+    .modal-body .form-control,
+    .modal-body .form-select {
+        font-size: 0.85rem;
+    }
+}
+</style>

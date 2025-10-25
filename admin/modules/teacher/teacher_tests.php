@@ -16,7 +16,35 @@ if (!empty($search_term)) {
     $types = "sss";
 }
 
-// Lấy danh sách bài test và thông tin liên quan
+// --- Pagination settings ---
+$tests_per_page = 10;
+$current_page = isset($_GET['test_page']) ? max(1, intval($_GET['test_page'])) : 1;
+$offset = ($current_page - 1) * $tests_per_page;
+
+// --- Count total tests ---
+$sql_count = "
+    SELECT COUNT(*) as total
+    FROM baitest bt 
+    LEFT JOIN khoahoc kh ON bt.id_khoahoc = kh.id_khoahoc
+    LEFT JOIN lop_hoc lh ON bt.id_lop = lh.id_lop
+    $sql_search
+";
+
+if (!empty($params)) {
+    $stmt_count = $conn->prepare($sql_count);
+    $stmt_count->bind_param($types, ...$params);
+    $stmt_count->execute();
+    $count_result = $stmt_count->get_result();
+    $total_tests = $count_result->fetch_assoc()['total'];
+    $stmt_count->close();
+} else {
+    $count_result = $conn->query($sql_count);
+    $total_tests = $count_result->fetch_assoc()['total'];
+}
+
+$total_pages = ceil($total_tests / $tests_per_page);
+
+// Lấy danh sách bài test và thông tin liên quan với pagination
 $sql = "
     SELECT 
         bt.id_baitest, bt.ten_baitest, bt.ngay_tao, bt.loai_baitest, bt.thoi_gian,
@@ -28,13 +56,23 @@ $sql = "
     LEFT JOIN lop_hoc lh ON bt.id_lop = lh.id_lop
     $sql_search
     ORDER BY bt.id_baitest DESC
+    LIMIT ? OFFSET ?
 ";
-$stmt = $conn->prepare($sql);
+
 if (!empty($params)) {
+    $stmt = $conn->prepare($sql);
+    $params[] = $tests_per_page;
+    $params[] = $offset;
+    $types .= "ii";
     $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+} else {
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ii", $tests_per_page, $offset);
+    $stmt->execute();
+    $result = $stmt->get_result();
 }
-$stmt->execute();
-$result = $stmt->get_result();
 
 // Lấy danh sách khóa học cho các modal
 $courses = $conn->query("SELECT id_khoahoc, ten_khoahoc FROM khoahoc ORDER BY ten_khoahoc");
@@ -234,6 +272,162 @@ function get_test_type_badge($type)
             border-top: 1px solid #f0f0f0;
         }
     }
+
+    /* Teacher Test Pagination Styles */
+    .teacher-test-pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+        padding: 20px 0;
+    }
+
+    .teacher-test-pagination {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #0db33b 0%, #0a8a2c 100%);
+        padding: 6px 12px;
+        border-radius: 50px;
+        box-shadow: 0 4px 15px rgba(13, 179, 59, 0.2);
+    }
+
+    .teacher-test-pagination-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 9px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #0db33b;
+        border: none;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .teacher-test-pagination-btn:hover:not(.disabled) {
+        background: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        color: #0a8a2c;
+    }
+
+    .teacher-test-pagination-btn.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .teacher-test-pagination-numbers {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin: 0 8px;
+    }
+
+    .teacher-test-pagination-number {
+        min-width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .teacher-test-pagination-number:hover {
+        background: rgba(255, 255, 255, 0.95);
+        color: #0db33b;
+        border-color: rgba(255,255,255,0.8);
+        transform: translateY(-1px) scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .teacher-test-pagination-number.active {
+        background: #fff;
+        color: #0a8a2c;
+        border-color: #fff;
+        transform: scale(1.08);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    .teacher-test-pagination-dots {
+        color: rgba(255,255,255,0.6);
+        font-weight: bold;
+        padding: 0 3px;
+        font-size: 12px;
+    }
+
+    .teacher-test-pagination-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 18px;
+        background: var(--brand-color-light, #e7f7ec);
+        border-radius: 20px;
+        color: #0db33b;
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid rgba(13, 179, 59, 0.2);
+    }
+
+    .teacher-test-pagination-info i {
+        font-size: 14px;
+    }
+
+    .teacher-test-pagination-info strong {
+        color: #0a8a2c;
+        font-size: 13px;
+    }
+
+    .teacher-test-pagination-info .separator {
+        margin: 0 3px;
+        color: rgba(13, 179, 59, 0.4);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .teacher-test-pagination {
+            padding: 6px 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .teacher-test-pagination-btn {
+            padding: 5px 8px;
+            font-size: 12px;
+        }
+
+        .teacher-test-pagination-btn span {
+            display: none;
+        }
+
+        .teacher-test-pagination-number {
+            min-width: 30px;
+            height: 30px;
+            font-size: 12px;
+        }
+
+        .teacher-test-pagination-info {
+            font-size: 12px;
+            padding: 7px 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            text-align: center;
+        }
+    }
 </style>
 <div class="container-fluid">
     <div class="page-header animated-card">
@@ -346,7 +540,89 @@ function get_test_type_badge($type)
         <?php if ($result->num_rows == 0): ?>
             <div class="text-center p-5">
                 <i class="fa-solid fa-folder-open fa-3x mb-3 text-muted"></i>
-                <p class="mb-0 text-muted">Không tìm thấy bài test nào.</p>
+                <p class="mb-0 text-muted">
+                    <?php if (!empty($search_term)): ?>
+                        Không tìm thấy bài test nào với từ khóa "<strong><?php echo htmlspecialchars($search_term); ?></strong>".
+                    <?php else: ?>
+                        Không tìm thấy bài test nào.
+                    <?php endif; ?>
+                </p>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($total_pages > 1): ?>
+            <!-- Pagination -->
+            <div class="teacher-test-pagination-container">
+                <div class="teacher-test-pagination">
+                    <!-- Previous Button -->
+                    <?php
+                    $prev_link = "?nav=question&test_page=" . max(1, $current_page - 1);
+                    if (!empty($search_term)) $prev_link .= "&search=" . urlencode($search_term);
+                    ?>
+                    <a href="<?php echo $prev_link; ?>" 
+                       class="teacher-test-pagination-btn <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>Trước</span>
+                    </a>
+
+                    <!-- Page Numbers -->
+                    <div class="teacher-test-pagination-numbers">
+                        <?php
+                        $start_page = max(1, $current_page - 2);
+                        $end_page = min($total_pages, $current_page + 2);
+
+                        if ($start_page > 1) {
+                            $first_link = "?nav=question&test_page=1";
+                            if (!empty($search_term)) $first_link .= "&search=" . urlencode($search_term);
+                            echo '<a href="' . $first_link . '" class="teacher-test-pagination-number">1</a>';
+                            if ($start_page > 2) {
+                                echo '<span class="teacher-test-pagination-dots">...</span>';
+                            }
+                        }
+
+                        for ($i = $start_page; $i <= $end_page; $i++) {
+                            $page_link = "?nav=question&test_page={$i}";
+                            if (!empty($search_term)) $page_link .= "&search=" . urlencode($search_term);
+                            $active_class = ($i == $current_page) ? 'active' : '';
+                            echo '<a href="' . $page_link . '" class="teacher-test-pagination-number ' . $active_class . '">' . $i . '</a>';
+                        }
+
+                        if ($end_page < $total_pages) {
+                            if ($end_page < $total_pages - 1) {
+                                echo '<span class="teacher-test-pagination-dots">...</span>';
+                            }
+                            $last_link = "?nav=question&test_page={$total_pages}";
+                            if (!empty($search_term)) $last_link .= "&search=" . urlencode($search_term);
+                            echo '<a href="' . $last_link . '" class="teacher-test-pagination-number">' . $total_pages . '</a>';
+                        }
+                        ?>
+                    </div>
+
+                    <!-- Next Button -->
+                    <?php
+                    $next_link = "?nav=question&test_page=" . min($total_pages, $current_page + 1);
+                    if (!empty($search_term)) $next_link .= "&search=" . urlencode($search_term);
+                    ?>
+                    <a href="<?php echo $next_link; ?>" 
+                       class="teacher-test-pagination-btn <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
+                        <span>Sau</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+
+                <!-- Pagination Info -->
+                <div class="teacher-test-pagination-info">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>
+                        Hiển thị 
+                        <strong><?php echo min($offset + 1, $total_tests); ?></strong>
+                        <span class="separator">-</span>
+                        <strong><?php echo min($offset + $tests_per_page, $total_tests); ?></strong>
+                        <span class="separator">/</span>
+                        <strong><?php echo $total_tests; ?></strong>
+                        bài test
+                    </span>
+                </div>
             </div>
         <?php endif; ?>
     </div>
@@ -472,5 +748,17 @@ function get_test_type_badge($type)
         const editClassWrapper = document.getElementById('edit_class_wrapper');
         const editClassSelect = document.getElementById('edit_id_lop');
         editCourseSelect.addEventListener('change', () => loadClasses(editCourseSelect.value, editClassSelect, editClassWrapper));
+
+        // Smooth scroll for pagination
+        document.querySelectorAll('.teacher-test-pagination-number, .teacher-test-pagination-btn').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const container = document.querySelector('.teacher-test-container') || document.querySelector('.row.mt-3');
+                if (container) {
+                    setTimeout(() => {
+                        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                }
+            });
+        });
     });
 </script>

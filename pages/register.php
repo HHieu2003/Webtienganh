@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
         if ($existing_user) {
             $conn->query("DELETE FROM hocvien WHERE id_hocvien = " . $existing_user['id_hocvien']);
         }
-        
+
         $hashedPassword = password_hash($mat_khau, PASSWORD_DEFAULT);
         // TẠO MÃ XÁC THỰC GỒM 6 CHỮ SỐ
         $verification_code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
@@ -46,15 +46,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
             $host = $_SERVER['HTTP_HOST'];
             $script_path = dirname($_SERVER['PHP_SELF']);
             $base_path = rtrim(str_replace('pages', '', $script_path), '/');
-            
+
             // Link xác thực chứa sẵn email và mã code
             $verification_link = $protocol . $host . $base_path . "/pages/verify.php?email=" . urlencode($email) . "&code=" . $verification_code;
-            
+
             $subject = "{$verification_code} la ma xac thuc tai khoan Tieng Anh Fighter cua ban";
             $body = "
                 <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
                     <div style='text-align: center; margin-bottom: 20px;'>
-                        <img src='https://i.imgur.com/your-logo-image.png' alt='Tieng Anh Fighter Logo' style='max-height: 60px;'>
+                        <img src='https://sf-static.upanhlaylink.com/img/image_20251025960366f848fb6649ab8450c008fd2e1b.jpg                        ' alt='Tieng Anh Fighter Logo' style='max-height: 60px;'>
                     </div>
                     <h2 style='color: #0db33b; text-align: center;'>Xác thực tài khoản của bạn</h2>
                     <p>Chào mừng bạn đến với Tiếng Anh Fighter!</p>
@@ -75,7 +75,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
             // Chuyển hướng người dùng đến trang verify để nhập mã
             header("Location: verify.php?email=" . urlencode($email));
             exit();
-
         } else {
             $message = "Có lỗi xảy ra, vui lòng thử lại.";
             $message_type = 'error';
@@ -88,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -104,12 +104,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
         }
 
         @keyframes gradient-animation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             font-family: 'Times New Roman', Times, serif;
@@ -136,27 +148,120 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .form-header { text-align: center; margin-bottom: 30px; }
-        .form-header .logo img { height: 100px; margin-bottom: 10px; border-radius: 10px; }
-        .form-header h2 { font-size: 26px; color: #333; font-weight: 700; }
-        .input-group { position: relative; margin-bottom: 25px; }
-        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa; }
-        .input-group input { width: 100%; padding: 14px 15px 14px 45px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; background-color: #f9f9f9; transition: all 0.3s ease; }
-        .input-group input:focus { outline: none; border-color: var(--brand-color); box-shadow: 0 0 0 4px rgba(13, 179, 59, 0.1); }
-        .btn-submit { width: 100%; background: linear-gradient(45deg, var(--brand-color), var(--brand-color-dark)); color: #fff; padding: 14px; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(13, 179, 59, 0.2); }
-        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 7px 20px rgba(13, 179, 59, 0.3); }
-        .form-footer { text-align: center; margin-top: 25px; color: #666; font-size: 17px; }
-        .form-footer a { color: var(--brand-color); font-weight: bold; text-decoration: none; }
-        .form-footer a:hover { text-decoration: underline; }
-        .message-box { text-align: center; margin-bottom: 15px; padding: 12px; border-radius: 8px; font-weight: 500; }
-        .message-box.success { background-color: var(--success-bg); color: var(--success-color); }
-        .message-box.error { background-color: var(--error-bg); color: var(--error-color); }
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-header .logo img {
+            height: 100px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+        }
+
+        .form-header h2 {
+            font-size: 26px;
+            color: #333;
+            font-weight: 700;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 15px 14px 45px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--brand-color);
+            box-shadow: 0 0 0 4px rgba(13, 179, 59, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(45deg, var(--brand-color), var(--brand-color-dark));
+            color: #fff;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(13, 179, 59, 0.2);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(13, 179, 59, 0.3);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #666;
+            font-size: 17px;
+        }
+
+        .form-footer a {
+            color: var(--brand-color);
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .message-box {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .message-box.success {
+            background-color: var(--success-bg);
+            color: var(--success-color);
+        }
+
+        .message-box.error {
+            background-color: var(--error-bg);
+            color: var(--error-color);
+        }
     </style>
 </head>
+
 <body>
     <div class="form-container">
         <div class="form-header">
@@ -190,4 +295,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
         </div>
     </div>
 </body>
+
 </html>

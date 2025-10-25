@@ -35,6 +35,10 @@ $date_condition = '';
 $filter_month = $_GET['month'] ?? date('n');
 $filter_year = $_GET['year'] ?? date('Y');
 
+// --- Pagination settings ---
+$payments_per_page = 10;
+$current_page = isset($_GET['payment_page']) ? max(1, intval($_GET['payment_page'])) : 1;
+$offset = ($current_page - 1) * $payments_per_page;
 
 if ($is_filtered) {
     // Chỉ thêm điều kiện lọc ngày tháng nếu người dùng đã chọn tháng và năm
@@ -43,8 +47,27 @@ if ($is_filtered) {
     $date_condition = "AND lt.ngay_thanhtoan BETWEEN ? AND ?";
 }
 
+// --- Count total payments ---
+$sql_count = "
+    SELECT COUNT(*) as total
+    FROM lichsu_thanhtoan lt
+    WHERE lt.id_hocvien = ? $date_condition
+";
+$stmt_count = $conn->prepare($sql_count);
+if ($is_filtered) {
+    $stmt_count->bind_param("iss", $id_hocvien, $start_date, $end_date);
+} else {
+    $stmt_count->bind_param("i", $id_hocvien);
+}
+$stmt_count->execute();
+$count_result = $stmt_count->get_result();
+$total_payments = $count_result->fetch_assoc()['total'];
+$stmt_count->close();
 
-// Lấy lịch sử thanh toán của học viên
+$total_pages = ceil($total_payments / $payments_per_page);
+
+
+// Lấy lịch sử thanh toán của học viên với phân trang
 $sql_payments = "
     SELECT 
         lt.id_thanhtoan,
@@ -57,14 +80,15 @@ $sql_payments = "
     JOIN khoahoc kh ON lt.id_khoahoc = kh.id_khoahoc
     WHERE lt.id_hocvien = ? $date_condition
     ORDER BY lt.ngay_thanhtoan DESC
+    LIMIT ? OFFSET ?
 ";
 $stmt = $conn->prepare($sql_payments);
 
 // Gán tham số dựa trên việc có lọc hay không
 if ($is_filtered) {
-    $stmt->bind_param("iss", $id_hocvien, $start_date, $end_date);
+    $stmt->bind_param("issii", $id_hocvien, $start_date, $end_date, $payments_per_page, $offset);
 } else {
-    $stmt->bind_param("i", $id_hocvien);
+    $stmt->bind_param("iii", $id_hocvien, $payments_per_page, $offset);
 }
 $stmt->execute();
 $result = $stmt->get_result();
@@ -231,6 +255,182 @@ function get_payment_status_badge($status)
             border-bottom: none;
         }
     }
+
+    /* Payment History Pagination Styles */
+    .payment-pagination-container {
+     
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        padding: 10px 0;
+    }
+
+    .payment-pagination {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #66eabaff 0%, #4ba254ff 100%);
+        padding: 12px 25px;
+        border-radius: 50px;
+        box-shadow: 0 8px 25px rgba(13, 179, 59, 0.25);
+        backdrop-filter: blur(10px);
+    }
+
+    .payment-pagination-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--primary-color);
+        border: none;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .payment-pagination-btn:hover:not(.disabled) {
+        background: #fff;
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        color: var(--primary-color-dark);
+    }
+
+    .payment-pagination-btn.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .payment-pagination-numbers {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0 10px;
+    }
+
+    .payment-pagination-number {
+        min-width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .payment-pagination-number:hover {
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--primary-color);
+        border-color: rgba(255,255,255,0.8);
+        transform: translateY(-2px) scale(1.1);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+
+    .payment-pagination-number.active {
+        background: #fff;
+        color: var(--primary-color-dark);
+        border-color: #fff;
+        transform: scale(1.15);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        animation: paymentPagePulse 0.4s ease;
+    }
+
+    @keyframes paymentPagePulse {
+        0%, 100% { transform: scale(1.15); }
+        50% { transform: scale(1.25); }
+    }
+
+    .payment-pagination-dots {
+        color: rgba(255,255,255,0.6);
+        font-weight: bold;
+        padding: 0 5px;
+    }
+
+    .payment-pagination-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 25px;
+        background: var(--primary-color-light);
+        border-radius: 25px;
+        color: var(--primary-color);
+        font-size: 14px;
+        font-weight: 600;
+        border: 2px solid rgba(13, 179, 59, 0.15);
+    }
+
+    .payment-pagination-info i {
+        font-size: 16px;
+    }
+
+    .payment-pagination-info strong {
+        color: var(--primary-color-dark);
+        font-size: 15px;
+    }
+
+    .payment-pagination-info .separator {
+        margin: 0 5px;
+        color: rgba(13, 179, 59, 0.4);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .payment-pagination {
+            padding: 10px 18px;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .payment-pagination-btn {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+
+        .payment-pagination-btn span {
+            display: none;
+        }
+
+        .payment-pagination-number {
+            min-width: 36px;
+            height: 36px;
+            font-size: 13px;
+        }
+
+        .payment-pagination-info {
+            font-size: 12px;
+            padding: 10px 18px;
+            flex-wrap: wrap;
+            justify-content: center;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .payment-pagination-numbers {
+            gap: 4px;
+            margin: 0 5px;
+        }
+
+        .payment-pagination-number {
+            min-width: 32px;
+            height: 32px;
+            font-size: 12px;
+        }
+    }
 </style>
 <div class="content-pane">
     <h2 class="mb-4">Lịch Sử Giao Dịch</h2>
@@ -324,6 +524,87 @@ function get_payment_status_badge($status)
                 ?>
             </tbody>
         </table>
+
+        <?php if ($total_pages > 1): ?>
+            <!-- Pagination -->
+            <div class="payment-pagination-container">
+                <div class="payment-pagination">
+                    <!-- Previous Button -->
+                    <?php
+                    $prev_link = "?nav=lichsuthanhtoan&payment_page=" . max(1, $current_page - 1);
+                    if ($is_filtered) {
+                        $prev_link .= "&month={$filter_month}&year={$filter_year}";
+                    }
+                    ?>
+                    <a href="<?php echo $prev_link; ?>" 
+                       class="payment-pagination-btn <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>Trước</span>
+                    </a>
+
+                    <!-- Page Numbers -->
+                    <div class="payment-pagination-numbers">
+                        <?php
+                        $start_page = max(1, $current_page - 2);
+                        $end_page = min($total_pages, $current_page + 2);
+
+                        if ($start_page > 1) {
+                            $first_link = "?nav=lichsuthanhtoan&payment_page=1";
+                            if ($is_filtered) $first_link .= "&month={$filter_month}&year={$filter_year}";
+                            echo '<a href="' . $first_link . '" class="payment-pagination-number">1</a>';
+                            if ($start_page > 2) {
+                                echo '<span class="payment-pagination-dots">...</span>';
+                            }
+                        }
+
+                        for ($i = $start_page; $i <= $end_page; $i++) {
+                            $page_link = "?nav=lichsuthanhtoan&payment_page={$i}";
+                            if ($is_filtered) $page_link .= "&month={$filter_month}&year={$filter_year}";
+                            $active_class = ($i == $current_page) ? 'active' : '';
+                            echo '<a href="' . $page_link . '" class="payment-pagination-number ' . $active_class . '">' . $i . '</a>';
+                        }
+
+                        if ($end_page < $total_pages) {
+                            if ($end_page < $total_pages - 1) {
+                                echo '<span class="payment-pagination-dots">...</span>';
+                            }
+                            $last_link = "?nav=lichsuthanhtoan&payment_page={$total_pages}";
+                            if ($is_filtered) $last_link .= "&month={$filter_month}&year={$filter_year}";
+                            echo '<a href="' . $last_link . '" class="payment-pagination-number">' . $total_pages . '</a>';
+                        }
+                        ?>
+                    </div>
+
+                    <!-- Next Button -->
+                    <?php
+                    $next_link = "?nav=lichsuthanhtoan&payment_page=" . min($total_pages, $current_page + 1);
+                    if ($is_filtered) {
+                        $next_link .= "&month={$filter_month}&year={$filter_year}";
+                    }
+                    ?>
+                    <a href="<?php echo $next_link; ?>" 
+                       class="payment-pagination-btn <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
+                        <span>Sau</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+
+                <!-- Pagination Info -->
+                <div class="payment-pagination-info">
+                    <i class="fas fa-receipt"></i>
+                    <span>
+                        Hiển thị 
+                        <strong><?php echo min($offset + 1, $total_payments); ?></strong>
+                        <span class="separator">-</span>
+                        <strong><?php echo min($offset + $payments_per_page, $total_payments); ?></strong>
+                        <span class="separator">/</span>
+                        <strong><?php echo $total_payments; ?></strong>
+                        giao dịch
+                    </span>
+                </div>
+            </div>
+        <?php endif; ?>
+
     <?php else: ?>
         <div class="alert alert-info text-center mt-4">
             <i class="fa-solid fa-search fa-2x mb-3"></i>
@@ -331,3 +612,20 @@ function get_payment_status_badge($status)
         </div>
     <?php endif; ?>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Smooth scroll to top when clicking payment pagination
+    const paymentPaginationLinks = document.querySelectorAll('.payment-pagination-number, .payment-pagination-btn');
+    paymentPaginationLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            setTimeout(() => {
+                const contentPane = document.querySelector('.content-pane');
+                if (contentPane) {
+                    contentPane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        });
+    });
+});
+</script>

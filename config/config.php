@@ -7,4 +7,7 @@ if (!$conn) {
 }
 
 
+// Thiết lập charset
+mysqli_set_charset($conn, "utf8mb4");
+mysqli_query($conn, "SET NAMES 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'");
 ?>

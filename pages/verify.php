@@ -3,12 +3,12 @@ session_start();
 include("../config/config.php");
 
 $message = '';
-$message_type = 'info'; 
+$message_type = 'info';
 $email_from_url = isset($_GET['email']) ? htmlspecialchars($_GET['email']) : '';
 
 // Xử lý khi người dùng nhấn link hoặc submit form
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['code'])) {
-    
+
     $email = $_POST['email'] ?? $_GET['email'] ?? '';
     $code = $_POST['verification_code'] ?? $_GET['code'] ?? '';
 
@@ -56,27 +56,73 @@ $conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Xác thực tài khoản - Tiếng Anh Fighter</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { background-color: #f0f2f5; font-family: 'Times New Roman', Times, serif; }
-        .verify-container { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .verify-box { max-width: 450px; width: 100%; padding: 40px; background: white; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); text-align: center; }
-        .verify-box h2 { font-weight: 700; color: #0db33b; margin-bottom: 15px; }
-        .code-inputs { display: flex; justify-content: center; gap: 10px; margin: 30px 0; }
-        .code-inputs input { width: 50px; height: 60px; text-align: center; font-size: 24px; font-weight: bold; border: 1px solid #ddd; border-radius: 8px; transition: all 0.2s ease; }
-        .code-inputs input:focus { border-color: #0db33b; box-shadow: 0 0 0 4px rgba(13, 179, 59, 0.2); outline: none; }
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .verify-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .verify-box {
+            max-width: 450px;
+            width: 100%;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .verify-box h2 {
+            font-weight: 700;
+            color: #0db33b;
+            margin-bottom: 15px;
+        }
+
+        .code-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+        }
+
+        .code-inputs input {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .code-inputs input:focus {
+            border-color: #0db33b;
+            box-shadow: 0 0 0 4px rgba(13, 179, 59, 0.2);
+            outline: none;
+        }
     </style>
 </head>
+
 <body>
     <div class="verify-container">
         <div class="verify-box">
             <i class="fa-solid fa-envelope-circle-check fa-3x text-success mb-3"></i>
             <h2>Xác thực tài khoản</h2>
-            
+
             <?php if (!empty($message)) : ?>
                 <div class="alert alert-<?php echo $message_type; ?>">
                     <?php echo $message; ?>
@@ -84,29 +130,29 @@ $conn->close();
             <?php endif; ?>
 
             <?php if ($message_type !== 'success' && !empty($email_from_url)): ?>
-            <form method="POST" action="verify.php" id="verify-form">
-                <input type="hidden" name="email" value="<?php echo $email_from_url; ?>">
-                <p>Nhập mã 6 số được gửi đến email của bạn:</p>
-                <div class="code-inputs" id="code-inputs">
-                    <input type="tel" maxlength="1" pattern="[0-9]" required>
-                    <input type="tel" maxlength="1" pattern="[0-9]" required>
-                    <input type="tel" maxlength="1" pattern="[0-9]" required>
-                    <input type="tel" maxlength="1" pattern="[0-9]" required>
-                    <input type="tel" maxlength="1" pattern="[0-9]" required>
-                    <input type="tel" maxlength="1" pattern="[0-9]" required>
+                <form method="POST" action="verify.php" id="verify-form">
+                    <input type="hidden" name="email" value="<?php echo $email_from_url; ?>">
+                    <p>Nhập mã 6 số được gửi đến email của bạn:</p>
+                    <div class="code-inputs" id="code-inputs">
+                        <input type="tel" maxlength="1" pattern="[0-9]" required>
+                        <input type="tel" maxlength="1" pattern="[0-9]" required>
+                        <input type="tel" maxlength="1" pattern="[0-9]" required>
+                        <input type="tel" maxlength="1" pattern="[0-9]" required>
+                        <input type="tel" maxlength="1" pattern="[0-9]" required>
+                        <input type="tel" maxlength="1" pattern="[0-9]" required>
+                    </div>
+                    <input type="hidden" name="verification_code" id="verification_code">
+                    <button type="submit" class="btn btn-primary w-100 btn-lg">Xác thực</button>
+                </form>
+                <div class="mt-3">
+                    <a href="register.php">Quay lại trang Đăng ký</a>
                 </div>
-                <input type="hidden" name="verification_code" id="verification_code">
-                <button type="submit" class="btn btn-primary w-100 btn-lg">Xác thực</button>
-            </form>
-            <div class="mt-3">
-                <a href="register.php">Quay lại trang Đăng ký</a>
-            </div>
             <?php elseif ($message_type === 'success'): ?>
                 <a href="login.php" class="btn btn-primary">Đi đến trang Đăng nhập ngay</a>
             <?php endif; ?>
         </div>
     </div>
-    
+
     <script>
         const inputsContainer = document.getElementById('code-inputs');
         if (inputsContainer) {
@@ -127,7 +173,7 @@ $conn->close();
                 input.addEventListener('input', (e) => {
                     // Chỉ cho phép nhập số
                     e.target.value = e.target.value.replace(/[^0-9]/g, '');
-                    
+
                     // Tự động chuyển sang ô tiếp theo nếu đã nhập
                     if (e.target.value && index < inputs.length - 1) {
                         inputs[index + 1].focus();
@@ -174,4 +220,5 @@ $conn->close();
         }
     </script>
 </body>
+
 </html>

@@ -87,7 +87,12 @@ if (!isset($_SESSION['has_counted'])) {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script>
-        AOS.init();
+        AOS.init(
+{
+    once: true
+}
+
+        );
     </script>
 
 </body>

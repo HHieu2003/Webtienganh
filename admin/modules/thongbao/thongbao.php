@@ -1,4 +1,9 @@
 <?php
+// Pagination variables
+$notifications_per_page = 15;
+$current_page = isset($_GET['notif_page']) ? max(1, intval($_GET['notif_page'])) : 1;
+$offset = ($current_page - 1) * $notifications_per_page;
+
 // --- LẤY DỮ LIỆU CHO BỘ LỌC VÀ FORM ---
 $courses_for_filter = $conn->query("SELECT id_khoahoc, ten_khoahoc FROM khoahoc ORDER BY ten_khoahoc");
 $classes_for_filter = $conn->query("SELECT id_lop, ten_lop FROM lop_hoc ORDER BY ten_lop");
@@ -10,10 +15,9 @@ $search_term = $_GET['search'] ?? '';
 $filter_course = $_GET['filter_course'] ?? 'all';
 $filter_class = $_GET['filter_class'] ?? 'all';
 
-$sql_notifications = "
-    SELECT 
-        tb.tieu_de, tb.noi_dung, tb.id_khoahoc, tb.id_lop,
-        kh.ten_khoahoc, lh.ten_lop, tb.ngay_tao
+// Count query
+$sql_count = "
+    SELECT COUNT(DISTINCT CONCAT(tb.tieu_de, '_', tb.noi_dung, '_', IFNULL(tb.id_khoahoc, ''), '_', IFNULL(tb.id_lop, ''), '_', tb.ngay_tao)) as total
     FROM thongbao tb
     LEFT JOIN khoahoc kh ON tb.id_khoahoc = kh.id_khoahoc
     LEFT JOIN lop_hoc lh ON tb.id_lop = lh.id_lop
@@ -45,13 +49,38 @@ if ($filter_class !== 'all') {
 }
 
 if (!empty($conditions)) {
+    $sql_count .= " WHERE " . implode(" AND ", $conditions);
+}
+
+$stmt_count = $conn->prepare($sql_count);
+if (!empty($params)) {
+    $stmt_count->bind_param($types, ...$params);
+}
+$stmt_count->execute();
+$total_notifications = $stmt_count->get_result()->fetch_assoc()['total'];
+$total_pages = ceil($total_notifications / $notifications_per_page);
+
+// Main query with pagination
+$sql_notifications = "
+    SELECT 
+        tb.tieu_de, tb.noi_dung, tb.id_khoahoc, tb.id_lop,
+        kh.ten_khoahoc, lh.ten_lop, tb.ngay_tao
+    FROM thongbao tb
+    LEFT JOIN khoahoc kh ON tb.id_khoahoc = kh.id_khoahoc
+    LEFT JOIN lop_hoc lh ON tb.id_lop = lh.id_lop
+";
+
+if (!empty($conditions)) {
     $sql_notifications .= " WHERE " . implode(" AND ", $conditions);
 }
 
 $sql_notifications .= " GROUP BY tb.tieu_de, tb.noi_dung, tb.id_khoahoc, tb.id_lop, kh.ten_khoahoc, lh.ten_lop, tb.ngay_tao
-                        ORDER BY tb.ngay_tao DESC";
+                        ORDER BY tb.ngay_tao DESC LIMIT ? OFFSET ?";
 
 $stmt = $conn->prepare($sql_notifications);
+$params[] = $notifications_per_page;
+$params[] = $offset;
+$types .= "ii";
 if (!empty($params)) {
     $stmt->bind_param($types, ...$params);
 }
@@ -124,12 +153,108 @@ $result_notifications = $stmt->get_result();
                         <?php endwhile;
                     else: ?>
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4">Không tìm thấy thông báo nào phù hợp.</td>
+                            <td colspan="5" class="text-center py-4">
+                                <i class="fa-solid fa-bell-slash fa-3x text-muted mb-3"></i>
+                                <p class="text-muted mb-0">
+                                    <?php
+                                    if (!empty($search_term) || $filter_course !== 'all' || $filter_class !== 'all') {
+                                        echo 'Không tìm thấy thông báo nào phù hợp với bộ lọc';
+                                    } else {
+                                        echo 'Chưa có thông báo nào trong hệ thống';
+                                    }
+                                    ?>
+                                </p>
+                            </td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
+        
+        <?php if ($total_pages > 1): ?>
+        <!-- Pagination -->
+        <div class="notification-pagination-container">
+            <div class="notification-pagination">
+                <?php
+                $query_params = [];
+                if (!empty($search_term)) $query_params[] = 'search=' . urlencode($search_term);
+                if ($filter_course !== 'all') $query_params[] = 'filter_course=' . urlencode($filter_course);
+                if ($filter_class !== 'all') $query_params[] = 'filter_class=' . urlencode($filter_class);
+                $query_string = !empty($query_params) ? '&' . implode('&', $query_params) : '';
+                
+                // Previous button
+                if ($current_page > 1):
+                    $prev_link = "./admin.php?nav=thongbao&notif_page=" . ($current_page - 1) . $query_string;
+                ?>
+                    <a href="<?php echo $prev_link; ?>" class="notification-pagination-btn">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span class="btn-text">Trước</span>
+                    </a>
+                <?php else: ?>
+                    <span class="notification-pagination-btn disabled">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span class="btn-text">Trước</span>
+                    </span>
+                <?php endif; ?>
+
+                <!-- Page numbers -->
+                <?php
+                $start_page = max(1, $current_page - 2);
+                $end_page = min($total_pages, $current_page + 2);
+
+                if ($start_page > 1):
+                    $first_link = "./admin.php?nav=thongbao&notif_page=1" . $query_string;
+                ?>
+                    <a href="<?php echo $first_link; ?>" class="notification-pagination-number">1</a>
+                    <?php if ($start_page > 2): ?>
+                        <span class="notification-pagination-dots">...</span>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                    <?php
+                    $page_link = "./admin.php?nav=thongbao&notif_page=" . $i . $query_string;
+                    $active_class = ($i == $current_page) ? ' active' : '';
+                    ?>
+                    <a href="<?php echo $page_link; ?>" class="notification-pagination-number<?php echo $active_class; ?>">
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+
+                <?php if ($end_page < $total_pages): ?>
+                    <?php if ($end_page < $total_pages - 1): ?>
+                        <span class="notification-pagination-dots">...</span>
+                    <?php endif; ?>
+                    <?php $last_link = "./admin.php?nav=thongbao&notif_page=" . $total_pages . $query_string; ?>
+                    <a href="<?php echo $last_link; ?>" class="notification-pagination-number"><?php echo $total_pages; ?></a>
+                <?php endif; ?>
+
+                <!-- Next button -->
+                <?php if ($current_page < $total_pages):
+                    $next_link = "./admin.php?nav=thongbao&notif_page=" . ($current_page + 1) . $query_string;
+                ?>
+                    <a href="<?php echo $next_link; ?>" class="notification-pagination-btn">
+                        <span class="btn-text">Sau</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                <?php else: ?>
+                    <span class="notification-pagination-btn disabled">
+                        <span class="btn-text">Sau</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </span>
+                <?php endif; ?>
+            </div>
+
+            <!-- Pagination info -->
+            <div class="notification-pagination-info">
+                <?php
+                $start_item = $offset + 1;
+                $end_item = min($offset + $notifications_per_page, $total_notifications);
+                ?>
+                Hiển thị <?php echo $start_item; ?>-<?php echo $end_item; ?> / <?php echo $total_notifications; ?> thông báo
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -280,4 +405,147 @@ $result_notifications = $stmt->get_result();
                 });
         });
     });
+    
+    // Smooth scroll for pagination
+    document.querySelectorAll('.notification-pagination-number, .notification-pagination-btn').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const container = document.querySelector('.card.animated-card');
+            if (container) {
+                setTimeout(() => {
+                    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        });
+    });
 </script>
+
+<style>
+/* Notification Pagination Styles */
+.notification-pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.notification-pagination {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: linear-gradient(135deg, #0db33b 0%, #0a8a2c 100%);
+    padding: 6px 12px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(13, 179, 59, 0.2);
+}
+
+.notification-pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 9px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+}
+
+.notification-pagination-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    transform: translateY(-1px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.notification-pagination-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.notification-pagination-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    text-decoration: none;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.notification-pagination-number:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    transform: translateY(-1px) scale(1.05);
+}
+
+.notification-pagination-number.active {
+    background: white;
+    color: #0db33b;
+    transform: scale(1.08);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    border-color: white;
+}
+
+.notification-pagination-dots {
+    color: white;
+    padding: 0 4px;
+    font-weight: bold;
+    opacity: 0.6;
+}
+
+.notification-pagination-info {
+    background: var(--brand-color-light, #e7f7ec);
+    color: var(--brand-color, #0db33b);
+    padding: 8px 18px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(13, 179, 59, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .notification-pagination-container {
+        justify-content: center;
+    }
+    
+    .notification-pagination-btn .btn-text {
+        display: none;
+    }
+    
+    .notification-pagination-btn {
+        padding: 6px 10px;
+    }
+    
+    .notification-pagination-info {
+        order: -1;
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .notification-pagination-number {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+    
+    .notification-pagination-btn {
+        padding: 5px 8px;
+    }
+}
+</style>

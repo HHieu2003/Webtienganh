@@ -242,3 +242,105 @@ function deletePost(postId) {
     });
 }
 </script>
+
+<style>
+/* Responsive Design for manage_posts.php */
+@media (max-width: 768px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .card-header .badge {
+        align-self: flex-start;
+    }
+    
+    .filter-section .row {
+        row-gap: 1rem;
+    }
+    
+    .filter-section .col-md-2 .btn {
+        margin-top: 0.5rem;
+    }
+    
+    .filter-section .col-md-2 .btn + .btn {
+        margin-top: 0.5rem;
+    }
+    
+    /* Make table scrollable on mobile */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Hide less important columns on mobile */
+    .table thead th:nth-child(3),
+    .table tbody td:nth-child(3) {
+        display: none;
+    }
+    
+    .table thead th:nth-child(4),
+    .table tbody td:nth-child(4) {
+        display: none;
+    }
+    
+    .table thead th:nth-child(5),
+    .table tbody td:nth-child(5) {
+        display: none;
+    }
+    
+    /* Stack action buttons vertically */
+    .actions-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .actions-cell .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-header h4 {
+        font-size: 1rem;
+    }
+    
+    .card-header h4 i {
+        font-size: 0.9rem;
+    }
+    
+    .nav-tabs .nav-link {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .filter-section {
+        padding: 1rem !important;
+    }
+    
+    .filter-section label {
+        font-size: 0.85rem;
+    }
+    
+    .filter-section .form-control,
+    .filter-section .form-select,
+    .filter-section .btn {
+        font-size: 0.85rem;
+    }
+    
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .btn-sm {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+}
+</style>

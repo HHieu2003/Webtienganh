@@ -268,3 +268,136 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<style>
+/* Responsive Design for dangkykhoahoc.php */
+@media (max-width: 768px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .card-header h4 {
+        margin-bottom: 0.5rem;
+    }
+    
+    .card-header form {
+        width: 100%;
+    }
+    
+    .card-header form .form-control {
+        width: 100% !important;
+    }
+    
+    .card-header .btn {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+    
+    .nav-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .nav-tabs .nav-item {
+        flex: 1 1 auto;
+    }
+    
+    .nav-tabs .nav-link {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+        text-align: center;
+    }
+    
+    .mb-3.text-end {
+        text-align: center !important;
+    }
+    
+    #delete-selected-btn {
+        width: 100%;
+    }
+    
+    /* Make table scrollable on mobile */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Hide less important columns on mobile for registration view */
+    .table thead th:nth-child(3),
+    .table tbody td:nth-child(3) {
+        display: none;
+    }
+    
+    /* Stack action buttons vertically */
+    .actions-cell,
+    .status-cell {
+        white-space: normal !important;
+    }
+    
+    .actions-cell .btn,
+    .status-cell .btn {
+        margin-bottom: 0.25rem;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-header h4 {
+        font-size: 1rem;
+    }
+    
+    .card-header h4 i {
+        font-size: 0.9rem;
+    }
+    
+    .card-header form .form-control {
+        font-size: 0.85rem;
+        padding: 0.5rem;
+    }
+    
+    .card-header .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Hide button text, keep only icons on very small screens */
+    .card-header .btn .fa-file-excel ~ text,
+    .card-header .btn .fa-magnifying-glass ~ text {
+        display: none;
+    }
+    
+    .nav-tabs .nav-link {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.5rem;
+    }
+    
+    #delete-selected-btn {
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .table thead th:nth-child(1),
+    .table tbody td:nth-child(1) {
+        width: 10%;
+    }
+    
+    .btn-sm {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.25em 0.4em;
+    }
+}
+</style>

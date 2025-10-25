@@ -11,7 +11,23 @@ if (!isset($_SESSION['id_hocvien'])) {
 
 $id_hocvien = $_SESSION['id_hocvien'];
 
-// --- Lấy tất cả thông báo của học viên, sắp xếp mới nhất lên đầu ---
+// --- Pagination settings ---
+$notifications_per_page = 10;
+$current_page = isset($_GET['notif_page']) ? max(1, intval($_GET['notif_page'])) : 1;
+$offset = ($current_page - 1) * $notifications_per_page;
+
+// --- Count total notifications ---
+$sql_count = "SELECT COUNT(*) as total FROM thongbao WHERE id_hocvien = ?";
+$stmt_count = $conn->prepare($sql_count);
+$stmt_count->bind_param('i', $id_hocvien);
+$stmt_count->execute();
+$count_result = $stmt_count->get_result();
+$total_notifications = $count_result->fetch_assoc()['total'];
+$stmt_count->close();
+
+$total_pages = ceil($total_notifications / $notifications_per_page);
+
+// --- Lấy thông báo của học viên với phân trang ---
 $sql_notifications = "
     SELECT 
         tieu_de, 
@@ -21,10 +37,11 @@ $sql_notifications = "
     FROM thongbao
     WHERE id_hocvien = ?
     ORDER BY ngay_tao DESC
+    LIMIT ? OFFSET ?
 ";
 
 $stmt = $conn->prepare($sql_notifications);
-$stmt->bind_param('i', $id_hocvien);
+$stmt->bind_param('iii', $id_hocvien, $notifications_per_page, $offset);
 $stmt->execute();
 $result = $stmt->get_result();
 $notifications = $result->fetch_all(MYSQLI_ASSOC);
@@ -167,6 +184,182 @@ foreach ($notifications as $notification) {
         padding-left: 55px;
         text-align: right;
     }
+
+    /* Notification Pagination Styles */
+    .notif-pagination-container {
+  
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        padding: 10px 0;
+    }
+
+    .notif-pagination {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #66eabaff 0%, #4ba254ff 100%);
+        padding: 12px 25px;
+        border-radius: 50px;
+        box-shadow: 0 8px 25px rgba(13, 179, 59, 0.25);
+        backdrop-filter: blur(10px);
+    }
+
+    .notif-pagination-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--primary-color);
+        border: none;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .notif-pagination-btn:hover:not(.disabled) {
+        background: #fff;
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        color: var(--primary-color-dark);
+    }
+
+    .notif-pagination-btn.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .notif-pagination-numbers {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0 10px;
+    }
+
+    .notif-pagination-number {
+        min-width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .notif-pagination-number:hover {
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--primary-color);
+        border-color: rgba(255,255,255,0.8);
+        transform: translateY(-2px) scale(1.1);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+
+    .notif-pagination-number.active {
+        background: #fff;
+        color: var(--primary-color-dark);
+        border-color: #fff;
+        transform: scale(1.15);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        animation: notifPagePulse 0.4s ease;
+    }
+
+    @keyframes notifPagePulse {
+        0%, 100% { transform: scale(1.15); }
+        50% { transform: scale(1.25); }
+    }
+
+    .notif-pagination-dots {
+        color: rgba(255,255,255,0.6);
+        font-weight: bold;
+        padding: 0 5px;
+    }
+
+    .notif-pagination-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 25px;
+        background: var(--primary-color-light);
+        border-radius: 25px;
+        color: var(--primary-color);
+        font-size: 14px;
+        font-weight: 600;
+        border: 2px solid rgba(13, 179, 59, 0.15);
+    }
+
+    .notif-pagination-info i {
+        font-size: 16px;
+    }
+
+    .notif-pagination-info strong {
+        color: var(--primary-color-dark);
+        font-size: 15px;
+    }
+
+    .notif-pagination-info .separator {
+        margin: 0 5px;
+        color: rgba(13, 179, 59, 0.4);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .notif-pagination {
+            padding: 10px 18px;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .notif-pagination-btn {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+
+        .notif-pagination-btn span {
+            display: none;
+        }
+
+        .notif-pagination-number {
+            min-width: 36px;
+            height: 36px;
+            font-size: 13px;
+        }
+
+        .notif-pagination-info {
+            font-size: 12px;
+            padding: 10px 18px;
+            flex-wrap: wrap;
+            justify-content: center;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .notif-pagination-numbers {
+            gap: 4px;
+            margin: 0 5px;
+        }
+
+        .notif-pagination-number {
+            min-width: 32px;
+            height: 32px;
+            font-size: 12px;
+        }
+    }
 </style>
 <div class="content-pane">
     <h2 class="mb-4">Hộp thư thông báo</h2>
@@ -208,4 +401,83 @@ foreach ($notifications as $notification) {
              <p class="mb-0">Bạn chưa có thông báo nào.</p>
         </div>
     <?php endif; ?>
+
+    <?php if ($total_pages > 1): ?>
+        <!-- Pagination -->
+        <div class="notif-pagination-container">
+            <div class="notif-pagination">
+                <!-- Previous Button -->
+                <a href="?nav=thongbao&notif_page=<?php echo max(1, $current_page - 1); ?>" 
+                   class="notif-pagination-btn <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Trước</span>
+                </a>
+
+                <!-- Page Numbers -->
+                <div class="notif-pagination-numbers">
+                    <?php
+                    $start_page = max(1, $current_page - 2);
+                    $end_page = min($total_pages, $current_page + 2);
+
+                    if ($start_page > 1) {
+                        echo '<a href="?nav=thongbao&notif_page=1" class="notif-pagination-number">1</a>';
+                        if ($start_page > 2) {
+                            echo '<span class="notif-pagination-dots">...</span>';
+                        }
+                    }
+
+                    for ($i = $start_page; $i <= $end_page; $i++) {
+                        $active_class = ($i == $current_page) ? 'active' : '';
+                        echo '<a href="?nav=thongbao&notif_page=' . $i . '" class="notif-pagination-number ' . $active_class . '">' . $i . '</a>';
+                    }
+
+                    if ($end_page < $total_pages) {
+                        if ($end_page < $total_pages - 1) {
+                            echo '<span class="notif-pagination-dots">...</span>';
+                        }
+                        echo '<a href="?nav=thongbao&notif_page=' . $total_pages . '" class="notif-pagination-number">' . $total_pages . '</a>';
+                    }
+                    ?>
+                </div>
+
+                <!-- Next Button -->
+                <a href="?nav=thongbao&notif_page=<?php echo min($total_pages, $current_page + 1); ?>" 
+                   class="notif-pagination-btn <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
+                    <span>Sau</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+
+            <!-- Pagination Info -->
+            <div class="notif-pagination-info">
+                <i class="fas fa-bell"></i>
+                <span>
+                    Hiển thị 
+                    <strong><?php echo min($offset + 1, $total_notifications); ?></strong>
+                    <span class="separator">-</span>
+                    <strong><?php echo min($offset + $notifications_per_page, $total_notifications); ?></strong>
+                    <span class="separator">/</span>
+                    <strong><?php echo $total_notifications; ?></strong>
+                    thông báo
+                </span>
+            </div>
+        </div>
+    <?php endif; ?>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Smooth scroll to top when clicking notification pagination
+    const notifPaginationLinks = document.querySelectorAll('.notif-pagination-number, .notif-pagination-btn');
+    notifPaginationLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            setTimeout(() => {
+                const contentPane = document.querySelector('.content-pane');
+                if (contentPane) {
+                    contentPane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        });
+    });
+});
+</script>

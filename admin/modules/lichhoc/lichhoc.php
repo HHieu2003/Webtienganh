@@ -405,4 +405,16 @@ if ($lop_id) {
             }
         }
     });
+
+    // Smooth scroll for pagination
+    document.querySelectorAll('.lichhoc-pagination-number, .lichhoc-pagination-btn').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const container = document.querySelector('.card.animated-card');
+            if (container) {
+                setTimeout(() => {
+                    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        });
+    });
 </script>

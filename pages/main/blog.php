@@ -12,10 +12,15 @@
 
                 // Biến cho tìm kiếm
                 $search_query = isset($_GET['blog_search']) ? trim($_GET['blog_search']) : '';
+                
+                // Pagination settings
+                $posts_per_page = 8; // Số bài viết mỗi trang (không tính featured)
+                $current_page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+                $offset = ($current_page - 1) * $posts_per_page;
 
-                // Lấy bài viết nổi bật (bài mới nhất) - chỉ khi không tìm kiếm
+                // Lấy bài viết nổi bật (bài mới nhất) - chỉ khi không tìm kiếm VÀ ở trang 1
                 $featured_post = null;
-                if (empty($search_query)) {
+                if (empty($search_query) && $current_page == 1) {
                     $sql_featured = "SELECT bv.id_baiviet, bv.tieu_de, bv.noi_dung, bv.hinh_anh_tieu_de, bv.ngay_duyet, hv.ten_hocvien 
                                      FROM bai_viet bv
                                      LEFT JOIN hocvien hv ON bv.id_tac_gia = hv.id_hocvien
@@ -26,7 +31,35 @@
                     }
                 }
 
-                // Lấy các bài viết còn lại (hoặc tất cả nếu có tìm kiếm)
+                // Count total posts for pagination
+                $count_sql = "SELECT COUNT(*) as total FROM bai_viet bv WHERE bv.trang_thai = 'da_duyet'";
+                $count_params = [];
+                $count_types = '';
+
+                // Nếu có featured post, trừ đi 1
+                if ($featured_post) {
+                    $count_sql .= " AND bv.id_baiviet != ?";
+                    $count_params[] = $featured_post['id_baiviet'];
+                    $count_types .= 'i';
+                }
+
+                // Nếu có tìm kiếm
+                if (!empty($search_query)) {
+                    $count_sql .= " AND bv.tieu_de LIKE ?";
+                    $count_params[] = '%' . $search_query . '%';
+                    $count_types .= 's';
+                }
+
+                $count_stmt = $conn->prepare($count_sql);
+                if (!empty($count_params)) {
+                    $count_stmt->bind_param($count_types, ...$count_params);
+                }
+                $count_stmt->execute();
+                $count_result = $count_stmt->get_result();
+                $total_posts = $count_result->fetch_assoc()['total'];
+                $total_pages = ceil($total_posts / $posts_per_page);
+
+                // Lấy các bài viết còn lại (hoặc tất cả nếu có tìm kiếm) với LIMIT
                 $sql_posts = "SELECT bv.id_baiviet, bv.tieu_de, bv.noi_dung, bv.hinh_anh_tieu_de, bv.ngay_duyet, hv.ten_hocvien 
                               FROM bai_viet bv
                               LEFT JOIN hocvien hv ON bv.id_tac_gia = hv.id_hocvien
@@ -49,7 +82,10 @@
                     $types .= 's';
                 }
 
-                $sql_posts .= " ORDER BY bv.ngay_duyet DESC";
+                $sql_posts .= " ORDER BY bv.ngay_duyet DESC LIMIT ? OFFSET ?";
+                $params[] = $posts_per_page;
+                $params[] = $offset;
+                $types .= 'ii';
                 
                 $stmt_posts = $conn->prepare($sql_posts);
                 if (!empty($params)) {
@@ -106,6 +142,102 @@
                         </div>
                     <?php endif; ?>
                 </div>
+
+                <!-- Pagination for Blog -->
+                <?php if ($total_pages > 1): ?>
+                <div class="blog-pagination-container" data-aos="fade-up">
+                    <div class="blog-pagination">
+                        <?php
+                        // Previous button
+                        if ($current_page > 1):
+                            $prev_page = $current_page - 1;
+                            $prev_url = "index.php?nav=blog&page=$prev_page";
+                            if (!empty($search_query)) {
+                                $prev_url .= "&blog_search=" . urlencode($search_query);
+                            }
+                        ?>
+                            <a href="<?php echo $prev_url; ?>" class="blog-pagination-btn blog-pagination-prev">
+                                <i class="fas fa-chevron-left"></i>
+                                <span>Trước</span>
+                            </a>
+                        <?php else: ?>
+                            <span class="blog-pagination-btn blog-pagination-prev disabled">
+                                <i class="fas fa-chevron-left"></i>
+                                <span>Trước</span>
+                            </span>
+                        <?php endif; ?>
+
+                        <!-- Page numbers -->
+                        <div class="blog-pagination-numbers">
+                            <?php
+                            $range = 2;
+                            $start = max(1, $current_page - $range);
+                            $end = min($total_pages, $current_page + $range);
+
+                            // First page
+                            if ($start > 1):
+                                $url = "index.php?nav=blog&page=1";
+                                if (!empty($search_query)) $url .= "&blog_search=" . urlencode($search_query);
+                            ?>
+                                <a href="<?php echo $url; ?>" class="blog-pagination-number">1</a>
+                                <?php if ($start > 2): ?>
+                                    <span class="blog-pagination-dots">...</span>
+                                <?php endif; ?>
+                            <?php endif; ?>
+
+                            <?php for ($i = $start; $i <= $end; $i++): 
+                                $url = "index.php?nav=blog&page=$i";
+                                if (!empty($search_query)) $url .= "&blog_search=" . urlencode($search_query);
+                            ?>
+                                <a href="<?php echo $url; ?>" 
+                                   class="blog-pagination-number <?php echo $i == $current_page ? 'active' : ''; ?>">
+                                    <?php echo $i; ?>
+                                </a>
+                            <?php endfor; ?>
+
+                            <!-- Last page -->
+                            <?php if ($end < $total_pages): ?>
+                                <?php if ($end < $total_pages - 1): ?>
+                                    <span class="blog-pagination-dots">...</span>
+                                <?php endif; ?>
+                                <?php
+                                $url = "index.php?nav=blog&page=$total_pages";
+                                if (!empty($search_query)) $url .= "&blog_search=" . urlencode($search_query);
+                                ?>
+                                <a href="<?php echo $url; ?>" class="blog-pagination-number"><?php echo $total_pages; ?></a>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Next button -->
+                        <?php
+                        if ($current_page < $total_pages):
+                            $next_page = $current_page + 1;
+                            $next_url = "index.php?nav=blog&page=$next_page";
+                            if (!empty($search_query)) {
+                                $next_url .= "&blog_search=" . urlencode($search_query);
+                            }
+                        ?>
+                            <a href="<?php echo $next_url; ?>" class="blog-pagination-btn blog-pagination-next">
+                                <span>Sau</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        <?php else: ?>
+                            <span class="blog-pagination-btn blog-pagination-next disabled">
+                                <span>Sau</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Page info -->
+                    <div class="blog-pagination-info">
+                        <i class="fas fa-book-open"></i>
+                        Trang <strong><?php echo $current_page; ?></strong> / <strong><?php echo $total_pages; ?></strong>
+                        <span class="separator">•</span>
+                        Tổng <strong><?php echo $total_posts; ?></strong> bài viết
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
 
             <div class="col-lg-4">
@@ -450,12 +582,189 @@
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
 .final-blog-section .recent-posts-list .post-info .date {
     font-size: 12px;
     color: var(--text-light);
+}
+
+/* --- Blog Pagination Styles --- */
+.blog-pagination-container {
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.blog-pagination {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: linear-gradient(135deg, #66eabaff 0%, #4ba254ff 100%);
+    padding: 10px 20px;
+    border-radius: 50px;
+    box-shadow: 0 10px 30px rgba(13, 179, 59, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.blog-pagination-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #0db33b;
+    border: none;
+    border-radius: 25px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.blog-pagination-btn:hover:not(.disabled) {
+    background: #fff;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    color: #0a8a2c;
+}
+
+.blog-pagination-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.blog-pagination-numbers {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 10px;
+}
+
+.blog-pagination-number {
+    min-width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.blog-pagination-number:hover {
+    background: rgba(255, 255, 255, 0.95);
+    color: #0db33b;
+    border-color: rgba(255,255,255,0.8);
+    transform: translateY(-3px) scale(1.15);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.blog-pagination-number.active {
+    background: #fff;
+    color: #0a8a2c;
+    border-color: #fff;
+    transform: scale(1.2);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    animation: blogPageActive 0.5s ease;
+}
+
+@keyframes blogPageActive {
+    0%, 100% { transform: scale(1.2); }
+    50% { transform: scale(1.3); }
+}
+
+.blog-pagination-dots {
+    color: rgba(255,255,255,0.6);
+    font-weight: bold;
+    padding: 0 5px;
+}
+
+.blog-pagination-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 30px;
+    background: rgba(13, 179, 59, 0.1);
+    border-radius: 30px;
+    color: #0db33b;
+    font-size: 15px;
+    font-weight: 600;
+    border: 2px solid rgba(13, 179, 59, 0.2);
+}
+
+.blog-pagination-info i {
+    font-size: 18px;
+}
+
+.blog-pagination-info strong {
+    color: #0a8a2c;
+    font-size: 17px;
+}
+
+.blog-pagination-info .separator {
+    margin: 0 5px;
+    color: rgba(13, 179, 59, 0.3);
+}
+
+/* Blog Pagination Responsive */
+@media (max-width: 768px) {
+    .blog-pagination {
+        padding: 15px 20px;
+        border-radius: 40px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .blog-pagination-btn {
+        padding: 5px 8px;
+        font-size: 14px;
+    }
+
+    .blog-pagination-btn span {
+        display: none;
+    }
+
+    .blog-pagination-number {
+        min-width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .blog-pagination-info {
+        font-size: 13px;
+        padding: 7px 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .blog-pagination-numbers {
+        gap: 5px;
+        margin: 0 5px;
+    }
+
+    .blog-pagination-number {
+        min-width: 35px;
+        height: 35px;
+        font-size: 13px;
+    }
 }
 
 /* --- Responsive --- */
@@ -469,3 +778,22 @@
 }
 
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Smooth scroll to top when clicking blog pagination
+    const blogPaginationLinks = document.querySelectorAll('.blog-pagination-number, .blog-pagination-btn');
+    blogPaginationLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Don't prevent default - let the link work
+            // But add smooth scroll after a small delay
+            setTimeout(() => {
+                const blogSection = document.querySelector('.final-blog-section');
+                if (blogSection) {
+                    blogSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        });
+    });
+});
+</script>

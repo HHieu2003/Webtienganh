@@ -194,3 +194,145 @@ $result_recent = $conn->query($sql_recent);
         }
     });
 </script>
+
+<style>
+/* Responsive Design for home.php */
+@media (max-width: 992px) {
+    .col-lg-8,
+    .col-lg-4 {
+        margin-bottom: 1.5rem;
+    }
+    
+    #popularCoursesChart {
+        height: 300px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .title-color {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-card .card-body {
+        padding: 1rem;
+    }
+    
+    .stat-card .card-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-card .card-text-content h5 {
+        font-size: 0.9rem;
+    }
+    
+    .stat-card .card-number {
+        font-size: 1.5rem;
+    }
+    
+    .card-header h4 {
+        font-size: 1rem;
+    }
+    
+    .card-header h4 i {
+        font-size: 0.9rem;
+    }
+    
+    #popularCoursesChart {
+        height: 250px !important;
+    }
+    
+    .list-group-item {
+        padding: 0.75rem 1rem;
+    }
+    
+    .list-group-item strong {
+        font-size: 0.9rem;
+    }
+    
+    .list-group-item small {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    .title-color {
+        font-size: 1.25rem;
+    }
+    
+    .row {
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
+    }
+    
+    .col-lg-4,
+    .col-md-6 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    .stat-card .card-body {
+        padding: 0.75rem;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .stat-card .card-icon {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+        font-size: 1.75rem;
+    }
+    
+    .stat-card .card-text-content {
+        text-align: center;
+    }
+    
+    .stat-card .card-title {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-card .card-number {
+        font-size: 1.25rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem;
+    }
+    
+    .card-header h4 {
+        font-size: 0.9rem;
+    }
+    
+    .card-body {
+        padding: 0.75rem;
+    }
+    
+    #popularCoursesChart {
+        height: 200px !important;
+    }
+    
+    .list-group-item {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .list-group-item strong {
+        font-size: 0.85rem;
+    }
+    
+    .list-group-item small {
+        font-size: 0.7rem;
+        line-height: 1.3;
+    }
+}
+</style>

@@ -68,15 +68,39 @@ try {
     error_log("Lỗi khi lấy bài test khóa học: " . $e->getMessage());
 }
 
-// 4. Lấy các bài test ôn tập công khai
+// 4. Lấy các bài test ôn tập công khai với phân trang
 $practice_tests = [];
+$total_practice_tests = 0;
+$total_practice_pages = 1;
+$practice_current_page = 1;
+
 try {
-    $result_practice_tests = $conn->query("SELECT * FROM baitest WHERE loai_baitest = 'on_tap' ORDER BY ten_baitest ASC");
+    // Pagination settings
+    $tests_per_page = 6; // Số bài test ôn tập mỗi trang
+    $practice_current_page = isset($_GET['test_page']) ? max(1, intval($_GET['test_page'])) : 1;
+    $offset = ($practice_current_page - 1) * $tests_per_page;
+    
+    // Count total practice tests
+    $count_result = $conn->query("SELECT COUNT(*) as total FROM baitest WHERE loai_baitest = 'on_tap'");
+    if ($count_result) {
+        $count_row = $count_result->fetch_assoc();
+        $total_practice_tests = $count_row['total'];
+        $total_practice_pages = ceil($total_practice_tests / $tests_per_page);
+    }
+    
+    // Fetch practice tests with LIMIT
+    $sql_practice = "SELECT * FROM baitest WHERE loai_baitest = 'on_tap' ORDER BY ten_baitest ASC LIMIT ? OFFSET ?";
+    $stmt_practice = $conn->prepare($sql_practice);
+    $stmt_practice->bind_param("ii", $tests_per_page, $offset);
+    $stmt_practice->execute();
+    $result_practice_tests = $stmt_practice->get_result();
+    
     if ($result_practice_tests) {
         while ($row = $result_practice_tests->fetch_assoc()) {
             $practice_tests[] = $row;
         }
     }
+    $stmt_practice->close();
 } catch (Exception $e) {
     error_log("Lỗi khi lấy bài test ôn tập: " . $e->getMessage());
 }
@@ -264,6 +288,7 @@ body {
     /* Giới hạn 2 dòng */
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -430,6 +455,183 @@ body {
     .ready-section-v2 { padding: 30px; }
 }
 
+/* --- Question Pagination Styles --- */
+.question-pagination-container {
+    margin-top: 25px;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.question-pagination {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: linear-gradient(135deg, #0db33b 0%, #0a8a2c 100%);
+    padding: 10px 20px;
+    border-radius: 50px;
+    box-shadow: 0 10px 30px rgba(13, 179, 59, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.question-pagination-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #0db33b;
+    border: none;
+    border-radius: 25px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.question-pagination-btn:hover:not(.disabled) {
+    background: #fff;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    color: #0a8a2c;
+}
+
+.question-pagination-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.question-pagination-numbers {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 10px;
+}
+
+.question-pagination-number {
+    min-width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.question-pagination-number:hover {
+    background: rgba(255, 255, 255, 0.95);
+    color: #0db33b;
+    border-color: rgba(255,255,255,0.8);
+    transform: translateY(-3px) scale(1.15);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.question-pagination-number.active {
+    background: #fff;
+    color: #0a8a2c;
+    border-color: #fff;
+    transform: scale(1.2);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    animation: questionPageActive 0.5s ease;
+}
+
+@keyframes questionPageActive {
+    0%, 100% { transform: scale(1.2); }
+    50% { transform: scale(1.3); }
+}
+
+.question-pagination-dots {
+    color: rgba(255,255,255,0.6);
+    font-weight: bold;
+    padding: 0 5px;
+}
+
+.question-pagination-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 30px;
+    background: rgba(13, 179, 59, 0.1);
+    border-radius: 30px;
+    color: #0db33b;
+    font-size: 15px;
+    font-weight: 600;
+    border: 2px solid rgba(13, 179, 59, 0.2);
+}
+
+.question-pagination-info i {
+    font-size: 18px;
+}
+
+.question-pagination-info strong {
+    color: #0a8a2c;
+    font-size: 17px;
+}
+
+.question-pagination-info .separator {
+    margin: 0 5px;
+    color: rgba(13, 179, 59, 0.3);
+}
+
+/* Question Pagination Responsive */
+@media (max-width: 768px) {
+    .question-pagination {
+        padding: 15px 20px;
+        border-radius: 40px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .question-pagination-btn {
+        padding: 5px 8px;
+        font-size: 14px;
+    }
+
+    .question-pagination-btn span {
+        display: none;
+    }
+
+    .question-pagination-number {
+        min-width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .question-pagination-info {
+        font-size: 13px;
+        padding: 7px 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .question-pagination-numbers {
+        gap: 5px;
+        margin: 0 5px;
+    }
+
+    .question-pagination-number {
+        min-width: 35px;
+        height: 35px;
+        font-size: 13px;
+    }
+}
+
 </style>
 
 <div class="tests-container-v2"> <?php if ($placement_test && !$trinh_do_hocvien): ?>
@@ -470,7 +672,86 @@ body {
         ?>
     </div>
 
-    <div class="ready-section-v2" data-aos="fade-up">
+    <!-- Pagination for Practice Tests -->
+    <?php if ($total_practice_pages > 1): ?>
+    <div class="question-pagination-container" data-aos="fade-up">
+        <div class="question-pagination">
+            <?php
+            // Previous button
+            if ($practice_current_page > 1):
+                $prev_page = $practice_current_page - 1;
+            ?>
+                <a href="index.php?nav=question&test_page=<?php echo $prev_page; ?>#practice-tests" class="question-pagination-btn question-pagination-prev">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Trước</span>
+                </a>
+            <?php else: ?>
+                <span class="question-pagination-btn question-pagination-prev disabled">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Trước</span>
+                </span>
+            <?php endif; ?>
+
+            <!-- Page numbers -->
+            <div class="question-pagination-numbers">
+                <?php
+                $range = 2;
+                $start = max(1, $practice_current_page - $range);
+                $end = min($total_practice_pages, $practice_current_page + $range);
+
+                // First page
+                if ($start > 1):
+                ?>
+                    <a href="index.php?nav=question&test_page=1#practice-tests" class="question-pagination-number">1</a>
+                    <?php if ($start > 2): ?>
+                        <span class="question-pagination-dots">...</span>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <?php for ($i = $start; $i <= $end; $i++): ?>
+                    <a href="index.php?nav=question&test_page=<?php echo $i; ?>#practice-tests" 
+                       class="question-pagination-number <?php echo $i == $practice_current_page ? 'active' : ''; ?>">
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+
+                <!-- Last page -->
+                <?php if ($end < $total_practice_pages): ?>
+                    <?php if ($end < $total_practice_pages - 1): ?>
+                        <span class="question-pagination-dots">...</span>
+                    <?php endif; ?>
+                    <a href="index.php?nav=question&test_page=<?php echo $total_practice_pages; ?>#practice-tests" class="question-pagination-number"><?php echo $total_practice_pages; ?></a>
+                <?php endif; ?>
+            </div>
+
+            <!-- Next button -->
+            <?php
+            if ($practice_current_page < $total_practice_pages):
+                $next_page = $practice_current_page + 1;
+            ?>
+                <a href="index.php?nav=question&test_page=<?php echo $next_page; ?>#practice-tests" class="question-pagination-btn question-pagination-next">
+                    <span>Sau</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            <?php else: ?>
+                <span class="question-pagination-btn question-pagination-next disabled">
+                    <span>Sau</span>
+                    <i class="fas fa-chevron-right"></i>
+                </span>
+            <?php endif; ?>
+        </div>
+
+        <!-- Page info -->
+        <div class="question-pagination-info">
+            <i class="fas fa-clipboard-list"></i>
+            Trang <strong><?php echo $practice_current_page; ?></strong> / <strong><?php echo $total_practice_pages; ?></strong>
+            <span class="separator">•</span>
+            Tổng <strong><?php echo $total_practice_tests; ?></strong> bài test
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <div id="practice-tests" class="ready-section-v2" data-aos="fade-up">
         <div class="ready-content-v2">
             <h2><i class="fa-solid fa-shield-halved"></i> Sẵn sàng chinh phục mọi kỳ thi!</h2>
             <p>Nền tảng của chúng tôi cung cấp đầy đủ kiến thức và kỹ năng cần thiết, giúp bạn tự tin đạt điểm cao trong các kỳ thi tiếng Anh quan trọng như TOEIC, IELTS, TOEFL.</p>
