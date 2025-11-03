@@ -1,3 +1,52 @@
+<?php
+// File này được include từ index.php nên biến $conn đã có sẵn.
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+
+// Get all distinct levels from database for filter dropdown - PHẢI LẤY TRƯỚC KHI DÙNG
+$sql_levels = "SELECT DISTINCT cap_do FROM khoahoc WHERE cap_do IS NOT NULL AND cap_do != '' ORDER BY cap_do";
+$levels_result = $conn->query($sql_levels);
+$available_levels = [];
+while ($level_row = $levels_result->fetch_assoc()) {
+    $available_levels[] = $level_row['cap_do'];
+}
+
+// Pagination settings
+$items_per_page = 12; // Số khóa học mỗi trang
+$current_page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$offset = ($current_page - 1) * $items_per_page;
+
+// Count total courses for pagination
+$count_sql = "SELECT COUNT(*) as total FROM khoahoc";
+if (!empty($search)) {
+    $count_sql .= " WHERE ten_khoahoc LIKE ?";
+}
+
+$count_stmt = $conn->prepare($count_sql);
+if (!empty($search)) {
+    $like_search = '%' . $search . '%';
+    $count_stmt->bind_param("s", $like_search);
+}
+$count_stmt->execute();
+$count_result = $count_stmt->get_result();
+$total_courses = $count_result->fetch_assoc()['total'];
+$total_pages = ceil($total_courses / $items_per_page);
+
+// Fetch ALL courses for client-side filtering
+$sql = "SELECT * FROM khoahoc";
+if (!empty($search)) {
+    $sql .= " WHERE ten_khoahoc LIKE ?";
+}
+$sql .= " ORDER BY id_khoahoc DESC";
+
+$stmt = $conn->prepare($sql);
+if (!empty($search)) {
+    $like_search = '%' . $search . '%';
+    $stmt->bind_param("s", $like_search);
+}
+$stmt->execute();
+$result = $stmt->get_result();
+?>
+
 <div class="course-section section-p20">
     <div class="section-header" data-aos="fade-down">
         <h2 class="introduce-title">TẤT CẢ KHÓA HỌC</h2>
@@ -34,12 +83,11 @@
                 <div class="select-wrapper">
                     <select id="filter-level" class="filter-select">
                         <option value="">Tất cả cấp độ</option>
-                        <option value="Beginner">Beginner</option>
-                        <option value="Intermediate">Intermediate</option>
-                        <option value="Advanced">Advanced</option>
-                        <option value="IELTS">IELTS</option>
-                        <option value="TOEIC">TOEIC</option>
-                        <option value="Business">Business English</option>
+                        <?php foreach ($available_levels as $level): ?>
+                            <option value="<?php echo htmlspecialchars($level); ?>">
+                                <?php echo htmlspecialchars($level); ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                     <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
@@ -59,47 +107,6 @@
 
     <div class="course-grid" id="course-grid">
         <?php
-        // File này được include từ index.php nên biến $conn đã có sẵn.
-        $search = isset($_GET['search']) ? trim($_GET['search']) : '';
-        
-        // Pagination settings
-        $items_per_page = 12; // Số khóa học mỗi trang
-        $current_page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-        $offset = ($current_page - 1) * $items_per_page;
-
-        // Count total courses for pagination
-        $count_sql = "SELECT COUNT(*) as total FROM khoahoc";
-        if (!empty($search)) {
-            $count_sql .= " WHERE ten_khoahoc LIKE ?";
-        }
-        
-        $count_stmt = $conn->prepare($count_sql);
-        if (!empty($search)) {
-            $like_search = '%' . $search . '%';
-            $count_stmt->bind_param("s", $like_search);
-        }
-        $count_stmt->execute();
-        $count_result = $count_stmt->get_result();
-        $total_courses = $count_result->fetch_assoc()['total'];
-        $total_pages = ceil($total_courses / $items_per_page);
-
-        // Fetch ALL courses for client-side filtering (không có LIMIT để filter toàn bộ)
-        $sql = "SELECT * FROM khoahoc";
-
-        if (!empty($search)) {
-            // Chỉ tìm kiếm theo tên khóa học
-            $sql .= " WHERE ten_khoahoc LIKE ?";
-        }
-        $sql .= " ORDER BY id_khoahoc DESC";
-
-        $stmt = $conn->prepare($sql);
-        if (!empty($search)) {
-            $like_search = '%' . $search . '%';
-            $stmt->bind_param("s", $like_search);
-        }
-        $stmt->execute();
-        $result = $stmt->get_result();
-
         if ($result->num_rows > 0) {
             $delay = 0; // Biến để tạo hiệu ứng xuất hiện nối tiếp
             $index = 0;
