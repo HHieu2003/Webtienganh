@@ -240,7 +240,7 @@ a {
 
 .admin-footer {
     text-align: center;
-    padding: 15px;
+    padding-top: 15px;
     background-color: var(--white-bg);
     border-top: 1px solid var(--border-color);
     color: #6c757d;

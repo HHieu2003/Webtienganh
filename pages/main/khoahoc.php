@@ -6,40 +6,21 @@
 
     <!-- Filter Section -->
     <div class="filter-container" data-aos="fade-up" data-aos-duration="800">
-        
         <div class="filter-controls">
             <div class="filter-group">
                 <label for="filter-sort" class="filter-label">
                     <i class="fas fa-sort-amount-down"></i>
-                    <span>Sắp xếp</span>
+                    Sắp xếp
                 </label>
                 <div class="select-wrapper">
                     <select id="filter-sort" class="filter-select">
                         <option value="">Mặc định</option>
-                        <option value="price_asc">💰 Giá: Thấp → Cao</option>
-                        <option value="price_desc">💰 Giá: Cao → Thấp</option>
-                        <option value="name_asc">📚 Tên: A → Z</option>
-                        <option value="name_desc">📚 Tên: Z → A</option>
-                        <option value="newest">🆕 Mới nhất</option>
-                        <option value="oldest">⏰ Cũ nhất</option>
-                    </select>
-                    <i class="fas fa-chevron-down select-arrow"></i>
-                </div>
-            </div>
-
-            <div class="filter-group">
-                <label for="filter-price" class="filter-label">
-                    <i class="fas fa-tag"></i>
-                    <span>Khoảng giá</span>
-                </label>
-                <div class="select-wrapper">
-                    <select id="filter-price" class="filter-select">
-                        <option value="">Tất cả mức giá</option>
-                        <option value="free">🎁 Miễn phí</option>
-                        <option value="under1m">💵 Dưới 1 triệu</option>
-                        <option value="1to2m">💴 1-2 triệu</option>
-                        <option value="2to3m">💶 2-3 triệu</option>
-                        <option value="above3m">💷 Trên 3 triệu</option>
+                        <option value="price_asc">Giá: Thấp → Cao</option>
+                        <option value="price_desc">Giá: Cao → Thấp</option>
+                        <option value="name_asc">Tên: A → Z</option>
+                        <option value="name_desc">Tên: Z → A</option>
+                        <option value="newest">Mới nhất</option>
+                        <option value="oldest">Cũ nhất</option>
                     </select>
                     <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
@@ -47,32 +28,31 @@
 
             <div class="filter-group">
                 <label for="filter-level" class="filter-label">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span>Cấp độ</span>
+                    <i class="fas fa-layer-group"></i>
+                    Cấp độ
                 </label>
                 <div class="select-wrapper">
                     <select id="filter-level" class="filter-select">
                         <option value="">Tất cả cấp độ</option>
-                        <option value="Beginner">⭐ Beginner (Sơ cấp)</option>
-                        <option value="Intermediate">⭐⭐ Intermediate (Trung cấp)</option>
-                        <option value="Advanced">⭐⭐⭐ Advanced (Cao cấp)</option>
-                        <option value="IELTS">🎯 IELTS</option>
-                        <option value="TOEIC">🎯 TOEIC</option>
-                        <option value="Business">💼 Business English</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                        <option value="IELTS">IELTS</option>
+                        <option value="TOEIC">TOEIC</option>
+                        <option value="Business">Business English</option>
                     </select>
                     <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
             </div>
 
-            <div class="filter-actions">
-                <button class="btn-reset-filter" onclick="resetFilters()">
-                    <i class="fas fa-redo-alt"></i>
-                    <span>Đặt lại</span>
-                </button>
-                <div class="filter-count" id="filter-count">
-                    <i class="fas fa-check-circle"></i>
-                    <span id="result-count">0</span> khóa học
-                </div>
+            <button class="btn-reset-filter" onclick="resetFilters()">
+                <i class="fas fa-redo-alt"></i>
+                Đặt lại
+            </button>
+
+            <div class="filter-count" id="filter-count">
+                <i class="fas fa-book-open"></i>
+                <span id="result-count">0</span> khóa học
             </div>
         </div>
     </div>
@@ -103,32 +83,37 @@
         $total_courses = $count_result->fetch_assoc()['total'];
         $total_pages = ceil($total_courses / $items_per_page);
 
-        // Fetch courses with LIMIT
+        // Fetch ALL courses for client-side filtering (không có LIMIT để filter toàn bộ)
         $sql = "SELECT * FROM khoahoc";
 
         if (!empty($search)) {
             // Chỉ tìm kiếm theo tên khóa học
             $sql .= " WHERE ten_khoahoc LIKE ?";
         }
-        $sql .= " ORDER BY id_khoahoc DESC LIMIT ? OFFSET ?";
+        $sql .= " ORDER BY id_khoahoc DESC";
 
         $stmt = $conn->prepare($sql);
         if (!empty($search)) {
             $like_search = '%' . $search . '%';
-            $stmt->bind_param("sii", $like_search, $items_per_page, $offset);
-        } else {
-            $stmt->bind_param("ii", $items_per_page, $offset);
+            $stmt->bind_param("s", $like_search);
         }
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
             $delay = 0; // Biến để tạo hiệu ứng xuất hiện nối tiếp
+            $index = 0;
             while ($row = $result->fetch_assoc()) {
                 $chiphi = number_format($row['chi_phi'], 0, ',', '.');
                 $chi_phi_raw = $row['chi_phi']; // Giá gốc không format
                 $thoi_gian = $row['thoi_gian'] ?? 0; // Thời lượng
                 $cap_do = $row['cap_do'] ?? ''; // Cấp độ
+                
+                // Chỉ hiển thị khóa học trong trang hiện tại khi CHƯA filter
+                $display_style = '';
+                if ($index < $offset || $index >= $offset + $items_per_page) {
+                    $display_style = 'style="display: none;"';
+                }
                 
                 echo '<div class="course-card" 
                           data-aos="fade-up" 
@@ -137,7 +122,9 @@
                           data-duration="' . $thoi_gian . '"
                           data-level="' . htmlspecialchars($cap_do) . '"
                           data-name="' . htmlspecialchars($row["ten_khoahoc"]) . '"
-                          data-id="' . $row["id_khoahoc"] . '">     
+                          data-id="' . $row["id_khoahoc"] . '"
+                          data-index="' . $index . '"
+                          ' . $display_style . '>     
                         <div class="course-image-container">
                             <a href="./index.php?nav=course_detail&course_id=' . $row["id_khoahoc"] . '">
                                 <img src="' . htmlspecialchars($row["hinh_anh"]) . '" class="course-image" alt="' . htmlspecialchars($row["ten_khoahoc"]) . '">
@@ -164,6 +151,7 @@
                         </div>  
                    </div>';
                 $delay += 50;
+                $index++;
             }
         } else {
             echo '<p class="text-center col-12">Không tìm thấy khóa học nào phù hợp.</p>';
@@ -289,13 +277,13 @@
         margin-bottom: 10px;
     }
 
-    /* Filter Styles - Enhanced Version */
+    /* Filter Styles - Compact & Modern Version */
     .filter-container {
-        margin-bottom: 40px;
-        background: linear-gradient(135deg, #44cc65 0%, #408d68 100%);
-        border-radius: 20px;
-        padding: 10px;
-        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        margin-bottom: 30px;
+        background: linear-gradient(135deg, #23b54c 0%, #1ebd98 100%);
+        border-radius: 16px;
+        padding: 13px 25px;
+        box-shadow: 0 8px 30px rgba(13, 179, 59, 0.25);
         position: relative;
         overflow: hidden;
     }
@@ -307,7 +295,7 @@
         right: -50%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
         animation: filterGlow 8s ease-in-out infinite;
     }
 
@@ -316,38 +304,11 @@
         50% { transform: translate(-30px, -30px); }
     }
 
-    .filter-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 25px;
-        position: relative;
-        z-index: 1;
-    }
-
-    .filter-icon {
-        font-size: 24px;
-        color: #fff;
-        animation: filterIconPulse 2s ease-in-out infinite;
-    }
-
-    @keyframes filterIconPulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-    }
-
-    .filter-title {
-        color: #fff;
-        font-size: 24px;
-        font-weight: 700;
-        margin: 0;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-
     .filter-controls {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
+        grid-template-columns: 1fr 1fr auto auto;
+        gap: 15px;
+        align-items: end;
         position: relative;
         z-index: 1;
     }
@@ -355,23 +316,22 @@
     .filter-group {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
     }
 
     .filter-label {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         color: #fff;
         font-weight: 600;
-        font-size: 14px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font-size: 13px;
+        letter-spacing: 0.3px;
     }
 
     .filter-label i {
-        font-size: 16px;
-        opacity: 0.9;
+        font-size: 14px;
+        opacity: 0.95;
     }
 
     .select-wrapper {
@@ -380,29 +340,30 @@
 
     .select-arrow {
         position: absolute;
-        right: 15px;
+        right: 12px;
         top: 50%;
         transform: translateY(-50%);
-        color: #667eea;
+        color: #0db33b;
         pointer-events: none;
         transition: all 0.3s ease;
+        font-size: 12px;
     }
 
     .filter-select:focus + .select-arrow {
         transform: translateY(-50%) rotate(180deg);
-        color: #764ba2;
+        color: #0a9430;
     }
 
     .filter-select {
         width: 100%;
-        padding: 14px 40px 14px 16px;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-radius: 12px;
-        font-size: 15px;
-        background: rgba(255, 255, 255, 0.95);
+        padding: 10px 32px 10px 12px;
+        border: 2px solid rgba(255,255,255,0.25);
+        border-radius: 10px;
+        font-size: 14px;
+        background: rgba(255, 255, 255, 0.97);
         backdrop-filter: blur(10px);
         cursor: pointer;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         appearance: none;
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -412,65 +373,59 @@
 
     .filter-select:hover {
         background: #fff;
-        border-color: rgba(255,255,255,0.6);
+        border-color: rgba(255,255,255,0.5);
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     .filter-select:focus {
         outline: none;
         border-color: #fff;
         background: #fff;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
     }
 
     .filter-select option {
-        padding: 10px;
+        padding: 8px;
         background: #fff;
         color: #333;
-    }
-
-    .filter-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        justify-content: center;
+        font-size: 14px;
     }
 
     .btn-reset-filter {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        padding: 14px 24px;
+        gap: 6px;
+        padding: 10px 18px;
         background: rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
         color: white;
         border: 2px solid rgba(255,255,255,0.3);
-        border-radius: 12px;
-        font-size: 15px;
+        border-radius: 10px;
+        font-size: 14px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         white-space: nowrap;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        height: 42px;
     }
 
     .btn-reset-filter:hover {
         background: rgba(255, 255, 255, 0.3);
-        border-color: rgba(255,255,255,0.6);
-        transform: translateY(-3px) scale(1.05);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        border-color: rgba(255,255,255,0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
     }
 
     .btn-reset-filter:active {
-        transform: translateY(-1px) scale(1.02);
+        transform: translateY(0px);
     }
 
     .btn-reset-filter i {
-        transition: transform 0.6s ease;
+        transition: transform 0.5s ease;
+        font-size: 13px;
     }
 
     .btn-reset-filter:hover i {
@@ -481,77 +436,78 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        padding: 12px 20px;
-        background: rgba(255, 255, 255, 0.95);
+        gap: 6px;
+        padding: 10px 18px;
+        background: rgba(255, 255, 255, 0.97);
         backdrop-filter: blur(10px);
-        border-radius: 12px;
-        color: #667eea;
+        border-radius: 10px;
+        color: #0db33b;
         font-weight: 700;
         font-size: 14px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        animation: countFadeIn 0.5s ease;
-    }
-
-    @keyframes countFadeIn {
-        from {
-            opacity: 0;
-            transform: scale(0.8);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        white-space: nowrap;
+        height: 42px;
+        border: 2px solid rgba(255,255,255,0.3);
     }
 
     .filter-count i {
-        color: #0db33b;
-        font-size: 16px;
+        font-size: 14px;
     }
 
     #result-count {
-        color: #764ba2;
-        font-size: 18px;
+        color: #0a9430;
+        font-size: 16px;
         font-weight: 800;
     }
 
     /* Responsive for filters */
     @media (max-width: 1024px) {
         .filter-controls {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
         
-        .filter-actions {
-            grid-column: 1 / -1;
-            flex-direction: row;
+        .btn-reset-filter,
+        .filter-count {
+            grid-column: span 1;
         }
     }
 
     @media (max-width: 768px) {
         .filter-container {
-            padding: 20px;
-            border-radius: 15px;
+            padding: 18px 20px;
+            border-radius: 14px;
         }
 
         .filter-controls {
             grid-template-columns: 1fr;
-            gap: 15px;
-        }
-        
-        .filter-title {
-            font-size: 20px;
+            gap: 12px;
         }
 
-        .filter-actions {
-            flex-direction: column;
+        .filter-select {
+            font-size: 13px;
+            padding: 9px 30px 9px 11px;
+        }
+
+        .btn-reset-filter,
+        .filter-count {
+            font-size: 13px;
+            padding: 9px 15px;
+            height: 38px;
         }
     }
 
     @media (max-width: 576px) {
-        .filter-header {
-            flex-direction: column;
-            text-align: center;
-            gap: 8px;
+        .filter-container {
+            padding: 15px 18px;
+        }
+
+        .filter-label {
+            font-size: 12px;
+        }
+
+        .filter-select {
+            font-size: 13px;
         }
     }
 
@@ -913,39 +869,25 @@
 </style>
 
 <script>
-    // Course filter functionality with smooth animations
-    function applyFilters() {
+    // Course filter functionality with pagination
+    let isFiltering = false;
+    let currentFilterPage = 1;
+    const itemsPerPage = 12;
+    let filteredCourses = [];
+    
+    function applyFilters(page = 1) {
         const sortValue = document.getElementById('filter-sort').value;
-        const priceValue = document.getElementById('filter-price').value;
         const levelValue = document.getElementById('filter-level').value;
+        
+        // Đánh dấu đang filter
+        isFiltering = (sortValue !== '' || levelValue !== '');
+        currentFilterPage = page;
         
         // Get all course cards
         const courseCards = Array.from(document.querySelectorAll('.course-card'));
         
-        // Filter by price range
-        let filteredCards = courseCards.filter(card => {
-            const price = parseInt(card.dataset.price);
-            
-            switch(priceValue) {
-                case '':
-                    return true;
-                case 'free':
-                    return price === 0;
-                case 'under1m':
-                    return price > 0 && price < 1000000;
-                case '1to2m':
-                    return price >= 1000000 && price < 2000000;
-                case '2to3m':
-                    return price >= 2000000 && price < 3000000;
-                case 'above3m':
-                    return price >= 3000000;
-                default:
-                    return true;
-            }
-        });
-        
         // Filter by level (cấp độ)
-        filteredCards = filteredCards.filter(card => {
+        filteredCourses = courseCards.filter(card => {
             const level = card.dataset.level || '';
             
             if (levelValue === '') {
@@ -957,7 +899,7 @@
         });
         
         // Sort courses
-        filteredCards.sort((a, b) => {
+        filteredCourses.sort((a, b) => {
             switch(sortValue) {
                 case 'price_asc':
                     return parseInt(a.dataset.price) - parseInt(b.dataset.price);
@@ -976,27 +918,18 @@
             }
         });
         
-        // Update result count with animation
-        updateResultCount(filteredCards.length);
+        // Calculate pagination
+        const totalFiltered = filteredCourses.length;
+        const totalPages = Math.ceil(totalFiltered / itemsPerPage);
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const coursesToShow = filteredCourses.slice(startIndex, endIndex);
         
-        // Hide pagination when filtering
-        const paginationContainer = document.querySelector('.pagination-container');
-        if (paginationContainer) {
-            const hasActiveFilter = sortValue !== '' || priceValue !== '' || levelValue !== '';
-            if (hasActiveFilter) {
-                paginationContainer.style.opacity = '0';
-                paginationContainer.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    paginationContainer.style.display = 'none';
-                }, 300);
-            } else {
-                paginationContainer.style.display = 'flex';
-                setTimeout(() => {
-                    paginationContainer.style.opacity = '1';
-                    paginationContainer.style.transform = 'translateY(0)';
-                }, 100);
-            }
-        }
+        // Update result count
+        updateResultCount(totalFiltered);
+        
+        // Update pagination
+        updateFilterPagination(totalPages, page, totalFiltered);
         
         // Fade out all cards first
         courseCards.forEach(card => {
@@ -1013,7 +946,7 @@
         const courseGrid = document.querySelector('.course-grid');
         
         setTimeout(() => {
-            filteredCards.forEach((card, index) => {
+            coursesToShow.forEach((card, index) => {
                 card.style.display = 'block';
                 courseGrid.appendChild(card); // Re-append to maintain sort order
                 
@@ -1029,7 +962,7 @@
         // Show/hide no results message
         setTimeout(() => {
             const noResults = document.getElementById('no-results-message');
-            if (filteredCards.length === 0) {
+            if (totalFiltered === 0) {
                 if (!noResults) {
                     const message = document.createElement('div');
                     message.id = 'no-results-message';
@@ -1063,6 +996,120 @@
         }, 800);
     }
     
+    function updateFilterPagination(totalPages, currentPage, totalItems) {
+        let paginationContainer = document.querySelector('.pagination-container');
+        
+        if (!paginationContainer) {
+            paginationContainer = document.createElement('div');
+            paginationContainer.className = 'pagination-container';
+            paginationContainer.setAttribute('data-aos', 'fade-up');
+            document.querySelector('.course-grid').parentElement.appendChild(paginationContainer);
+        }
+        
+        if (isFiltering && totalPages > 1) {
+            // Show pagination with filter results
+            paginationContainer.style.display = 'flex';
+            paginationContainer.style.opacity = '1';
+            paginationContainer.style.transform = 'translateY(0)';
+            
+            let paginationHTML = '<div class="pagination">';
+            
+            // Previous button
+            if (currentPage > 1) {
+                paginationHTML += `
+                    <a href="javascript:void(0)" onclick="applyFilters(${currentPage - 1}); scrollToTop();" class="pagination-btn pagination-prev">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>Trước</span>
+                    </a>
+                `;
+            } else {
+                paginationHTML += `
+                    <span class="pagination-btn pagination-prev disabled">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>Trước</span>
+                    </span>
+                `;
+            }
+            
+            // Page numbers
+            paginationHTML += '<div class="pagination-numbers">';
+            
+            const range = 2;
+            const start = Math.max(1, currentPage - range);
+            const end = Math.min(totalPages, currentPage + range);
+            
+            // First page
+            if (start > 1) {
+                paginationHTML += `<a href="javascript:void(0)" onclick="applyFilters(1); scrollToTop();" class="pagination-number">1</a>`;
+                if (start > 2) {
+                    paginationHTML += '<span class="pagination-dots">...</span>';
+                }
+            }
+            
+            // Page numbers in range
+            for (let i = start; i <= end; i++) {
+                const activeClass = i === currentPage ? 'active' : '';
+                paginationHTML += `<a href="javascript:void(0)" onclick="applyFilters(${i}); scrollToTop();" class="pagination-number ${activeClass}">${i}</a>`;
+            }
+            
+            // Last page
+            if (end < totalPages) {
+                if (end < totalPages - 1) {
+                    paginationHTML += '<span class="pagination-dots">...</span>';
+                }
+                paginationHTML += `<a href="javascript:void(0)" onclick="applyFilters(${totalPages}); scrollToTop();" class="pagination-number">${totalPages}</a>`;
+            }
+            
+            paginationHTML += '</div>';
+            
+            // Next button
+            if (currentPage < totalPages) {
+                paginationHTML += `
+                    <a href="javascript:void(0)" onclick="applyFilters(${currentPage + 1}); scrollToTop();" class="pagination-btn pagination-next">
+                        <span>Sau</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                `;
+            } else {
+                paginationHTML += `
+                    <span class="pagination-btn pagination-next disabled">
+                        <span>Sau</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+                `;
+            }
+            
+            paginationHTML += '</div>';
+            
+            // Page info
+            paginationHTML += `
+                <div class="pagination-info">
+                    <i class="fas fa-info-circle"></i>
+                    Trang <strong>${currentPage}</strong> / <strong>${totalPages}</strong>
+                    <span class="separator">•</span>
+                    Tổng <strong>${totalItems}</strong> khóa học
+                </div>
+            `;
+            
+            paginationContainer.innerHTML = paginationHTML;
+        } else if (!isFiltering) {
+            // Show original pagination (reload page to reset)
+            paginationContainer.style.display = 'flex';
+            paginationContainer.style.opacity = '1';
+            paginationContainer.style.transform = 'translateY(0)';
+        } else {
+            // Hide pagination if only 1 page or less
+            paginationContainer.style.display = 'none';
+        }
+    }
+    
+    function scrollToTop() {
+        const courseSection = document.querySelector('.course-section');
+        if (courseSection) {
+            courseSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+    
     // Update result count with animation
     function updateResultCount(count) {
         const countElement = document.getElementById('result-count');
@@ -1077,12 +1124,6 @@
                 countElement.textContent = count;
                 countElement.style.transform = 'scale(1)';
             }, 150);
-            
-            // Pulse animation for filter count
-            filterCount.style.animation = 'none';
-            setTimeout(() => {
-                filterCount.style.animation = 'countFadeIn 0.5s ease';
-            }, 10);
         }
     }
     
@@ -1098,32 +1139,29 @@
         
         // Reset all filters
         document.getElementById('filter-sort').value = '';
-        document.getElementById('filter-price').value = '';
         document.getElementById('filter-level').value = '';
         
-        // Apply filters with animation
-        setTimeout(() => {
-            applyFilters();
-        }, 300);
+        // Đánh dấu không còn filter
+        isFiltering = false;
+        currentFilterPage = 1;
+        
+        // Reload page to restore original state
+        window.location.href = 'index.php?nav=khoahoc';
     }
     
     // Add event listeners with smooth transitions
     document.addEventListener('DOMContentLoaded', function() {
-        // Initial count
-        const totalCourses = document.querySelectorAll('.course-card').length;
+        // Initial count - đếm số khóa học đang hiển thị
+        const visibleCourses = document.querySelectorAll('.course-card[style*="display: block"], .course-card:not([style*="display: none"])');
+        const totalCourses = visibleCourses.length;
         updateResultCount(totalCourses);
         
         // Smooth scroll to top when clicking pagination
         const paginationLinks = document.querySelectorAll('.pagination-number, .pagination-btn');
         paginationLinks.forEach(link => {
             link.addEventListener('click', function(e) {
-                // Don't prevent default - let the link work
-                // But add smooth scroll
                 setTimeout(() => {
-                    const courseSection = document.querySelector('.course-section');
-                    if (courseSection) {
-                        courseSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    scrollToTop();
                 }, 100);
             });
         });
@@ -1133,11 +1171,11 @@
         
         const handleFilterChange = () => {
             clearTimeout(filterTimeout);
-            filterTimeout = setTimeout(applyFilters, 200);
+            currentFilterPage = 1; // Reset to page 1 when filter changes
+            filterTimeout = setTimeout(() => applyFilters(1), 200);
         };
         
         document.getElementById('filter-sort').addEventListener('change', handleFilterChange);
-        document.getElementById('filter-price').addEventListener('change', handleFilterChange);
         document.getElementById('filter-level').addEventListener('change', handleFilterChange);
         
         // Add visual feedback on select focus

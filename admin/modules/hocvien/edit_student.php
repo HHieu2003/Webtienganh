@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'] ?? '';
     $mat_khau = $_POST['mat_khau'] ?? '';
     $is_admin = isset($_POST['is_admin']) ? 1 : 0;
+    $is_verified = isset($_POST['is_verified']) ? 1 : 0;
 
     if (empty($ten_hocvien) || empty($email) || $id_hocvien === 0) {
         $response['message'] = 'Dữ liệu không hợp lệ.';
@@ -33,13 +34,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Kiểm tra xem có nhập mật khẩu mới không
     if (!empty($mat_khau)) {
         $hashedPassword = password_hash($mat_khau, PASSWORD_DEFAULT);
-        $sql = "UPDATE hocvien SET ten_hocvien = ?, so_dien_thoai = ?, email = ?, mat_khau = ?, is_admin = ? WHERE id_hocvien = ?";
+        $sql = "UPDATE hocvien SET ten_hocvien = ?, so_dien_thoai = ?, email = ?, mat_khau = ?, is_admin = ?, is_verified = ? WHERE id_hocvien = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssii", $ten_hocvien, $so_dien_thoai, $email, $hashedPassword, $is_admin, $id_hocvien);
+        $stmt->bind_param("ssssiiii", $ten_hocvien, $so_dien_thoai, $email, $hashedPassword, $is_admin, $is_verified, $id_hocvien);
     } else {
-        $sql = "UPDATE hocvien SET ten_hocvien = ?, so_dien_thoai = ?, email = ?, is_admin = ? WHERE id_hocvien = ?";
+        $sql = "UPDATE hocvien SET ten_hocvien = ?, so_dien_thoai = ?, email = ?, is_admin = ?, is_verified = ? WHERE id_hocvien = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sssii", $ten_hocvien, $so_dien_thoai, $email, $is_admin, $id_hocvien);
+        $stmt->bind_param("sssiii", $ten_hocvien, $so_dien_thoai, $email, $is_admin, $is_verified, $id_hocvien);
     }
 
     if ($stmt->execute()) {

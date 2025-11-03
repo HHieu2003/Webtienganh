@@ -35,6 +35,9 @@ CREATE TABLE `hocvien` (
   `so_dien_thoai` VARCHAR(15),
   `mat_khau` VARCHAR(255),
    `trinh_do` VARCHAR(50) NULL DEFAULT NULL COMMENT 'Trình độ được phân loại sau bài test',
+     `verification_token` varchar(255) DEFAULT NULL COMMENT 'Mã token để xác thực email',
+  `token_expiry` datetime DEFAULT NULL COMMENT 'Thời gian hết hạn của token',
+  `is_verified` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0: Chưa xác thực, 1: Đã xác thực',
   `is_admin` BOOLEAN DEFAULT FALSE
 ) ENGINE=InnoDB;
 

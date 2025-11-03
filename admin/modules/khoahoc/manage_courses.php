@@ -429,7 +429,12 @@ $result = $stmt->get_result();
                         </div>
                         <div class="col-md-6 mb-3">
                              <label for="add_cap_do" class="form-label">Cấp Độ</label>
-                             <input type="text" class="form-control" id="add_cap_do" name="cap_do" placeholder="Ví dụ: Beginner, IELTS 5.0+">
+                             <input type="text" class="form-control" id="add_cap_do" name="cap_do" list="levelList" placeholder="Chọn hoặc nhập cấp độ...">
+                             <datalist id="levelList">
+                                 <?php foreach ($available_levels as $level): ?>
+                                     <option value="<?php echo htmlspecialchars($level); ?>">
+                                 <?php endforeach; ?>
+                             </datalist>
                          </div>
                     </div>
                      <div class="mb-3">
@@ -478,7 +483,7 @@ $result = $stmt->get_result();
                          </div>
                          <div class="col-md-6 mb-3">
                              <label for="edit_cap_do" class="form-label">Cấp Độ</label>
-                             <input type="text" class="form-control" id="edit_cap_do" name="cap_do">
+                             <input type="text" class="form-control" id="edit_cap_do" name="cap_do" list="levelList" placeholder="Chọn hoặc nhập cấp độ...">
                          </div>
                      </div>
                     <div class="mb-3">
@@ -494,24 +499,10 @@ $result = $stmt->get_result();
                             <label for="edit_chi_phi" class="form-label">Chi Phí (VNĐ) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="edit_chi_phi" name="chi_phi" min="0" required>
                         </div>
-            }
-        });
-    }
-
-    // Smooth scroll for pagination
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.course-pagination-number, .course-pagination-btn').forEach(link => {
-            link.addEventListener('click', function(e) {
-                const container = document.querySelector('.card.animated-card');
-                if (container) {
-                    setTimeout(() => {
-                        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                }
-            });
-        });
-    });
-</script>               <input type="file" class="form-control" id="edit_hinh_anh" name="hinh_anh" accept="image/*">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_hinh_anh" class="form-label">Hình Ảnh</label>
+                        <input type="file" class="form-control" id="edit_hinh_anh" name="hinh_anh" accept="image/*">
                         <div class="mt-2">
                             <small>Ảnh hiện tại:</small><br>
                             <img id="current_image" src="" alt="Ảnh khóa học" style="max-width: 150px; height: auto; margin-top: 5px; display: none;">

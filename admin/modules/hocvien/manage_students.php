@@ -28,7 +28,7 @@ $total_students = $stmt_count->get_result()->fetch_assoc()['total'];
 $total_pages = ceil($total_students / $students_per_page);
 
 // Main query with pagination
-$sql = "SELECT * FROM hocvien" . $sql_search . " ORDER BY id_hocvien DESC LIMIT ? OFFSET ?";
+$sql = "SELECT id_hocvien, ten_hocvien, email, so_dien_thoai, is_admin, is_verified FROM hocvien" . $sql_search . " ORDER BY id_hocvien DESC LIMIT ? OFFSET ?";
 $stmt = $conn->prepare($sql);
 
 if (!empty($search_term)) {
@@ -71,7 +71,13 @@ $result = $stmt->get_result();
             <table class="table table-hover align-middle">
                 <thead class="table-dark">
                     <tr>
-                        <th>ID</th><th>Tên học viên</th><th>Email</th><th>Số điện thoại</th><th>Admin</th><th class="text-center">Hành động</th>
+                        <th>ID</th>
+                        <th>Tên học viên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th class="text-center">Xác minh</th>
+                        <th class="text-center">Admin</th>
+                        <th class="text-center">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -85,7 +91,18 @@ $result = $stmt->get_result();
                             <td><?php echo htmlspecialchars($row['ten_hocvien']); ?></td>
                             <td><?php echo htmlspecialchars($row['email']); ?></td>
                             <td><?php echo htmlspecialchars($row['so_dien_thoai']); ?></td>
-                            <td>
+                            <td class="text-center">
+                                <?php if ($row['is_verified']): ?>
+                                    <span class="badge bg-success">
+                                        <i class="fa-solid fa-circle-check"></i> Đã xác minh
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fa-solid fa-circle-exclamation"></i> Chưa xác minh
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="text-center">
                                 <?php if ($row['is_admin']): ?>
                                     <span class="badge bg-success">Yes</span>
                                 <?php else: ?>
@@ -107,7 +124,7 @@ $result = $stmt->get_result();
                     else:
                     ?>
                         <tr>
-                            <td colspan="6" class="text-center py-4">
+                            <td colspan="7" class="text-center py-4">
                                 <i class="fa-solid fa-users-slash fa-3x text-muted mb-3"></i>
                                 <p class="text-muted mb-0">
                                     <?php 
@@ -425,6 +442,12 @@ $result = $stmt->get_result();
                         </div>
                     </div>
                     <div class="mb-3 form-check form-switch">
+                        <input type="checkbox" class="form-check-input" id="editIsVerified" name="is_verified" value="1">
+                        <label class="form-check-label" for="editIsVerified">
+                            <i class="fa-solid fa-circle-check text-success"></i> Đã xác minh email
+                        </label>
+                    </div>
+                    <div class="mb-3 form-check form-switch">
                         <input type="checkbox" class="form-check-input" id="editIsAdmin" name="is_admin" value="1">
                         <label class="form-check-label" for="editIsAdmin">Là Quản trị viên</label>
                     </div>
@@ -481,6 +504,7 @@ function openEditModal(studentId) {
             document.getElementById('editStudentName').value = data.ten_hocvien;
             document.getElementById('editStudentPhone').value = data.so_dien_thoai;
             document.getElementById('editStudentEmail').value = data.email;
+            document.getElementById('editIsVerified').checked = (data.is_verified == 1);
             document.getElementById('editIsAdmin').checked = (data.is_admin == 1);
             document.getElementById('editStudentPassword').value = "";
             editStudentModal.show();

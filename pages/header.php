@@ -237,6 +237,7 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
         .mobile-nav-header .logo-item {
             font-size: 22px;
             font-weight: bold;
+            color: #381111;
         }
 
         #close-mobile-nav {
@@ -502,9 +503,17 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
             .mobile-nav-panel {
                 width: 65%;
             }
+              .header-top .right a {
+            font-size: 14px;
+            margin-left: 0px;
         }
 
-    
+        .header-top .left {
+            display: none;
+        }
+        }
+
+
         .badge {
             position: absolute;
             top: 5px;
@@ -559,6 +568,8 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
         .notification-dropdown ul li:hover {
             background: #f8f9fa;
         }
+
+      
     </style>
 </head>
 
@@ -574,7 +585,7 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
                         <a href="./admin/admin.php" style="font-weight: bold;">Trang Admin</a>
                     <?php endif; ?>
                     <a href="./user/dashboard.php"> <?php echo htmlspecialchars($_SESSION['user']);  ?> </a>
-                    <a href="./user/dashboard.php">Thông Tin Cá Nhân</a>
+                    <a href="./user/dashboard.php">Trang Cá Nhân</a>
                     <a href="./pages/logout.php">Đăng Xuất</a>
                 <?php else : ?>
                     <a href="./pages/login.php">Đăng Nhập</a>

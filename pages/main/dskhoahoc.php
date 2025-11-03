@@ -57,7 +57,7 @@ $result_courses = $conn->query($sql_courses);
             }
             ?>
         </div>
-        <div class="text-center mt-5" data-aos="fade-up" data-aos-delay="200">
+        <div class="text-center mt-2" data-aos="fade-up" data-aos-delay="200">
             <a href="./index.php?nav=khoahoc" class="btn-view-all-courses">Xem tất cả khóa học <i class="fas fa-arrow-right"></i></a>
         </div>
     </div>

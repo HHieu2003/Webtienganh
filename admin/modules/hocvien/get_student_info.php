@@ -7,7 +7,7 @@ include('../../../config/config.php');
 $studentId = $_GET['id'] ?? 0;
 
 // Sử dụng Prepared Statements để chống tấn công SQL Injection
-$sql = "SELECT id_hocvien, ten_hocvien, email, so_dien_thoai, is_admin FROM hocvien WHERE id_hocvien = ?";
+$sql = "SELECT id_hocvien, ten_hocvien, email, so_dien_thoai, is_admin, is_verified FROM hocvien WHERE id_hocvien = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $studentId);
 $stmt->execute();
