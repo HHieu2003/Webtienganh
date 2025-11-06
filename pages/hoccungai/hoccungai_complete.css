@@ -414,7 +414,6 @@ body.ai-learning-page {
 
 .form-control {
     width: 100%;
-    padding: 0.75rem 1rem;
     font-size: 1rem;
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius-sm);

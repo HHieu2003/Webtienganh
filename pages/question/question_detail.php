@@ -66,17 +66,82 @@ if (!empty($mc_question_ids)) {
 ?>
 
 <style>
-    .quiz-timer-bar { position: sticky; top: 0; left: 0; width: 100%; background-color: #2c3e50; color: white; padding: 15px 20px; text-align: center; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-size: 20px; font-weight: bold; }
-    .quiz-timer-bar i { margin-right: 10px; }
-    .quiz-container { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
-    .quiz-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 5px; color: #333; }
-    .quiz-header .instruction { color: #777; font-size: 15px; margin-bottom: 20px; }
-    .question-block { margin-bottom: 30px; text-align: left; }
-    .question-block p { font-size: 18px; font-weight: 600; margin-bottom: 15px; }
-    .answers-list { display: flex; flex-direction: column; gap: 10px; }
-    .answers-list label { display: block; background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 12px 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; }
-    .answers-list label:hover { background-color: #e9ecef; }
-    .answers-list input[type="radio"] { margin-right: 10px; }
+    .quiz-timer-bar {
+        position: sticky;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: #2c3e50;
+        color: white;
+        padding: 15px 20px;
+        text-align: center;
+        z-index: 1000;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .quiz-timer-bar i {
+        margin-right: 10px;
+    }
+
+    .quiz-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .quiz-header h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .quiz-header .instruction {
+        color: #777;
+        font-size: 15px;
+        margin-bottom: 20px;
+    }
+
+    .question-block {
+        margin-bottom: 30px;
+        text-align: left;
+    }
+
+    .question-block p {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .answers-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .answers-list label {
+        display: block;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 12px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .answers-list label:hover {
+        background-color: #e9ecef;
+    }
+
+    .answers-list input[type="radio"] {
+        margin-right: 10px;
+    }
+
     /* CSS mới cho câu hỏi tự luận */
     .essay-answer-area {
         width: 100%;
@@ -87,13 +152,29 @@ if (!empty($mc_question_ids)) {
         border: 1px solid #ced4da;
         resize: vertical;
     }
+
     .essay-answer-area:focus {
         outline: none;
         border-color: #0db33b;
         box-shadow: 0 0 0 0.25rem rgba(13, 179, 59, 0.25);
     }
-    .submit-btn { display: block; width: 100%; padding: 12px 20px; background-color: #28a745; color: white; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s ease; }
-    .submit-btn:hover { background-color: #218838; }
+
+    .submit-btn {
+        display: block;
+        width: 100%;
+        padding: 12px 20px;
+        background-color: #28a745;
+        color: white;
+        font-size: 18px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .submit-btn:hover {
+        background-color: #218838;
+    }
 </style>
 
 <div class="quiz-timer-bar" id="timer-bar">
@@ -114,7 +195,7 @@ if (!empty($mc_question_ids)) {
         ?>
             <div class="question-block">
                 <p><strong>Câu <?php echo $question_number++; ?>.</strong> <?php echo htmlspecialchars($data['noi_dung']); ?></p>
-                
+
                 <?php if ($data['loai_cauhoi'] === 'trac_nghiem'): ?>
                     <div class="answers-list">
                         <?php foreach ($data['answers'] as $answer): ?>
@@ -124,13 +205,13 @@ if (!empty($mc_question_ids)) {
                             </label>
                         <?php endforeach; ?>
                     </div>
-                <?php else: // Đây là câu hỏi tự luận ?>
-                    <textarea 
-                        name="answers[<?php echo htmlspecialchars($id_cauhoi); ?>][tra_loi_tu_luan]" 
+                <?php else: // Đây là câu hỏi tự luận 
+                ?>
+                    <textarea
+                        name="answers[<?php echo htmlspecialchars($id_cauhoi); ?>][tra_loi_tu_luan]"
                         class="essay-answer-area"
                         placeholder="Nhập bài làm của bạn vào đây..."
-                        required
-                    ></textarea>
+                        required></textarea>
                 <?php endif; ?>
 
             </div>
@@ -140,116 +221,116 @@ if (!empty($mc_question_ids)) {
 </div>
 
 <script>
-// --- Phần JavaScript giữ nguyên, không cần thay đổi ---
-document.addEventListener("DOMContentLoaded", function() {
-    const timeDisplay = document.getElementById('time-display');
-    const quizForm = document.getElementById('quizForm');
-    const timeInMinutes = <?php echo (int)$baitest['thoi_gian']; ?>;
-    
-    const timerKey = `quizTimer_user<?php echo $hocvien_id; ?>_test<?php echo $id_baitest; ?>`;
-    const answersKey = `quizAnswers_user<?php echo $hocvien_id; ?>_test<?php echo $id_baitest; ?>`;
-    
-    let timerInterval;
-    let hasSubmitted = false;
+    // --- Phần JavaScript giữ nguyên, không cần thay đổi ---
+    document.addEventListener("DOMContentLoaded", function() {
+        const timeDisplay = document.getElementById('time-display');
+        const quizForm = document.getElementById('quizForm');
+        const timeInMinutes = <?php echo (int)$baitest['thoi_gian']; ?>;
 
-    function saveAnswers() {
-        const formData = new FormData(quizForm);
-        const answers = {};
-        for (let [key, value] of formData.entries()) {
-            // Cập nhật logic lưu để hoạt động với cả radio và textarea
-            if (key.startsWith('answers[')) {
-                 const match = key.match(/answers\[(\d+)\]\[(\w+)\]/);
-                if (match) {
-                    const qId = match[1];
-                    const field = match[2];
-                    if (!answers[qId]) answers[qId] = {};
-                    answers[qId][field] = value;
+        const timerKey = `quizTimer_user<?php echo $hocvien_id; ?>_test<?php echo $id_baitest; ?>`;
+        const answersKey = `quizAnswers_user<?php echo $hocvien_id; ?>_test<?php echo $id_baitest; ?>`;
+
+        let timerInterval;
+        let hasSubmitted = false;
+
+        function saveAnswers() {
+            const formData = new FormData(quizForm);
+            const answers = {};
+            for (let [key, value] of formData.entries()) {
+                // Cập nhật logic lưu để hoạt động với cả radio và textarea
+                if (key.startsWith('answers[')) {
+                    const match = key.match(/answers\[(\d+)\]\[(\w+)\]/);
+                    if (match) {
+                        const qId = match[1];
+                        const field = match[2];
+                        if (!answers[qId]) answers[qId] = {};
+                        answers[qId][field] = value;
+                    }
                 }
             }
+            sessionStorage.setItem(answersKey, JSON.stringify(answers));
         }
-        sessionStorage.setItem(answersKey, JSON.stringify(answers));
-    }
 
-    function loadAnswers() {
-        const savedAnswers = JSON.parse(sessionStorage.getItem(answersKey));
-        if (savedAnswers) {
-             for (const qId in savedAnswers) {
-                for (const field in savedAnswers[qId]) {
-                    const value = savedAnswers[qId][field];
-                    const input = quizForm.querySelector(`[name="answers[${qId}][${field}]"][value="${value}"]`) || quizForm.querySelector(`[name="answers[${qId}][${field}]"]`);
-                    if (input) {
-                        if (input.type === 'radio') {
-                            input.checked = true;
-                        } else {
-                            input.value = value;
+        function loadAnswers() {
+            const savedAnswers = JSON.parse(sessionStorage.getItem(answersKey));
+            if (savedAnswers) {
+                for (const qId in savedAnswers) {
+                    for (const field in savedAnswers[qId]) {
+                        const value = savedAnswers[qId][field];
+                        const input = quizForm.querySelector(`[name="answers[${qId}][${field}]"][value="${value}"]`) || quizForm.querySelector(`[name="answers[${qId}][${field}]"]`);
+                        if (input) {
+                            if (input.type === 'radio') {
+                                input.checked = true;
+                            } else {
+                                input.value = value;
+                            }
                         }
                     }
                 }
             }
         }
-    }
 
-    quizForm.addEventListener('input', saveAnswers);
-    loadAnswers();
+        quizForm.addEventListener('input', saveAnswers);
+        loadAnswers();
 
-    let endTime = sessionStorage.getItem(timerKey);
-    if (!endTime) {
-        endTime = new Date().getTime() + timeInMinutes * 60 * 1000;
-        sessionStorage.setItem(timerKey, endTime);
-    }
-
-    function clearStorage() {
-        sessionStorage.removeItem(timerKey);
-        sessionStorage.removeItem(answersKey);
-    }
-
-    function submitForm(isAuto = false) {
-        if (hasSubmitted) return;
-        hasSubmitted = true;
-        window.onbeforeunload = null;
-        clearStorage();
-        
-        if (isAuto) {
-            alert("Đã hết thời gian làm bài! Bài của bạn sẽ được tự động nộp.");
+        let endTime = sessionStorage.getItem(timerKey);
+        if (!endTime) {
+            endTime = new Date().getTime() + timeInMinutes * 60 * 1000;
+            sessionStorage.setItem(timerKey, endTime);
         }
-        quizForm.submit();
-    }
 
-    function updateTimer() {
-        const remainingTime = endTime - new Date().getTime();
-        if (remainingTime <= 0) {
-            clearInterval(timerInterval);
-            timeDisplay.textContent = "00:00";
-            submitForm(true);
-            return;
+        function clearStorage() {
+            sessionStorage.removeItem(timerKey);
+            sessionStorage.removeItem(answersKey);
         }
-        const minutes = Math.floor((remainingTime / 1000) / 60);
-        const seconds = Math.floor((remainingTime / 1000) % 60);
-        timeDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }
 
-    timerInterval = setInterval(updateTimer, 1000);
-    updateTimer();
-
-    window.onbeforeunload = function(event) {
-        if (!hasSubmitted) {
-            event.preventDefault();
-            return event.returnValue = 'Bạn có chắc chắn muốn rời khỏi trang? Bài làm chưa nộp sẽ bị mất.';
-        }
-    };
-
-    quizForm.addEventListener('submit', function() {
-        hasSubmitted = true;
-        window.onbeforeunload = null;
-        clearStorage();
-    });
-
-    window.addEventListener('unload', function(event) {
-        if (!hasSubmitted) {
-            const formData = new FormData(quizForm);
-            navigator.sendBeacon('index.php?nav=dapan', formData);
+        function submitForm(isAuto = false) {
+            if (hasSubmitted) return;
+            hasSubmitted = true;
+            window.onbeforeunload = null;
             clearStorage();
+
+            if (isAuto) {
+                alert("Đã hết thời gian làm bài! Bài của bạn sẽ được tự động nộp.");
+            }
+            quizForm.submit();
         }
+
+        function updateTimer() {
+            const remainingTime = endTime - new Date().getTime();
+            if (remainingTime <= 0) {
+                clearInterval(timerInterval);
+                timeDisplay.textContent = "00:00";
+                submitForm(true);
+                return;
+            }
+            const minutes = Math.floor((remainingTime / 1000) / 60);
+            const seconds = Math.floor((remainingTime / 1000) % 60);
+            timeDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+
+        window.onbeforeunload = function(event) {
+            if (!hasSubmitted) {
+                event.preventDefault();
+                return event.returnValue = 'Bạn có chắc chắn muốn rời khỏi trang? Bài làm chưa nộp sẽ bị mất.';
+            }
+        };
+
+        quizForm.addEventListener('submit', function() {
+            hasSubmitted = true;
+            window.onbeforeunload = null;
+            clearStorage();
+        });
+
+        window.addEventListener('unload', function(event) {
+            if (!hasSubmitted) {
+                const formData = new FormData(quizForm);
+                navigator.sendBeacon('index.php?nav=dapan', formData);
+                clearStorage();
+            }
+        });
     });
-});
 </script>

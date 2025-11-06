@@ -63,30 +63,61 @@ try {
 function handleGenerate($geminiAPI) {
     $level = SecurityHelper::sanitizeInput($_POST['level'] ?? 'intermediate');
     $topic = SecurityHelper::sanitizeInput($_POST['topic'] ?? '');
+    $questionCount = intval($_POST['question_count'] ?? 5);
+    
+    // Limit question count
+    $questionCount = max(3, min(10, $questionCount));
+
+    // Level descriptions
+    $levelDescriptions = [
+        'beginner' => 'A1-A2 (Basic vocabulary, simple sentences, everyday topics)',
+        'elementary' => 'A2 (Familiar daily situations, basic conversations)',
+        'intermediate' => 'B1 (Common topics, standard speech, clear pronunciation)',
+        'upper_intermediate' => 'B2 (Complex topics, extended speech, idiomatic expressions)',
+        'advanced' => 'C1 (Sophisticated content, nuanced meanings, varied accents)',
+        'proficiency' => 'C2 (Native-like understanding, abstract topics, all accents)',
+        'ielts_5' => 'IELTS 5.0-6.0 (Academic/general content, moderate complexity)',
+        'ielts_7' => 'IELTS 7.0-8.0 (Academic discourse, inference questions)',
+        'toeic_600' => 'TOEIC 600-700 (Business context, office situations)',
+        'toeic_800' => 'TOEIC 800+ (Complex business, meetings, presentations)'
+    ];
+
+    $levelDesc = $levelDescriptions[$level] ?? $levelDescriptions['intermediate'];
 
     // Create prompt for Gemini
     $prompt = "Create an English listening comprehension exercise.\n\n";
-    $prompt .= "Level: {$level}\n";
+    $prompt .= "Level: {$levelDesc}\n";
     if (!empty($topic)) {
         $prompt .= "Topic: {$topic}\n";
+    } else {
+        $prompt .= "Topic: Choose an engaging and relevant topic for this level\n";
     }
     $prompt .= "\nGenerate:\n";
-    $prompt .= "1. A natural English text (150-250 words) suitable for listening practice\n";
-    $prompt .= "2. 5 multiple choice questions to test comprehension\n";
-    $prompt .= "3. Each question should have 4 options\n\n";
+    $prompt .= "1. A natural, engaging English text (200-350 words) suitable for listening practice\n";
+    $prompt .= "   - Use appropriate vocabulary and grammar for the level\n";
+    $prompt .= "   - Include clear context and interesting content\n";
+    $prompt .= "   - Make it sound natural as spoken English\n";
+    $prompt .= "2. {$questionCount} multiple choice questions to test comprehension\n";
+    $prompt .= "   - Include different question types: main idea, details, inference, vocabulary\n";
+    $prompt .= "   - Each question should have 4 options (A, B, C, D)\n";
+    $prompt .= "   - Make distractors plausible but clearly wrong\n";
+    $prompt .= "3. A short title (max 10 words)\n\n";
     $prompt .= "Return ONLY valid JSON in this exact format:\n";
     $prompt .= "{\n";
+    $prompt .= '  "title": "Exercise Title",'."\n";
     $prompt .= '  "text": "The listening passage text...",'."\n";
     $prompt .= '  "questions": ['."\n";
     $prompt .= "    {\n";
     $prompt .= '      "question": "Question text?",'."\n";
-    $prompt .= '      "options": ["A", "B", "C", "D"],'."\n";
-    $prompt .= '      "correct": 0'."\n";
+    $prompt .= '      "options": ["Option A", "Option B", "Option C", "Option D"],'."\n";
+    $prompt .= '      "correct": 0,'."\n";
+    $prompt .= '      "type": "main_idea"'."\n";
     $prompt .= "    }\n";
     $prompt .= "  ]\n";
-    $prompt .= "}";
+    $prompt .= "}\n\n";
+    $prompt .= "Question types: main_idea, detail, inference, vocabulary, tone";
 
-    $result = $geminiAPI->sendRequest($prompt, 0.8, 2000);
+    $result = $geminiAPI->sendRequest($prompt, 0.8, 2500);
 
     if (!$result['success']) {
         ResponseHelper::error('Failed to generate exercise: ' . $result['error'], 500);

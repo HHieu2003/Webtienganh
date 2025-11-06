@@ -12,6 +12,11 @@ $pending_registrations = $conn->query("SELECT COUNT(*) AS total FROM dangkykhoah
 
 $total_views = $conn->query("SELECT SUM(so_luot) AS total FROM luot_truy_cap")->fetch_assoc()['total'] ?? 0;
 
+// Lượt truy cập tháng này
+$current_month = date('Y-m');
+$sql_month_views = "SELECT SUM(so_luot) AS total FROM luot_truy_cap WHERE DATE_FORMAT(ngay_truy_cap, '%Y-%m') = '$current_month'";
+$month_views = $conn->query($sql_month_views)->fetch_assoc()['total'] ?? 0;
+
 
 // 2. Dữ liệu cho biểu đồ (Top 5 khóa học đông học viên nhất)
 $sql_chart = "
@@ -93,12 +98,23 @@ $result_recent = $conn->query($sql_recent);
             </div>
         </div>
         <div class="col-lg-4 col-md-6 mb-4">
-            <div class="card stat-card bg-danger animated-card" style="animation-delay: 300ms;">
+            <div class="card stat-card bg-danger animated-card" style="animation-delay: 500ms;">
                 <div class="card-body">
                     <div class="card-icon"><i class="fa-solid fa-eye"></i></div>
                     <div class="card-text-content">
                         <h5 class="card-title">Lượt truy cập trang</h5>
                         <p class="card-number" data-target="<?php echo $total_views; ?>">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card stat-card bg-purple animated-card" style="animation-delay: 600ms;">
+                <div class="card-body">
+                    <div class="card-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                    <div class="card-text-content">
+                        <h5 class="card-title">Truy cập tháng này</h5>
+                        <p class="card-number" data-target="<?php echo $month_views; ?>">0</p>
                     </div>
                 </div>
             </div>
@@ -196,6 +212,17 @@ $result_recent = $conn->query($sql_recent);
 </script>
 
 <style>
+/* Background color for purple card */
+.bg-purple {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white;
+}
+
+.bg-purple .card-icon,
+.bg-purple .card-text-content {
+    color: white;
+}
+
 /* Responsive Design for home.php */
 @media (max-width: 992px) {
     .col-lg-8,

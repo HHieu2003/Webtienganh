@@ -8,7 +8,7 @@ $test_type_filter = isset($_GET['test_type']) ? trim($_GET['test_type']) : '';
 $course_filter = isset($_GET['course_id']) && !empty($_GET['course_id']) ? intval($_GET['course_id']) : '';
 
 // --- Pagination settings ---
-$tests_per_page = 10;
+$tests_per_page = 15;
 $current_page = isset($_GET['test_page']) ? max(1, intval($_GET['test_page'])) : 1;
 $offset = ($current_page - 1) * $tests_per_page;
 
