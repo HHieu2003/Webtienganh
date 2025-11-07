@@ -65,8 +65,8 @@ function handleGenerate($geminiAPI) {
     $topic = SecurityHelper::sanitizeInput($_POST['topic'] ?? '');
     $questionCount = intval($_POST['question_count'] ?? 5);
     
-    // Limit question count
-    $questionCount = max(3, min(10, $questionCount));
+    // Limit question count (increased to 20)
+    $questionCount = max(3, min(20, $questionCount));
 
     // Level descriptions
     $levelDescriptions = [
@@ -93,7 +93,8 @@ function handleGenerate($geminiAPI) {
         $prompt .= "Topic: Choose an engaging and relevant topic for this level\n";
     }
     $prompt .= "\nGenerate:\n";
-    $prompt .= "1. A natural, engaging English text (200-350 words) suitable for listening practice\n";
+    $prompt .= "1. A natural, engaging English text suitable for listening practice\n";
+    $prompt .= "   - Length: " . ($questionCount <= 5 ? "200-300" : ($questionCount <= 10 ? "350-500" : "500-700")) . " words\n";
     $prompt .= "   - Use appropriate vocabulary and grammar for the level\n";
     $prompt .= "   - Include clear context and interesting content\n";
     $prompt .= "   - Make it sound natural as spoken English\n";

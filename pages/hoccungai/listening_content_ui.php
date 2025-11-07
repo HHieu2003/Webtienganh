@@ -59,6 +59,8 @@
                             <option value="5" selected>5 câu hỏi</option>
                             <option value="7">7 câu hỏi</option>
                             <option value="10">10 câu hỏi</option>
+                            <option value="15">15 câu hỏi</option>
+                            <option value="20">20 câu hỏi</option>
                         </select>
                     </div>
                 </div>
@@ -264,6 +266,9 @@
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .btn-audio-control:hover {
