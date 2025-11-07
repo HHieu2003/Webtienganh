@@ -133,6 +133,11 @@ class TabNavigator {
     constructor() {
         this.tabs = document.querySelectorAll('.skill-tab-btn');
         this.contentSections = document.querySelectorAll('.skill-content-section');
+        this.sidebar = document.getElementById('skill-sidebar');
+        this.overlay = document.getElementById('sidebar-overlay');
+        this.mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        this.sidebarToggle = document.getElementById('sidebar-toggle');
+        this.appLayout = document.querySelector('.ai-app-layout');
         this.init();
     }
 
@@ -140,12 +145,120 @@ class TabNavigator {
         this.tabs.forEach(tab => {
             tab.addEventListener('click', (e) => {
                 this.switchTab(e.currentTarget);
+                // Close sidebar on mobile after selection
+                if (window.innerWidth <= 768) {
+                    this.closeSidebar();
+                }
             });
         });
+
+        // Mobile menu button
+        if (this.mobileMenuBtn) {
+            this.mobileMenuBtn.addEventListener('click', () => {
+                this.toggleSidebar();
+            });
+        }
+
+        // Sidebar toggle button
+        if (this.sidebarToggle) {
+            this.sidebarToggle.addEventListener('click', () => {
+                this.closeSidebar();
+            });
+        }
+
+        // Overlay click to close
+        if (this.overlay) {
+            this.overlay.addEventListener('click', () => {
+                this.closeSidebar();
+            });
+        }
+
+        // Handle window resize (with debounce for performance)
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (window.innerWidth > 768) {
+                    this.closeSidebar();
+                }
+                this.updateMobileMenuVisibility();
+            }, 150);
+        });
+
+        // Show/hide mobile menu button based on screen size
+        this.updateMobileMenuVisibility();
+
+        // Prevent body scroll when sidebar is open on mobile
+        this.preventBodyScroll();
 
         // Show first tab by default
         if (this.tabs.length > 0) {
             this.switchTab(this.tabs[0]);
+        }
+    }
+
+    preventBodyScroll() {
+        // Lock body scroll when sidebar is open on mobile
+        const observer = new MutationObserver(() => {
+            if (this.sidebar && this.sidebar.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+                document.body.style.position = 'fixed';
+                document.body.style.width = '100%';
+            } else {
+                document.body.style.overflow = '';
+                document.body.style.position = '';
+                document.body.style.width = '';
+            }
+        });
+
+        if (this.sidebar) {
+            observer.observe(this.sidebar, { attributes: true, attributeFilter: ['class'] });
+        }
+    }
+
+    updateMobileMenuVisibility() {
+        if (this.mobileMenuBtn) {
+            if (window.innerWidth <= 768) {
+                this.mobileMenuBtn.style.display = 'flex';
+            } else {
+                this.mobileMenuBtn.style.display = 'none';
+            }
+        }
+    }
+
+    toggleSidebar() {
+        if (this.sidebar && this.overlay) {
+            const isActive = this.sidebar.classList.contains('active');
+            if (isActive) {
+                this.closeSidebar();
+            } else {
+                this.openSidebar();
+            }
+        }
+    }
+
+    openSidebar() {
+        if (this.sidebar && this.overlay) {
+            this.sidebar.classList.add('active');
+            this.overlay.classList.add('active');
+            if (this.appLayout) {
+                this.appLayout.classList.add('sidebar-open');
+            }
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    closeSidebar() {
+        if (this.sidebar && this.overlay) {
+            this.sidebar.classList.remove('active');
+            this.overlay.classList.remove('active');
+            if (this.appLayout) {
+                this.appLayout.classList.remove('sidebar-open');
+            }
+            // Restore body scroll
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
         }
     }
 
@@ -510,6 +623,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize tab navigation
     const tabNavigator = new TabNavigator();
 
+    // Initialize header collapse functionality
+    initHeaderCollapse();
+
     // Initialize global instances
     window.audioPlayer = new AudioPlayer();
     window.speechRecognition = new SpeechRecognitionHelper();
@@ -523,6 +639,45 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Hoc Cung AI - Ready!');
     console.log('Current skill:', AppState.currentSkill);
 });
+
+// Header Collapse Functionality
+function initHeaderCollapse() {
+    const header = document.getElementById('ai-header');
+    const collapseBtn = document.getElementById('header-collapse-btn');
+    
+    if (!header || !collapseBtn) return;
+
+    // Load saved state from localStorage
+    const isCollapsed = localStorage.getItem('headerCollapsed') === 'true';
+    if (isCollapsed) {
+        header.classList.add('collapsed');
+    } else {
+        // Auto-collapse after 5 seconds if not already collapsed
+        setTimeout(() => {
+            if (!header.classList.contains('collapsed')) {
+                header.classList.add('collapsed');
+                collapseBtn.title = 'Mở rộng header';
+                localStorage.setItem('headerCollapsed', 'true');
+            }
+        }, 5000);
+    }
+
+    // Toggle collapse on button click
+    collapseBtn.addEventListener('click', () => {
+        const willBeCollapsed = !header.classList.contains('collapsed');
+        
+        if (willBeCollapsed) {
+            header.classList.add('collapsed');
+            collapseBtn.title = 'Mở rộng header';
+        } else {
+            header.classList.remove('collapsed');
+            collapseBtn.title = 'Thu gọn header';
+        }
+        
+        // Save state to localStorage
+        localStorage.setItem('headerCollapsed', willBeCollapsed);
+    });
+}
 
 // Handle page visibility change
 document.addEventListener('visibilitychange', () => {

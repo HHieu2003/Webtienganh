@@ -41,6 +41,26 @@
     box-sizing: border-box;
 }
 
+html {
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
+    /* Prevent text size adjustment on mobile */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+/* Wrapper for embedded mode - ensure no pointer-events blocking */
+.hoccungai-wrapper {
+    position: relative;
+    width: 100%;
+    pointer-events: auto !important;
+    isolation: isolate; /* Create stacking context */
+}
+
+.hoccungai-wrapper * {
+    pointer-events: auto !important; /* Ensure all children are clickable */
+}
+
 body.ai-learning-page {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: linear-gradient(135deg, #66ea66 0%, #4ba258 100%);
@@ -48,6 +68,11 @@ body.ai-learning-page {
     line-height: 1.6;
     min-height: 100vh;
     overflow-x: hidden;
+    /* Better font rendering on mobile */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent pull-to-refresh on mobile */
+    overscroll-behavior-y: contain;
 }
 
 /* ================================================
@@ -62,12 +87,114 @@ body.ai-learning-page {
 
 .ai-app-layout {
     display: flex;
-    flex-direction: column;
+    flex-direction: row; /* Changed from column to row for sidebar */
     background: var(--bg-primary);
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-xl);
     overflow: hidden;
     min-height: 85vh;
+    position: relative;
+}
+
+/* ================================================
+   SIDEBAR NAVIGATION
+   ================================================ */
+
+.skill-sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border-right: 2px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition-speed), width var(--transition-speed);
+    z-index: 200;
+    height: 85vh;
+    position: sticky;
+    top: 0;
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    gap: 1rem;
+}
+
+.sidebar-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+    flex: 1;
+}
+
+.sidebar-header i {
+    font-size: 1.5rem;
+}
+
+/* Mobile toggle button (visible on mobile, opens sidebar) */
+.sidebar-mobile-toggle {
+    display: none; /* Hidden on desktop */
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border: none;
+    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+    z-index: 250; /* Above content but below sidebar */
+}
+
+.sidebar-mobile-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+}
+
+.sidebar-mobile-toggle:active {
+    transform: scale(0.95);
+}
+
+.sidebar-mobile-toggle i {
+    font-size: 1.4rem;
+}
+
+/* Close button (visible on mobile inside sidebar) */
+.sidebar-close-btn {
+    display: none; /* Hidden on desktop */
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.sidebar-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.sidebar-close-btn i {
+    font-size: 1.2rem;
+}
+
+/* Legacy sidebar-toggle (keep for compatibility) */
+.sidebar-toggle {
+    display: none;
 }
 
 /* ================================================
@@ -84,6 +211,53 @@ body.ai-learning-page {
     box-shadow: var(--shadow-lg);
     position: relative;
     overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ai-header.collapsed {
+    padding: 1rem 2rem;
+    margin-bottom: 1rem;
+}
+
+.ai-header.collapsed .header-content {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transform: translateY(-20px);
+}
+
+.ai-header.collapsed .header-collapse-btn i {
+    transform: rotate(180deg);
+}
+
+.header-collapse-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.header-collapse-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.header-collapse-btn i {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
 }
 
 .ai-header::before {
@@ -105,6 +279,9 @@ body.ai-learning-page {
 .header-content {
     position: relative;
     z-index: 1;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
+    max-height: 300px;
 }
 
 .ai-header h1 {
@@ -149,32 +326,27 @@ body.ai-learning-page {
 }
 
 /* ================================================
-   NAVIGATION TABS
+   NAVIGATION TABS (Now in Sidebar)
    ================================================ */
 
 .skill-tabs-nav {
-    background: var(--bg-secondary);
-    border-bottom: 2px solid var(--border-color);
-    padding: 1rem 1.5rem 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 0.75rem;
 }
 
 .skill-tabs-wrapper {
     display: flex;
+    flex-direction: column; /* Changed from row to column */
     gap: 0.5rem;
-    overflow-x: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--primary-color) var(--bg-light);
 }
 
 .skill-tabs-wrapper::-webkit-scrollbar {
-    height: 4px;
+    width: 4px;
 }
 
 .skill-tabs-wrapper::-webkit-scrollbar-track {
-    background: var(--bg-light);
+    background: transparent;
 }
 
 .skill-tabs-wrapper::-webkit-scrollbar-thumb {
@@ -185,33 +357,85 @@ body.ai-learning-page {
 .skill-tab-btn {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.875rem 1.5rem;
-    background: transparent;
-    border: none;
-    border-bottom: 3px solid transparent;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: white;
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-sm);
     color: var(--text-secondary);
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-speed);
     white-space: nowrap;
-    position: relative;
+    text-align: left;
+    width: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .skill-tab-btn i {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+    min-width: 24px;
+    text-align: center;
+}
+
+.skill-tab-btn span {
+    flex: 1;
 }
 
 .skill-tab-btn:hover {
     color: var(--primary-color);
-    background: rgba(99, 102, 241, 0.05);
+    background: rgba(99, 102, 241, 0.08);
+    border-color: rgba(99, 102, 241, 0.2);
+    transform: translateX(5px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .skill-tab-btn.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
-    background: rgba(99, 102, 241, 0.1);
+    color: white;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    transform: translateX(5px);
+}
+
+.skill-tab-btn.active i {
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* ================================================
+   MAIN CONTENT WRAPPER
+   ================================================ */
+
+.ai-content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Sidebar Overlay for Mobile */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 150;
+    opacity: 0;
+    transition: opacity var(--transition-speed);
+}
+
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
 }
 
 /* ================================================
@@ -243,15 +467,26 @@ body.ai-learning-page {
 
 .ai-main-content {
     padding: 2rem;
+    position: relative;
+    z-index: 1;
 }
 
 .skill-content-section {
     display: none;
     animation: fadeInUp 0.4s ease-out;
+    position: relative;
+    z-index: 1;
 }
 
 .skill-content-section.active {
     display: block;
+}
+
+/* Ensure buttons are clickable */
+.skill-content-section .btn {
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
 }
 
 @keyframes fadeInUp {
@@ -414,6 +649,7 @@ body.ai-learning-page {
 
 .form-control {
     width: 100%;
+   
     font-size: 1rem;
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius-sm);
@@ -434,10 +670,7 @@ textarea.form-control {
 
 select.form-control {
     cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
-    background-position: right 0.5rem center;
-    background-repeat: no-repeat;
-    background-size: 1.5em 1.5em;
+  
     padding-right: 2.5rem;
 }
 
@@ -533,8 +766,9 @@ select.form-control {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 10000;
-    display: flex;
+    z-index: 99999;
+    display: none;
+
     flex-direction: column;
     gap: 0.75rem;
 }
@@ -607,63 +841,504 @@ select.form-control {
 }
 
 /* ================================================
-   RESPONSIVE DESIGN
+   LOADING OVERLAY
    ================================================ */
 
-@media (max-width: 768px) {
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    text-align: center;
+    background: white;
+    padding: 2rem 3rem;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ================================================
+   RESPONSIVE DESIGN - MOBILE OPTIMIZED
+   ================================================ */
+
+/* Tablet and below */
+@media (max-width: 1024px) {
     .ai-container {
-        padding: 10px;
+        padding: 15px;
+    }
+
+    .skill-sidebar {
+        width: 240px;
+    }
+    
+    .skill-tab-btn {
+        padding: 0.875rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .ai-header {
+        padding: 2rem 1.5rem;
     }
 
     .ai-header h1 {
-        font-size: 1.75rem;
+        font-size: 2rem;
+    }
+}
+
+/* Mobile devices - PRIMARY BREAKPOINT */
+@media (max-width: 768px) {
+    /* Container */
+    .ai-container {
+        padding: 8px;
+    }
+
+    /* Header Optimizations */
+    .ai-header {
+        padding: 1.5rem 1rem;
+        margin-bottom: 1rem;
+        border-radius: 16px;
+    }
+
+    .ai-header h1 {
+        font-size: 1.6rem;
+        gap: 0.75rem;
     }
 
     .ai-header p {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+        line-height: 1.4;
     }
 
-    .skill-tabs-nav {
-        padding: 0.75rem 1rem 0;
+    .ai-header.collapsed {
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .header-collapse-btn {
+        width: 36px;
+        height: 36px;
+        top: 0.875rem;
+        right: 0.875rem;
+    }
+
+    .header-collapse-btn i {
+        font-size: 1.1rem;
+    }
+
+    .user-welcome {
+        font-size: 0.875rem;
+        padding: 0.6rem 1rem;
+        margin-top: 0.75rem;
+    }
+    
+    /* Layout Structure */
+    .ai-app-layout {
+        flex-direction: column;
+        min-height: auto;
+        border-radius: 16px;
+    }
+
+    /* Sidebar becomes full-screen drawer on mobile */
+    .skill-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 85%;
+        max-width: 320px;
+        height: 100vh;
+        height: 100dvh; /* Dynamic viewport height for mobile browsers */
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 3000;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+        overflow-y: auto;
+    }
+    
+    .skill-sidebar.active {
+        transform: translateX(0);
+    }
+
+    .sidebar-header {
+        padding: 1.25rem 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .sidebar-header h3 {
+        font-size: 1.15rem;
+    }
+    
+    /* Show mobile toggle button on mobile (outside sidebar) */
+    .sidebar-mobile-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Hide toggle button when sidebar is OPEN */
+    .ai-app-layout.sidebar-open .sidebar-mobile-toggle {
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.8);
+    }
+    
+    /* Close button - Show only when sidebar is OPEN */
+    .sidebar-close-btn {
+        display: none !important; /* Hidden by default */
+    }
+    
+    .skill-sidebar.active .sidebar-close-btn {
+        display: flex !important; /* Show when sidebar opens */
+        align-items: center;
+        justify-content: center;
+    }
+
+    .skill-tabs-wrapper {
+        padding: 0.5rem;
     }
 
     .skill-tab-btn {
-        padding: 0.75rem 1rem;
-        font-size: 0.875rem;
-    }
-
-    .skill-tab-btn span {
-        display: none;
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.5rem;
+        border-radius: 12px;
+        font-size: 0.95rem;
     }
 
     .skill-tab-btn i {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
+        min-width: 28px;
+    }
+    
+    .skill-tab-btn span {
+        display: inline;
+        font-weight: 500;
+    }
+
+    /* Sidebar Overlay */
+    .sidebar-overlay {
+        backdrop-filter: blur(4px);
+    }
+
+    /* Content Area */
+    .ai-content-wrapper {
+        flex: 1;
+        width: 100%;
+    }
+
+    .ai-scrollable-content {
+        height: auto;
+        max-height: none;
     }
 
     .ai-main-content {
-        padding: 1rem;
+        padding: 0.75rem;
     }
 
+    /* Cards */
     .ai-card {
-        padding: 1rem;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        border-radius: 16px;
+    }
+
+    .ai-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
     }
 
     .ai-card-title {
-        font-size: 1.25rem;
+        font-size: 1.3rem;
     }
 
+    /* Login Prompt */
     .login-prompt-card {
-        padding: 2rem;
+        padding: 2rem 1.5rem;
         margin: 1rem;
+        border-radius: 16px;
     }
 
+    .login-prompt-card h2 {
+        font-size: 1.5rem;
+    }
+
+    .login-prompt-icon {
+        font-size: 3rem;
+    }
+
+    /* Toast Notifications */
     .toast-container {
-        right: 10px;
-        left: 10px;
+        right: 8px;
+        left: 8px;
+        bottom: 8px;
     }
 
     .toast {
         min-width: unset;
+        width: 100%;
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+
+    /* Form Elements */
+    .form-select,
+    .form-control {
+        font-size: 16px !important; /* Prevent zoom on iOS */
+        padding: 0.75rem;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Row columns */
+    .row {
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
+    }
+
+    .row > [class*='col-'] {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+        border-radius: 12px;
+    }
+
+    .btn-lg {
+        padding: 1rem 2rem;
+        font-size: 1rem;
+    }
+}
+
+/* Small mobile devices - EXTRA SMALL */
+@media (max-width: 480px) {
+    .ai-container {
+        padding: 5px;
+    }
+
+    /* Header */
+    .ai-header {
+        padding: 1.25rem 0.875rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .ai-header h1 {
+        font-size: 1.35rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .header-icon {
+        font-size: 2rem !important;
+    }
+
+    .ai-header p {
+        font-size: 0.825rem;
+    }
+
+    .header-collapse-btn {
+        width: 32px;
+        height: 32px;
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+    
+    .header-collapse-btn i {
+        font-size: 0.95rem;
+    }
+    
+    .ai-header.collapsed {
+        padding: 0.625rem 0.875rem;
+    }
+
+    .user-welcome {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.875rem;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .user-welcome i {
+        font-size: 1.1rem;
+    }
+
+    /* Sidebar */
+    .skill-sidebar {
+        width: 90%;
+        max-width: 280px;
+    }
+
+    .sidebar-header {
+        padding: 1rem 0.875rem;
+    }
+
+    .sidebar-header h3 {
+        font-size: 1rem;
+    }
+
+    .skill-tab-btn {
+        padding: 0.875rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .skill-tab-btn i {
+        font-size: 1.15rem;
+        min-width: 24px;
+    }
+
+    /* Content */
+    .ai-main-content {
+        padding: 0.5rem;
+    }
+
+    .ai-card {
+        padding: 1rem;
+        border-radius: 14px;
+    }
+
+    .ai-card-title {
+        font-size: 1.15rem;
+    }
+
+    /* Forms */
+    .form-select,
+    .form-control {
+        padding: 0.625rem;
+        font-size: 15px !important;
+    }
+
+    .form-label {
+        font-size: 0.85rem;
+    }
+
+    /* Make columns stack on very small screens */
+    .col-md-4,
+    .col-md-6,
+    .col-md-8,
+    .col-md-12 {
+        width: 100%;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.875rem;
+    }
+
+    .btn-lg {
+        padding: 0.875rem 1.75rem;
+        font-size: 0.95rem;
+    }
+
+    /* Login Prompt */
+    .login-prompt-card {
+        padding: 1.5rem 1rem;
+        margin: 0.75rem;
+    }
+
+    .login-prompt-card h2 {
+        font-size: 1.25rem;
+    }
+
+    .login-prompt-icon {
+        font-size: 2.5rem;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .ai-header {
+        padding: 1rem 1.5rem;
+    }
+
+    .ai-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .ai-header p {
+        display: none; /* Hide subtitle in landscape to save space */
+    }
+
+    .skill-sidebar {
+        width: 280px;
+    }
+
+    .ai-main-content {
+        padding-top: 70px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Increase touch target sizes */
+    .skill-tab-btn {
+        min-height: 48px;
+    }
+
+    .sidebar-mobile-toggle,
+    .sidebar-close-btn,
+    .header-collapse-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* Better tap feedback */
+    .btn:active,
+    .skill-tab-btn:active {
+        transform: scale(0.97);
+        transition: transform 0.1s;
+    }
+}
+
+/* Print styles */
+@media print {
+    .sidebar-mobile-toggle,
+    .sidebar-close-btn,
+    .header-collapse-btn,
+    .skill-sidebar,
+    .sidebar-overlay {
+        display: none !important;
+    }
+
+    .ai-app-layout {
+        flex-direction: column;
+    }
+
+    .ai-content-wrapper {
+        width: 100%;
     }
 }
 

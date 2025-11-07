@@ -472,42 +472,56 @@ function initListeningSection() {
     const transcriptBtn = document.getElementById('listening-show-transcript-btn');
     const submitBtn = document.getElementById('listening-submit-btn');
     
+    console.log('Listening Section Init:', {
+        generateBtn: generateBtn ? 'Found' : 'NOT FOUND',
+        playBtn: playBtn ? 'Found' : 'NOT FOUND'
+    });
+    
     let currentExercise = null;
     let audioSynthesis = null;
     let currentSpeed = 1.0;
     const speeds = [0.75, 1.0, 1.25, 1.5];
     let speedIndex = 1;
+    let progressInterval = null;
+    let startTime = 0;
+    let estimatedDuration = 0;
 
     // Generate exercise
-    generateBtn?.addEventListener('click', async () => {
-        const level = document.getElementById('listening-level').value;
-        const topic = document.getElementById('listening-topic').value;
-        const questionCount = document.getElementById('listening-question-count').value;
+    if (generateBtn) {
+        console.log('Attaching click event to generate button');
+        generateBtn.addEventListener('click', async () => {
+            console.log('Generate button clicked!');
+            const level = document.getElementById('listening-level').value;
+            const topic = document.getElementById('listening-topic').value;
+            const questionCount = document.getElementById('listening-question-count').value;
 
-        Utils.showLoading('Đang tạo bài nghe với AI...');
+            Utils.showLoading('Đang tạo bài nghe với AI...');
 
-        try {
-            const result = await Utils.apiRequest('listening_api.php', {
-                action: 'generate',
-                level: level,
-                topic: topic,
-                question_count: questionCount
-            });
+            try {
+                const result = await Utils.apiRequest('listening_api.php', {
+                    action: 'generate',
+                    level: level,
+                    topic: topic,
+                    question_count: questionCount
+                });
 
-            if (result.success) {
-                currentExercise = result.data;
-                displayListeningExercise(currentExercise);
-                Utils.showToast('Đã tạo bài nghe thành công!', 'success');
-            } else {
-                Utils.showToast('Lỗi: ' + result.message, 'error');
+                if (result.success) {
+                    currentExercise = result.data;
+                    displayListeningExercise(currentExercise);
+                    Utils.showToast('Đã tạo bài nghe thành công!', 'success');
+                } else {
+                    Utils.showToast('Lỗi: ' + result.message, 'error');
+                }
+            } catch (error) {
+                Utils.showToast('Không thể tạo bài nghe', 'error');
+                console.error(error);
+            } finally {
+                Utils.hideLoading();
             }
-        } catch (error) {
-            Utils.showToast('Không thể tạo bài nghe', 'error');
-            console.error(error);
-        } finally {
-            Utils.hideLoading();
-        }
-    });
+        });
+    } else {
+        console.error('Generate button NOT FOUND!');
+    }
 
     // Play audio
     playBtn?.addEventListener('click', () => {
@@ -522,12 +536,14 @@ function initListeningSection() {
             window.speechSynthesis.cancel();
             playBtn.style.display = 'flex';
             pauseBtn.style.display = 'none';
+            clearInterval(progressInterval);
         }
     });
 
     // Replay audio
     replayBtn?.addEventListener('click', () => {
         window.speechSynthesis.cancel();
+        clearInterval(progressInterval);
         if (currentExercise && currentExercise.text) {
             playAudio(currentExercise.text, currentSpeed);
         }
@@ -541,6 +557,7 @@ function initListeningSection() {
         
         if (window.speechSynthesis.speaking) {
             window.speechSynthesis.cancel();
+            clearInterval(progressInterval);
             playAudio(currentExercise.text, currentSpeed);
         }
     });
@@ -605,6 +622,7 @@ function initListeningSection() {
     function playAudio(text, speed = 1.0) {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
+            clearInterval(progressInterval);
             
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
@@ -612,19 +630,66 @@ function initListeningSection() {
             utterance.pitch = 1;
             utterance.volume = 1;
             
+            // Estimate duration based on text length and speed
+            // Average reading speed: ~150 words per minute at 1.0x
+            const wordCount = text.split(/\s+/).length;
+            estimatedDuration = (wordCount / 150) * 60 / speed; // in seconds
+            
+            // Update total time display
+            const totalTimeEl = document.getElementById('listening-total-time');
+            if (totalTimeEl) {
+                totalTimeEl.textContent = formatTime(estimatedDuration);
+            }
+            
             utterance.onstart = () => {
                 playBtn.style.display = 'none';
                 pauseBtn.style.display = 'flex';
+                startTime = Date.now();
+                
+                // Start progress tracking
+                progressInterval = setInterval(() => {
+                    const elapsed = (Date.now() - startTime) / 1000; // in seconds
+                    const progress = Math.min((elapsed / estimatedDuration) * 100, 100);
+                    
+                    // Update progress bar
+                    const progressFill = document.getElementById('listening-progress-fill');
+                    if (progressFill) {
+                        progressFill.style.width = progress + '%';
+                    }
+                    
+                    // Update current time
+                    const currentTimeEl = document.getElementById('listening-current-time');
+                    if (currentTimeEl) {
+                        currentTimeEl.textContent = formatTime(Math.min(elapsed, estimatedDuration));
+                    }
+                    
+                    // Stop if reached end
+                    if (progress >= 100) {
+                        clearInterval(progressInterval);
+                    }
+                }, 100); // Update every 100ms for smooth animation
             };
             
             utterance.onend = () => {
                 playBtn.style.display = 'flex';
                 pauseBtn.style.display = 'none';
+                clearInterval(progressInterval);
+                
+                // Set to 100% complete
+                const progressFill = document.getElementById('listening-progress-fill');
+                if (progressFill) {
+                    progressFill.style.width = '100%';
+                }
+                const currentTimeEl = document.getElementById('listening-current-time');
+                if (currentTimeEl) {
+                    currentTimeEl.textContent = formatTime(estimatedDuration);
+                }
             };
             
             utterance.onerror = () => {
                 playBtn.style.display = 'flex';
                 pauseBtn.style.display = 'none';
+                clearInterval(progressInterval);
                 Utils.showToast('Lỗi phát audio', 'error');
             };
             
@@ -633,6 +698,12 @@ function initListeningSection() {
         } else {
             Utils.showToast('Trình duyệt không hỗ trợ text-to-speech', 'warning');
         }
+    }
+    
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
 
     function displayListeningExercise(exercise) {

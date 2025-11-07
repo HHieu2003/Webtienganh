@@ -16,6 +16,7 @@ switch ($nav) {
         include("main/about.php");
         break;
     case 'hoccungai':
+        // Include content-only wrapper so the page is rendered inside the site's header/footer
         include("hoccungai/hoccungai_complete.php");
         break;
 
