@@ -45,9 +45,23 @@ $result = $stmt->get_result();
 ?>
 
 <style>
-    .description-cell { max-width: 350px; }
-    .description-truncate { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
-    .actions-cell { white-space: nowrap; min-width: 180px; }
+    .description-cell {
+        max-width: 350px;
+    }
+
+    .description-truncate {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: justify;
+    }
+
+    .actions-cell {
+        white-space: nowrap;
+        min-width: 180px;
+    }
 
     /* Lecturer Pagination Styles */
     .lecturer-pagination-container {
@@ -150,15 +164,15 @@ $result = $stmt->get_result();
         .lecturer-pagination-container {
             justify-content: center;
         }
-        
+
         .lecturer-pagination-btn .btn-text {
             display: none;
         }
-        
+
         .lecturer-pagination-btn {
             padding: 6px 10px;
         }
-        
+
         .lecturer-pagination-info {
             order: -1;
             width: 100%;
@@ -172,7 +186,7 @@ $result = $stmt->get_result();
             height: 30px;
             font-size: 12px;
         }
-        
+
         .lecturer-pagination-btn {
             padding: 5px 8px;
         }
@@ -197,46 +211,54 @@ $result = $stmt->get_result();
             </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body text-center">
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead class="table-dark">
-                    <tr><th>ID</th><th  class="text-center">Hình ảnh</th><th>Tên giảng viên</th><th>Email</th><th>Số điện thoại</th><th>Mô tả</th><th class="text-center">Hành động</th></tr>
+                    <tr>
+                        <th>ID</th>
+                        <th class="text-center">Hình ảnh</th>
+                        <th>Tên giảng viên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Mô tả</th>
+                        <th class="text-center">Hành động</th>
+                    </tr>
                 </thead>
                 <tbody>
-                    <?php 
+                    <?php
                     if ($result->num_rows > 0):
                         $index = 0;
-                        while ($row = $result->fetch_assoc()): 
+                        while ($row = $result->fetch_assoc()):
                     ?>
-                        <tr id="lecturer-row-<?php echo $row['id_giangvien']; ?>" class="animated-row" style="animation-delay: <?php echo $index * 50; ?>ms;">
-                            <td><?php echo $row['id_giangvien']; ?></td>
-                            <td><img src="../<?php echo !empty($row['hinh_anh']) ? htmlspecialchars($row['hinh_anh']) : 'images/default-avatar.png'; ?>" alt="avatar" class="rounded-circle" width="50" height="50" style="object-fit: cover;"></td>
-                            <td><?php echo htmlspecialchars($row['ten_giangvien']); ?></td>
-                            <td><?php echo htmlspecialchars($row['email']); ?></td>
-                            <td><?php echo htmlspecialchars($row['so_dien_thoai']); ?></td>
-                            
-                            <td class="description-cell" title="<?php echo htmlspecialchars($row['mo_ta']); ?>">
-                                <div class="description-truncate">
-                                    <?php echo htmlspecialchars($row['mo_ta']); ?>
-                                </div>
-                            </td>
+                            <tr id="lecturer-row-<?php echo $row['id_giangvien']; ?>" class="animated-row" style="animation-delay: <?php echo $index * 50; ?>ms;">
+                                <td><?php echo $row['id_giangvien']; ?></td>
+                                <td><img src="../<?php echo !empty($row['hinh_anh']) ? htmlspecialchars($row['hinh_anh']) : 'images/default-avatar.png'; ?>" alt="avatar" class="rounded-circle" width="50" height="50" style="object-fit: cover;"></td>
+                                <td><?php echo htmlspecialchars($row['ten_giangvien']); ?></td>
+                                <td><?php echo htmlspecialchars($row['email']); ?></td>
+                                <td><?php echo htmlspecialchars($row['so_dien_thoai']); ?></td>
 
-                            <td class="text-center actions-cell">
-                                <button class="btn btn-primary btn-sm" onclick="openEditModal(<?php echo $row['id_giangvien']; ?>)"><i class="fa-solid fa-pen-to-square"></i> Sửa</button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteLecturer(<?php echo $row['id_giangvien']; ?>)"><i class="fa-solid fa-trash"></i> Xóa</button>
-                            </td>
-                        </tr>
-                    <?php 
-                        $index++;
+                                <td class="description-cell" title="<?php echo htmlspecialchars($row['mo_ta']); ?>">
+                                    <div class="description-truncate">
+                                        <?php echo htmlspecialchars($row['mo_ta']); ?>
+                                    </div>
+                                </td>
+
+                                <td class="text-center actions-cell">
+                                    <button class="btn btn-primary btn-sm" onclick="openEditModal(<?php echo $row['id_giangvien']; ?>)"><i class="fa-solid fa-pen-to-square"></i> Sửa</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteLecturer(<?php echo $row['id_giangvien']; ?>)"><i class="fa-solid fa-trash"></i> Xóa</button>
+                                </td>
+                            </tr>
+                        <?php
+                            $index++;
                         endwhile;
                     else:
-                    ?>
+                        ?>
                         <tr>
                             <td colspan="7" class="text-center py-4">
                                 <i class="fa-solid fa-chalkboard-user fa-3x text-muted mb-3"></i>
                                 <p class="text-muted mb-0">
-                                    <?php 
+                                    <?php
                                     if (!empty($search_term)) {
                                         echo 'Không tìm thấy giảng viên nào với từ khóa: <strong>' . htmlspecialchars($search_term) . '</strong>';
                                     } else {
@@ -252,84 +274,84 @@ $result = $stmt->get_result();
         </div>
 
         <?php if ($total_pages > 1): ?>
-        <!-- Pagination -->
-        <div class="lecturer-pagination-container">
-            <div class="lecturer-pagination">
-                <?php
-                $search_query = !empty($search_term) ? '&search=' . urlencode($search_term) : '';
-                
-                // Previous button
-                if ($current_page > 1):
-                    $prev_link = "./admin.php?nav=lecturers&lecturer_page=" . ($current_page - 1) . $search_query;
-                ?>
-                    <a href="<?php echo $prev_link; ?>" class="lecturer-pagination-btn">
-                        <i class="fa-solid fa-chevron-left"></i>
-                        <span class="btn-text">Trước</span>
-                    </a>
-                <?php else: ?>
-                    <span class="lecturer-pagination-btn disabled">
-                        <i class="fa-solid fa-chevron-left"></i>
-                        <span class="btn-text">Trước</span>
-                    </span>
-                <?php endif; ?>
-
-                <!-- Page numbers -->
-                <?php
-                $start_page = max(1, $current_page - 2);
-                $end_page = min($total_pages, $current_page + 2);
-
-                if ($start_page > 1):
-                    $first_link = "./admin.php?nav=lecturers&lecturer_page=1" . $search_query;
-                ?>
-                    <a href="<?php echo $first_link; ?>" class="lecturer-pagination-number">1</a>
-                    <?php if ($start_page > 2): ?>
-                        <span class="lecturer-pagination-dots">...</span>
-                    <?php endif; ?>
-                <?php endif; ?>
-
-                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+            <!-- Pagination -->
+            <div class="lecturer-pagination-container">
+                <div class="lecturer-pagination">
                     <?php
-                    $page_link = "./admin.php?nav=lecturers&lecturer_page=" . $i . $search_query;
-                    $active_class = ($i == $current_page) ? ' active' : '';
+                    $search_query = !empty($search_term) ? '&search=' . urlencode($search_term) : '';
+
+                    // Previous button
+                    if ($current_page > 1):
+                        $prev_link = "./admin.php?nav=lecturers&lecturer_page=" . ($current_page - 1) . $search_query;
                     ?>
-                    <a href="<?php echo $page_link; ?>" class="lecturer-pagination-number<?php echo $active_class; ?>">
-                        <?php echo $i; ?>
-                    </a>
-                <?php endfor; ?>
-
-                <?php if ($end_page < $total_pages): ?>
-                    <?php if ($end_page < $total_pages - 1): ?>
-                        <span class="lecturer-pagination-dots">...</span>
+                        <a href="<?php echo $prev_link; ?>" class="lecturer-pagination-btn">
+                            <i class="fa-solid fa-chevron-left"></i>
+                            <span class="btn-text">Trước</span>
+                        </a>
+                    <?php else: ?>
+                        <span class="lecturer-pagination-btn disabled">
+                            <i class="fa-solid fa-chevron-left"></i>
+                            <span class="btn-text">Trước</span>
+                        </span>
                     <?php endif; ?>
-                    <?php $last_link = "./admin.php?nav=lecturers&lecturer_page=" . $total_pages . $search_query; ?>
-                    <a href="<?php echo $last_link; ?>" class="lecturer-pagination-number"><?php echo $total_pages; ?></a>
-                <?php endif; ?>
 
-                <!-- Next button -->
-                <?php if ($current_page < $total_pages):
-                    $next_link = "./admin.php?nav=lecturers&lecturer_page=" . ($current_page + 1) . $search_query;
-                ?>
-                    <a href="<?php echo $next_link; ?>" class="lecturer-pagination-btn">
-                        <span class="btn-text">Sau</span>
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </a>
-                <?php else: ?>
-                    <span class="lecturer-pagination-btn disabled">
-                        <span class="btn-text">Sau</span>
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </span>
-                <?php endif; ?>
-            </div>
+                    <!-- Page numbers -->
+                    <?php
+                    $start_page = max(1, $current_page - 2);
+                    $end_page = min($total_pages, $current_page + 2);
 
-            <!-- Pagination info -->
-            <div class="lecturer-pagination-info">
-                <?php
-                $start_item = $offset + 1;
-                $end_item = min($offset + $lecturers_per_page, $total_lecturers);
-                ?>
-                Hiển thị <?php echo $start_item; ?>-<?php echo $end_item; ?> / <?php echo $total_lecturers; ?> giảng viên
+                    if ($start_page > 1):
+                        $first_link = "./admin.php?nav=lecturers&lecturer_page=1" . $search_query;
+                    ?>
+                        <a href="<?php echo $first_link; ?>" class="lecturer-pagination-number">1</a>
+                        <?php if ($start_page > 2): ?>
+                            <span class="lecturer-pagination-dots">...</span>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
+                    <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                        <?php
+                        $page_link = "./admin.php?nav=lecturers&lecturer_page=" . $i . $search_query;
+                        $active_class = ($i == $current_page) ? ' active' : '';
+                        ?>
+                        <a href="<?php echo $page_link; ?>" class="lecturer-pagination-number<?php echo $active_class; ?>">
+                            <?php echo $i; ?>
+                        </a>
+                    <?php endfor; ?>
+
+                    <?php if ($end_page < $total_pages): ?>
+                        <?php if ($end_page < $total_pages - 1): ?>
+                            <span class="lecturer-pagination-dots">...</span>
+                        <?php endif; ?>
+                        <?php $last_link = "./admin.php?nav=lecturers&lecturer_page=" . $total_pages . $search_query; ?>
+                        <a href="<?php echo $last_link; ?>" class="lecturer-pagination-number"><?php echo $total_pages; ?></a>
+                    <?php endif; ?>
+
+                    <!-- Next button -->
+                    <?php if ($current_page < $total_pages):
+                        $next_link = "./admin.php?nav=lecturers&lecturer_page=" . ($current_page + 1) . $search_query;
+                    ?>
+                        <a href="<?php echo $next_link; ?>" class="lecturer-pagination-btn">
+                            <span class="btn-text">Sau</span>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    <?php else: ?>
+                        <span class="lecturer-pagination-btn disabled">
+                            <span class="btn-text">Sau</span>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </span>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Pagination info -->
+                <div class="lecturer-pagination-info">
+                    <?php
+                    $start_item = $offset + 1;
+                    $end_item = min($offset + $lecturers_per_page, $total_lecturers);
+                    ?>
+                    Hiển thị <?php echo $start_item; ?>-<?php echo $end_item; ?> / <?php echo $total_lecturers; ?> giảng viên
+                </div>
             </div>
-        </div>
         <?php endif; ?>
     </div>
 </div>
@@ -337,18 +359,30 @@ $result = $stmt->get_result();
 <div class="modal fade" id="addLecturerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title"><i class="fa-solid fa-user-plus me-2"></i>Thêm Giảng viên mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa-solid fa-user-plus me-2"></i>Thêm Giảng viên mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
             <form id="addLecturerForm" enctype="multipart/form-data">
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="text" class="form-control" name="ten_giangvien" placeholder="Tên giảng viên" required><label>Tên giảng viên *</label></div></div>
-                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="email" class="form-control" name="email" placeholder="Email" required><label>Email *</label></div></div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-floating"><input type="text" class="form-control" name="ten_giangvien" placeholder="Tên giảng viên" required><label>Tên giảng viên *</label></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-floating"><input type="email" class="form-control" name="email" placeholder="Email" required><label>Email *</label></div>
+                        </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="tel" class="form-control" name="so_dien_thoai" placeholder="Số điện thoại"><label>Số điện thoại</label></div></div>
-                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="password" class="form-control" name="mat_khau" placeholder="Mật khẩu" required><label>Mật khẩu *</label></div></div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-floating"><input type="tel" class="form-control" name="so_dien_thoai" placeholder="Số điện thoại"><label>Số điện thoại</label></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-floating"><input type="password" class="form-control" name="mat_khau" placeholder="Mật khẩu" required><label>Mật khẩu *</label></div>
+                        </div>
                     </div>
-                    <div class="mb-3"><div class="form-floating"><textarea class="form-control" name="mo_ta" placeholder="Mô tả" style="height: 100px"></textarea><label>Mô tả chuyên môn</label></div></div>
+                    <div class="mb-3">
+                        <div class="form-floating"><textarea class="form-control" name="mo_ta" placeholder="Mô tả" style="height: 100px"></textarea><label>Mô tả chuyên môn</label></div>
+                    </div>
                     <div class="mb-3"><label class="form-label">Hình ảnh đại diện</label><input type="file" class="form-control" name="hinh_anh" accept="image/*"></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="submit" class="btn btn-primary">Thêm</button></div>
@@ -360,20 +394,32 @@ $result = $stmt->get_result();
 <div class="modal fade" id="editLecturerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title"><i class="fa-solid fa-user-pen me-2"></i>Chỉnh sửa thông tin Giảng viên</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa-solid fa-user-pen me-2"></i>Chỉnh sửa thông tin Giảng viên</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
             <form id="editLecturerForm" enctype="multipart/form-data">
                 <input type="hidden" id="editLecturerId" name="id_giangvien">
                 <input type="hidden" id="editCurrentImage" name="hinh_anh_hien_tai">
                 <div class="modal-body">
-                     <div class="row">
-                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="text" id="editTenGiangVien" class="form-control" name="ten_giangvien" placeholder="Tên giảng viên" required><label>Tên giảng viên *</label></div></div>
-                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="email" id="editEmail" class="form-control" name="email" placeholder="Email" required><label>Email *</label></div></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-floating"><input type="text" id="editTenGiangVien" class="form-control" name="ten_giangvien" placeholder="Tên giảng viên" required><label>Tên giảng viên *</label></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-floating"><input type="email" id="editEmail" class="form-control" name="email" placeholder="Email" required><label>Email *</label></div>
+                        </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="tel" id="editSoDienThoai" class="form-control" name="so_dien_thoai" placeholder="Số điện thoại"><label>Số điện thoại</label></div></div>
-                        <div class="col-md-6 mb-3"><div class="form-floating"><input type="password" class="form-control" name="mat_khau" placeholder="Mật khẩu mới"><label>Mật khẩu mới (để trống nếu không đổi)</label></div></div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-floating"><input type="tel" id="editSoDienThoai" class="form-control" name="so_dien_thoai" placeholder="Số điện thoại"><label>Số điện thoại</label></div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-floating"><input type="password" class="form-control" name="mat_khau" placeholder="Mật khẩu mới"><label>Mật khẩu mới (để trống nếu không đổi)</label></div>
+                        </div>
                     </div>
-                    <div class="mb-3"><div class="form-floating"><textarea id="editMoTa" class="form-control" name="mo_ta" placeholder="Mô tả" style="height: 100px"></textarea><label>Mô tả chuyên môn</label></div></div>
+                    <div class="mb-3">
+                        <div class="form-floating"><textarea id="editMoTa" class="form-control" name="mo_ta" placeholder="Mô tả" style="height: 100px"></textarea><label>Mô tả chuyên môn</label></div>
+                    </div>
                     <div class="mb-3"><label class="form-label">Tải ảnh đại diện mới</label><input type="file" class="form-control" name="hinh_anh" accept="image/*"></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="submit" class="btn btn-primary">Lưu thay đổi</button></div>
@@ -383,129 +429,160 @@ $result = $stmt->get_result();
 </div>
 
 <div class="modal fade" id="confirmDeleteLecturerModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white"><h5 class="modal-title"><i class="fa-solid fa-triangle-exclamation"></i> Xác nhận xóa</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body">
-        Bạn có chắc chắn muốn xóa giảng viên này? Hành động này không thể khôi phục. Các khóa học và lớp học do giảng viên này phụ trách sẽ được cập nhật thành "Chưa phân công".
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-        <button type="button" class="btn btn-danger" id="confirmDeleteLecturerBtn">Xác nhận xóa</button>
-      </div>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-triangle-exclamation"></i> Xác nhận xóa</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa giảng viên này? Hành động này không thể khôi phục. Các khóa học và lớp học do giảng viên này phụ trách sẽ được cập nhật thành "Chưa phân công".
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteLecturerBtn">Xác nhận xóa</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
-let addLecturerModal, editLecturerModal, confirmDeleteLecturerModal;
-let lecturerIdToDelete = null;
+    let addLecturerModal, editLecturerModal, confirmDeleteLecturerModal;
+    let lecturerIdToDelete = null;
 
-// Hàm mở modal Sửa
-async function openEditModal(lecturerId) {
-    try {
-        const response = await fetch(`./modules/giangvien/get_lecturer_info.php?id=${lecturerId}`);
-        const data = await response.json();
-        if (data.error) {
-            Swal.fire('Lỗi!', data.error, 'error');
-            return;
+    // Hàm mở modal Sửa
+    async function openEditModal(lecturerId) {
+        try {
+            const response = await fetch(`./modules/giangvien/get_lecturer_info.php?id=${lecturerId}`);
+            const data = await response.json();
+            if (data.error) {
+                Swal.fire('Lỗi!', data.error, 'error');
+                return;
+            }
+            document.getElementById('editLecturerId').value = data.id_giangvien;
+            document.getElementById('editTenGiangVien').value = data.ten_giangvien;
+            document.getElementById('editEmail').value = data.email;
+            document.getElementById('editSoDienThoai').value = data.so_dien_thoai;
+            document.getElementById('editMoTa').value = data.mo_ta;
+            document.getElementById('editCurrentImage').value = data.hinh_anh;
+            editLecturerModal.show();
+        } catch (error) {
+            Swal.fire('Lỗi!', 'Không thể lấy dữ liệu giảng viên.', 'error');
         }
-        document.getElementById('editLecturerId').value = data.id_giangvien;
-        document.getElementById('editTenGiangVien').value = data.ten_giangvien;
-        document.getElementById('editEmail').value = data.email;
-        document.getElementById('editSoDienThoai').value = data.so_dien_thoai;
-        document.getElementById('editMoTa').value = data.mo_ta;
-        document.getElementById('editCurrentImage').value = data.hinh_anh;
-        editLecturerModal.show();
-    } catch (error) {
-        Swal.fire('Lỗi!', 'Không thể lấy dữ liệu giảng viên.', 'error');
     }
-}
 
-// Hàm mở modal Xóa
-function deleteLecturer(lecturerId) {
-    lecturerIdToDelete = lecturerId;
-    confirmDeleteLecturerModal.show();
-}
+    // Hàm mở modal Xóa
+    function deleteLecturer(lecturerId) {
+        lecturerIdToDelete = lecturerId;
+        confirmDeleteLecturerModal.show();
+    }
 
-document.addEventListener("DOMContentLoaded", function() {
-    addLecturerModal = new bootstrap.Modal(document.getElementById('addLecturerModal'));
-    editLecturerModal = new bootstrap.Modal(document.getElementById('editLecturerModal'));
-    confirmDeleteLecturerModal = new bootstrap.Modal(document.getElementById('confirmDeleteLecturerModal'));
+    document.addEventListener("DOMContentLoaded", function() {
+        addLecturerModal = new bootstrap.Modal(document.getElementById('addLecturerModal'));
+        editLecturerModal = new bootstrap.Modal(document.getElementById('editLecturerModal'));
+        confirmDeleteLecturerModal = new bootstrap.Modal(document.getElementById('confirmDeleteLecturerModal'));
 
-    // Xử lý submit form THÊM
-    document.getElementById('addLecturerForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        fetch('./modules/giangvien/add_lecturer.php', { method: 'POST', body: formData })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                addLecturerModal.hide();
-                Swal.fire({ icon: 'success', title: 'Thành công!', text: data.message, timer: 1500, showConfirmButton: false })
-                .then(() => location.reload());
-            } else {
-                Swal.fire('Lỗi!', data.message, 'error');
+        // Xử lý submit form THÊM
+        document.getElementById('addLecturerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('./modules/giangvien/add_lecturer.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        addLecturerModal.hide();
+                        Swal.fire({
+                                icon: 'success',
+                                title: 'Thành công!',
+                                text: data.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            })
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire('Lỗi!', data.message, 'error');
+                    }
+                });
+        });
+
+        // Xử lý submit form SỬA
+        document.getElementById('editLecturerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('./modules/giangvien/edit_lecturer.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        editLecturerModal.hide();
+                        Swal.fire({
+                                icon: 'success',
+                                title: 'Thành công!',
+                                text: data.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            })
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire('Lỗi!', data.message, 'error');
+                    }
+                });
+        });
+
+        // Xử lý nút xác nhận XÓA
+        document.getElementById('confirmDeleteLecturerBtn').addEventListener('click', function() {
+            if (lecturerIdToDelete) {
+                this.disabled = true;
+                this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Đang xóa...`;
+
+                fetch(`./modules/giangvien/delete_lecturer.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `delete_id=${lecturerIdToDelete}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        confirmDeleteLecturerModal.hide();
+                        if (data.status === 'success') {
+                            Swal.fire({
+                                    icon: 'success',
+                                    title: 'Đã xóa!',
+                                    text: data.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                })
+                                .then(() => location.reload());
+                        } else {
+                            Swal.fire('Lỗi!', data.message, 'error');
+                        }
+                    })
+                    .finally(() => {
+                        this.disabled = false;
+                        this.innerHTML = 'Xác nhận xóa';
+                        lecturerIdToDelete = null;
+                    });
             }
         });
-    });
 
-    // Xử lý submit form SỬA
-    document.getElementById('editLecturerForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        fetch('./modules/giangvien/edit_lecturer.php', { method: 'POST', body: formData })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                editLecturerModal.hide();
-                Swal.fire({ icon: 'success', title: 'Thành công!', text: data.message, timer: 1500, showConfirmButton: false })
-                .then(() => location.reload());
-            } else {
-                Swal.fire('Lỗi!', data.message, 'error');
-            }
-        });
-    });
-
-    // Xử lý nút xác nhận XÓA
-    document.getElementById('confirmDeleteLecturerBtn').addEventListener('click', function() {
-        if (lecturerIdToDelete) {
-            this.disabled = true;
-            this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Đang xóa...`;
-            
-            fetch(`./modules/giangvien/delete_lecturer.php`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: `delete_id=${lecturerIdToDelete}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                confirmDeleteLecturerModal.hide();
-                if (data.status === 'success') {
-                    Swal.fire({ icon: 'success', title: 'Đã xóa!', text: data.message, timer: 1500, showConfirmButton: false })
-                    .then(() => location.reload());
-                } else {
-                    Swal.fire('Lỗi!', data.message, 'error');
+        // Smooth scroll for pagination
+        document.querySelectorAll('.lecturer-pagination-number, .lecturer-pagination-btn').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const container = document.querySelector('.card.animated-card');
+                if (container) {
+                    setTimeout(() => {
+                        container.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }, 100);
                 }
-            })
-            .finally(() => {
-                this.disabled = false;
-                this.innerHTML = 'Xác nhận xóa';
-                lecturerIdToDelete = null;
             });
-        }
-    });
-
-    // Smooth scroll for pagination
-    document.querySelectorAll('.lecturer-pagination-number, .lecturer-pagination-btn').forEach(link => {
-        link.addEventListener('click', function(e) {
-            const container = document.querySelector('.card.animated-card');
-            if (container) {
-                setTimeout(() => {
-                    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
-            }
         });
     });
-});
 </script>

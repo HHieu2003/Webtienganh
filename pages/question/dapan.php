@@ -256,6 +256,9 @@ try {
     $stmt_details->close();
     
     // --- PHÂN LOẠI TRÌNH ĐỘ CHO TEST ĐẦU VÀO ---
+    $final_total_score = 0; // Khởi tạo biến mặc định
+    $trinh_do = ''; // Khởi tạo biến mặc định
+    
     if ($is_placement_test) {
         // Tính điểm trung bình tự luận (nếu có)
         $avg_essay_score = ($essay_count_graded > 0) ? round($total_essay_score / $essay_count_graded, 2) : 0;
@@ -264,7 +267,6 @@ try {
         // - Nếu có cả trắc nghiệm và tự luận: lấy trung bình
         // - Nếu chỉ có trắc nghiệm: lấy điểm trắc nghiệm
         // - Nếu chỉ có tự luận: lấy điểm tự luận
-        $final_total_score = 0;
         if ($total_mc_questions > 0 && $essay_count_graded > 0) {
             // Có cả 2 loại: trung bình cộng
             $final_total_score = round(($final_mc_score + $avg_essay_score) / 2, 2);
@@ -277,7 +279,6 @@ try {
         }
         
         // Phân loại trình độ dựa trên điểm tổng
-        $trinh_do = '';
         if ($final_total_score >= 8.5) {
             $trinh_do = 'Nâng cao (C1-C2)';
         } elseif ($final_total_score >= 7.0) {
@@ -305,17 +306,20 @@ try {
     // --- HIỂN THỊ THÔNG BÁO SWEETALERT2 KHI THÀNH CÔNG ---
     // Chuẩn bị thông báo cho test đầu vào
     $placement_message = '';
-    if ($is_placement_test && isset($trinh_do) && isset($final_total_score)) {
+    if ($is_placement_test && !empty($trinh_do)) {
         $placement_message = "<div style='margin-top: 15px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white;'>
             <h4 style='margin: 0 0 10px 0; font-size: 18px;'><i class='fas fa-award'></i> Kết quả phân loại trình độ</h4>
-            <p style='margin: 5px 0; font-size: 16px;'><strong>Điểm tổng kết:</strong> {$final_total_score}/10</p>
-            <p style='margin: 5px 0; font-size: 18px; font-weight: bold;'><strong>Trình độ của bạn:</strong> {$trinh_do}</p>
+            <p style='margin: 5px 0; font-size: 16px;'><strong>Điểm tổng kết:</strong> " . htmlspecialchars($final_total_score) . "/10</p>
+            <p style='margin: 5px 0; font-size: 18px; font-weight: bold;'><strong>Trình độ của bạn:</strong> " . htmlspecialchars($trinh_do) . "</p>
             <p style='margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;'>Trình độ này sẽ được lưu vào hồ sơ của bạn để gợi ý khóa học phù hợp.</p>
         </div>";
     }
     
-    $mc_score_message = ($total_mc_questions > 0) ? "Điểm trắc nghiệm: <strong>{$score}/{$total_mc_questions} ({$final_mc_score}/10)</strong><br>" : '';
+    $mc_score_message = ($total_mc_questions > 0) ? "Điểm trắc nghiệm: <strong>" . htmlspecialchars($score) . "/" . htmlspecialchars($total_mc_questions) . " (" . htmlspecialchars($final_mc_score) . "/10)</strong><br>" : '';
     $essay_message = ($total_essay_questions > 0) ? "Phần tự luận đã được chấm tự động (nếu có).<br>" : '';
+    
+    // Tạo message hoàn chỉnh
+    $full_message = "Bạn đã hoàn thành bài kiểm tra.<br>" . $mc_score_message . $essay_message . $placement_message . "<br><br>Vui lòng xem chi tiết trong trang cá nhân.";
     
     ?>
     <!DOCTYPE html>
@@ -329,18 +333,20 @@ try {
     </head>
     <body>
         <script>
-            Swal.fire({
-                title: "Hoàn thành!",
-                html: "Bạn đã hoàn thành bài kiểm tra.<br><?php echo $mc_score_message . $essay_message . $placement_message; ?><br><br>Vui lòng xem chi tiết trong trang cá nhân.",
-                icon: "success",
-                confirmButtonText: "Xem kết quả chi tiết",
-                confirmButtonColor: "#3085d6",
-                allowOutsideClick: false,
-                width: "600px"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "user/dashboard.php?nav=ketquakiemtra";
-                }
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    title: "Hoàn thành!",
+                    html: <?php echo json_encode($full_message, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>,
+                    icon: "success",
+                    confirmButtonText: "Xem chi tiết",
+                    confirmButtonColor: "#3085d6",
+                    allowOutsideClick: false,
+                    width: "600px"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "/user/dashboard.php?nav=ketquakiemtra";
+                    }
+                });
             });
         </script>
     </body>

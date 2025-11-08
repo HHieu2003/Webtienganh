@@ -19,7 +19,11 @@ $teaching_management_pages = [
 ];
 
 $is_teaching_management_active = in_array($current_page, $teaching_management_pages);
-
+// === MỚI: Xác định đường dẫn avatar ===
+// Giả định rằng bạn lưu đường dẫn ảnh trong session là 'hinh_anh' khi giảng viên đăng nhập
+$avatar_path = (isset($_SESSION['hinh_anh']) && !empty($_SESSION['hinh_anh'])) 
+                ? '../' . htmlspecialchars($_SESSION['hinh_anh']) 
+                : '../images/default-avatar.png'; // Đường dẫn đến avatar mặc định
 ?>
 <style>
     /* Nâng cấp giao diện chung cho menu giảng viên */

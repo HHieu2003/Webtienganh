@@ -28,7 +28,7 @@ $total_students = $stmt_count->get_result()->fetch_assoc()['total'];
 $total_pages = ceil($total_students / $students_per_page);
 
 // Main query with pagination
-$sql = "SELECT id_hocvien, ten_hocvien, email, so_dien_thoai, is_admin, is_verified FROM hocvien" . $sql_search . " ORDER BY id_hocvien DESC LIMIT ? OFFSET ?";
+$sql = "SELECT id_hocvien, ten_hocvien, email, so_dien_thoai, is_admin, trinh_do, is_verified FROM hocvien" . $sql_search . " ORDER BY id_hocvien DESC LIMIT ? OFFSET ?";
 $stmt = $conn->prepare($sql);
 
 if (!empty($search_term)) {
@@ -66,7 +66,7 @@ $result = $stmt->get_result();
             </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body text-center">
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead class="table-dark">
@@ -75,6 +75,7 @@ $result = $stmt->get_result();
                         <th>Tên học viên</th>
                         <th>Email</th>
                         <th>Số điện thoại</th>
+                        <th>Trình độ</th>
                         <th class="text-center">Xác minh</th>
                         <th class="text-center">Admin</th>
                         <th class="text-center">Hành động</th>
@@ -91,6 +92,7 @@ $result = $stmt->get_result();
                             <td><?php echo htmlspecialchars($row['ten_hocvien']); ?></td>
                             <td><?php echo htmlspecialchars($row['email']); ?></td>
                             <td><?php echo htmlspecialchars($row['so_dien_thoai']); ?></td>
+                            <td><?php echo htmlspecialchars($row['trinh_do'] ?? 'Chưa có'); ?></td>
                             <td class="text-center">
                                 <?php if ($row['is_verified']): ?>
                                     <span class="badge bg-success">
@@ -110,7 +112,7 @@ $result = $stmt->get_result();
                                 <?php endif; ?>
                             </td>
                             <td class="text-center">
-                                <button class="btn btn-primary btn-sm" onclick="openEditModal(<?php echo $row['id_hocvien']; ?>)">
+                                <button class="btn btn-primary btn-sm mb-1" onclick="openEditModal(<?php echo $row['id_hocvien']; ?>)">
                                     <i class="fa-solid fa-pen-to-square"></i> Sửa
                                 </button>
                                 <button class="btn btn-danger btn-sm" onclick="deleteStudent(<?php echo $row['id_hocvien']; ?>)">
