@@ -979,7 +979,7 @@ function render_test_card_v2($test, $conn, $aos_delay = 0)
 <div class="tests-container-v2"> <?php if ($placement_test && !$trinh_do_hocvien): ?>
         <div class="placement-test-cta-v2" data-aos="zoom-in">
             <h2><i class="fa-solid fa-rocket"></i> Kiểm tra trình độ đầu vào!</h2>
-            <p>Xác định năng lực hiện tại của bạn chỉ với bài kiểm tra ngắn. Hệ thống sẽ gợi ý lộ trình học phù hợp nhất dành riêng cho bạn.</p>
+            <p>Xác định năng lực hiện tại của bạn chỉ với bài kiểm tra ngắn.</p>
             <a href="index.php?nav=question_detail&id_baitest=<?php echo $placement_test['id_baitest']; ?>" class="cta-button-v2">
                 <i class="fa-solid fa-play"></i> Làm bài ngay
             </a>

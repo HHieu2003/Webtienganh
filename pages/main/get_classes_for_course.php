@@ -23,10 +23,10 @@ $result_classes = $stmt_classes->get_result();
 
 $classes = [];
 while ($class_row = $result_classes->fetch_assoc()) {
-    // Với mỗi lớp, lấy lịch học
+    // Lấy TẤT CẢ lịch học của lớp (cả đã qua và chưa đến)
     $sql_schedule = "SELECT ngay_hoc, gio_bat_dau, gio_ket_thuc, phong_hoc 
                      FROM lichhoc 
-                     WHERE id_lop = ? 
+                     WHERE id_lop = ?
                      ORDER BY ngay_hoc ASC, gio_bat_dau ASC";
     $stmt_schedule = $conn->prepare($sql_schedule);
     $stmt_schedule->bind_param("s", $class_row['id_lop']);
@@ -34,12 +34,23 @@ while ($class_row = $result_classes->fetch_assoc()) {
     $result_schedule = $stmt_schedule->get_result();
     
     $schedules = [];
+    $has_future_schedule = false; // Kiểm tra xem có lịch học trong tương lai không
+    
     while ($schedule_row = $result_schedule->fetch_assoc()) {
         $schedules[] = $schedule_row;
+        
+        // Kiểm tra nếu có ít nhất 1 lịch học chưa diễn ra
+        if ($schedule_row['ngay_hoc'] >= date('Y-m-d')) {
+            $has_future_schedule = true;
+        }
     }
     
-    $class_row['schedules'] = $schedules;
-    $classes[] = $class_row;
+    // Chỉ thêm lớp học nếu còn có ít nhất 1 lịch học trong tương lai
+    // Nhưng hiển thị TẤT CẢ lịch học (cả quá khứ và tương lai) của lớp đó
+    if ($has_future_schedule) {
+        $class_row['schedules'] = $schedules;
+        $classes[] = $class_row;
+    }
 }
 
 echo json_encode($classes);

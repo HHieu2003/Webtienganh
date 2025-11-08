@@ -325,6 +325,7 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
                                 <li><a href="./dashboard.php?nav=hoclieu" class="<?php echo ($nav == 'hoclieu') ? 'active' : ''; ?>">Học liệu</a></li>
                                 <li><a href="./dashboard.php?nav=ketquakiemtra" class="<?php echo ($nav == 'ketquakiemtra') ? 'active' : ''; ?>">Kết quả bài test</a></li>
                                 <li><a href="./dashboard.php?nav=bangdiem" class="<?php echo ($nav == 'bangdiem') ? 'active' : ''; ?>">Bảng điểm & Nhận xét</a></li>
+                                <li><a href="../index.php?nav=question" class="<?php echo ($nav == 'question') ? 'active' : ''; ?>">Bài tập</a></li>
                             </ul>
                         </li>
                         <li>
