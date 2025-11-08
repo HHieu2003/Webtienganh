@@ -1,5 +1,7 @@
 <?php
 // File: pages/question/dapan.php (Phiên bản cải tiến thông báo)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 set_time_limit(120); // QUAN TRỌNG: Tăng thời gian thực thi script lên 120 giây
 if (session_status() == PHP_SESSION_NONE) session_start();
 include('./config/config.php');
@@ -119,6 +121,19 @@ if (empty($answers)) {
 $conn->begin_transaction();
 
 try {
+    // Lấy thông tin bài test để kiểm tra loại bài test
+    $sql_baitest_info = "SELECT loai_baitest FROM baitest WHERE id_baitest = ?";
+    $stmt_baitest_info = $conn->prepare($sql_baitest_info);
+    if (!$stmt_baitest_info) throw new Exception("Lỗi chuẩn bị câu lệnh lấy thông tin bài test: " . $conn->error);
+    $stmt_baitest_info->bind_param("i", $id_baitest);
+    $stmt_baitest_info->execute();
+    $result_baitest_info = $stmt_baitest_info->get_result();
+    $baitest_info = $result_baitest_info->fetch_assoc();
+    $stmt_baitest_info->close();
+    
+    $loai_baitest = $baitest_info['loai_baitest'] ?? 'on_tap';
+    $is_placement_test = ($loai_baitest === 'dau_vao'); // Kiểm tra có phải test đầu vào không
+    
     // Lấy tất cả câu hỏi và đáp án đúng của bài test
     $sql_questions_info = "
         SELECT c.id_cauhoi, c.noi_dung, c.loai_cauhoi, d.id_dapan
@@ -166,13 +181,17 @@ try {
         }
     }
 
+    // Tính điểm trắc nghiệm trên thang 10 (nếu có câu trắc nghiệm)
+    $final_mc_score = ($total_mc_questions > 0) ? round(($score / $total_mc_questions) * 10, 2) : 0;
+    
+    // Biến để tính tổng điểm tự luận (dùng để tính điểm trung bình)
+    $total_essay_score = 0;
+    $essay_count_graded = 0; // Số bài tự luận đã được chấm điểm
+
     // Lưu kết quả tổng (chỉ tính điểm trắc nghiệm) vào bảng ketquabaitest
     $sql_save_result = "INSERT INTO ketquabaitest (id_hocvien, id_baitest, diem, ngay_lam_bai) VALUES (?, ?, ?, NOW())";
     $stmt_save_result = $conn->prepare($sql_save_result);
     if (!$stmt_save_result) throw new Exception("Lỗi chuẩn bị câu lệnh lưu kết quả: " . $conn->error);
-
-    // Tính điểm trắc nghiệm trên thang 10 (nếu có câu trắc nghiệm)
-    $final_mc_score = ($total_mc_questions > 0) ? round(($score / $total_mc_questions) * 10, 2) : 0;
 
     $stmt_save_result->bind_param("iid", $id_hocvien, $id_baitest, $final_mc_score); // Lưu điểm trắc nghiệm trên thang 10
     $stmt_save_result->execute();
@@ -207,6 +226,13 @@ try {
                 $grading_result = gradeEssayWithAI($question_info['noi_dung'], $tra_loi_tu_luan);
                 $diem_tu_luan = $grading_result['score']; // Lấy điểm từ AI (thang 10)
                 $nhan_xet_tu_luan = $grading_result['feedback'];
+                
+                // Cộng điểm tự luận để tính trung bình
+                if ($diem_tu_luan !== null) {
+                    $total_essay_score += $diem_tu_luan;
+                    $essay_count_graded++;
+                }
+                
                 // Nếu AI không chấm được (trả về null), trạng thái là 'cho_cham'
                 if ($diem_tu_luan === null) {
                     $trang_thai_cham = 'cho_cham';
@@ -228,40 +254,98 @@ try {
         }
     }
     $stmt_details->close();
+    
+    // --- PHÂN LOẠI TRÌNH ĐỘ CHO TEST ĐẦU VÀO ---
+    if ($is_placement_test) {
+        // Tính điểm trung bình tự luận (nếu có)
+        $avg_essay_score = ($essay_count_graded > 0) ? round($total_essay_score / $essay_count_graded, 2) : 0;
+        
+        // Tính điểm tổng kết:
+        // - Nếu có cả trắc nghiệm và tự luận: lấy trung bình
+        // - Nếu chỉ có trắc nghiệm: lấy điểm trắc nghiệm
+        // - Nếu chỉ có tự luận: lấy điểm tự luận
+        $final_total_score = 0;
+        if ($total_mc_questions > 0 && $essay_count_graded > 0) {
+            // Có cả 2 loại: trung bình cộng
+            $final_total_score = round(($final_mc_score + $avg_essay_score) / 2, 2);
+        } elseif ($total_mc_questions > 0) {
+            // Chỉ có trắc nghiệm
+            $final_total_score = $final_mc_score;
+        } elseif ($essay_count_graded > 0) {
+            // Chỉ có tự luận
+            $final_total_score = $avg_essay_score;
+        }
+        
+        // Phân loại trình độ dựa trên điểm tổng
+        $trinh_do = '';
+        if ($final_total_score >= 8.5) {
+            $trinh_do = 'Nâng cao (C1-C2)';
+        } elseif ($final_total_score >= 7.0) {
+            $trinh_do = 'Trung cấp cao (B2)';
+        } elseif ($final_total_score >= 5.5) {
+            $trinh_do = 'Trung cấp (B1)';
+        } elseif ($final_total_score >= 4.0) {
+            $trinh_do = 'Sơ cấp cao (A2)';
+        } else {
+            $trinh_do = 'Sơ cấp (A1)';
+        }
+        
+        // Cập nhật trình độ vào bảng hocvien
+        $sql_update_level = "UPDATE hocvien SET trinh_do = ? WHERE id_hocvien = ?";
+        $stmt_update_level = $conn->prepare($sql_update_level);
+        if (!$stmt_update_level) throw new Exception("Lỗi chuẩn bị câu lệnh cập nhật trình độ: " . $conn->error);
+        $stmt_update_level->bind_param("si", $trinh_do, $id_hocvien);
+        $stmt_update_level->execute();
+        $stmt_update_level->close();
+    }
+    // --- KẾT THÚC PHÂN LOẠI TRÌNH ĐỘ ---
 
     $conn->commit();
 
     // --- HIỂN THỊ THÔNG BÁO SWEETALERT2 KHI THÀNH CÔNG ---
-    echo '
-        <!DOCTYPE html>
-        <html lang="vi">
-        <head>
-            <meta charset="UTF-8">
-            <title>Kết quả bài kiểm tra</title>
-            <script src="[https://cdn.jsdelivr.net/npm/sweetalert2@11](https://cdn.jsdelivr.net/npm/sweetalert2@11)"></script>
-            <style>body { font-family: sans-serif; }</style>
-        </head>
-        <body>
-            <script>
-                Swal.fire({
-                    title: "Hoàn thành!",
-                    html: "Bạn đã hoàn thành bài kiểm tra.<br>' .
-                          ($total_mc_questions > 0 ? 'Điểm trắc nghiệm: <strong>' . $score . '/' . $total_mc_questions . ' (' . $final_mc_score . '/10)</strong><br>' : '') .
-                          ($total_essay_questions > 0 ? 'Phần tự luận đã được chấm tự động (nếu có).' : '') .
-                          '<br>Vui lòng xem chi tiết trong trang cá nhân.",
-                    icon: "success",
-                    confirmButtonText: "Xem kết quả chi tiết",
-                    confirmButtonColor: "#3085d6", // Màu xanh dương
-                    allowOutsideClick: false // Không cho đóng khi click bên ngoài
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = "user/dashboard.php?nav=ketquakiemtra"; // Đảm bảo đường dẫn này đúng
-                    }
-                });
-            </script>
-        </body>
-        </html>
-    ';
+    // Chuẩn bị thông báo cho test đầu vào
+    $placement_message = '';
+    if ($is_placement_test && isset($trinh_do) && isset($final_total_score)) {
+        $placement_message = "<div style='margin-top: 15px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white;'>
+            <h4 style='margin: 0 0 10px 0; font-size: 18px;'><i class='fas fa-award'></i> Kết quả phân loại trình độ</h4>
+            <p style='margin: 5px 0; font-size: 16px;'><strong>Điểm tổng kết:</strong> {$final_total_score}/10</p>
+            <p style='margin: 5px 0; font-size: 18px; font-weight: bold;'><strong>Trình độ của bạn:</strong> {$trinh_do}</p>
+            <p style='margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;'>Trình độ này sẽ được lưu vào hồ sơ của bạn để gợi ý khóa học phù hợp.</p>
+        </div>";
+    }
+    
+    $mc_score_message = ($total_mc_questions > 0) ? "Điểm trắc nghiệm: <strong>{$score}/{$total_mc_questions} ({$final_mc_score}/10)</strong><br>" : '';
+    $essay_message = ($total_essay_questions > 0) ? "Phần tự luận đã được chấm tự động (nếu có).<br>" : '';
+    
+    ?>
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <title>Kết quả bài kiểm tra</title>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>body { font-family: sans-serif; }</style>
+    </head>
+    <body>
+        <script>
+            Swal.fire({
+                title: "Hoàn thành!",
+                html: "Bạn đã hoàn thành bài kiểm tra.<br><?php echo $mc_score_message . $essay_message . $placement_message; ?><br><br>Vui lòng xem chi tiết trong trang cá nhân.",
+                icon: "success",
+                confirmButtonText: "Xem kết quả chi tiết",
+                confirmButtonColor: "#3085d6",
+                allowOutsideClick: false,
+                width: "600px"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "user/dashboard.php?nav=ketquakiemtra";
+                }
+            });
+        </script>
+    </body>
+    </html>
+    <?php
     exit();
 
 } catch (Exception $e) {
@@ -269,33 +353,33 @@ try {
     error_log("Lỗi khi nộp bài test ID {$id_baitest} của học viên ID {$id_hocvien}: " . $e->getMessage());
 
     // --- HIỂN THỊ THÔNG BÁO SWEETALERT2 KHI CÓ LỖI ---
-     echo '
-        <!DOCTYPE html>
-        <html lang="vi">
-        <head>
-            <meta charset="UTF-8">
-            <title>Lỗi nộp bài</title>
-            <script src="[https://cdn.jsdelivr.net/npm/sweetalert2@11](https://cdn.jsdelivr.net/npm/sweetalert2@11)"></script>
-            <style>body { font-family: sans-serif; }</style>
-        </head>
-        <body>
-            <script>
-                Swal.fire({
-                    title: "Có lỗi xảy ra!",
-                    text: "Đã có lỗi trong quá trình nộp bài. Chi tiết lỗi đã được ghi lại. Vui lòng thử lại sau.",
-                    icon: "error",
-                    confirmButtonText: "Quay lại",
-                    confirmButtonColor: "#d33", // Màu đỏ
-                    allowOutsideClick: false
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.history.back(); // Quay lại trang trước đó (trang làm bài)
-                    }
-                });
-            </script>
-        </body>
-        </html>
-     ';
+    ?>
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <title>Lỗi nộp bài</title>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <style>body { font-family: sans-serif; }</style>
+    </head>
+    <body>
+        <script>
+            Swal.fire({
+                title: "Có lỗi xảy ra!",
+                text: "Đã có lỗi trong quá trình nộp bài: <?php echo htmlspecialchars($e->getMessage()); ?>",
+                icon: "error",
+                confirmButtonText: "Quay lại",
+                confirmButtonColor: "#d33",
+                allowOutsideClick: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.history.back();
+                }
+            });
+        </script>
+    </body>
+    </html>
+    <?php
     exit();
 } finally {
     // Đảm bảo đóng kết nối CSDL ngay cả khi có lỗi

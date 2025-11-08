@@ -57,6 +57,7 @@ if (!$hocvien_id) {
                 box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
                 animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
                 text-align: center;
+                margin: auto;
             }
             
             .login-required-icon {
@@ -244,25 +245,94 @@ try {
 }
 
 
-// 2. Lấy bài test đầu vào (nếu có)
-$placement_test = null;
+// 2. Lấy TẤT CẢ bài test đầu vào mà học viên có thể truy cập
+$placement_tests = [];
 try {
-    $result_placement = $conn->query("SELECT * FROM baitest WHERE loai_baitest = 'dau_vao' LIMIT 1");
-    if ($result_placement) {
-        $placement_test = $result_placement->fetch_assoc();
+    // Lấy bài test đầu vào CÔNG KHAI (không thuộc khóa/lớp)
+    $sql_public_placement = "
+        SELECT * FROM baitest 
+        WHERE loai_baitest = 'dau_vao' 
+        AND id_khoahoc IS NULL 
+        AND id_lop IS NULL
+    ";
+    
+    // Lấy bài test đầu vào của KHÓA HỌC và LỚP HỌC đã đăng ký
+    $sql_registered_placement = "
+        SELECT DISTINCT bt.*
+        FROM baitest bt
+        JOIN dangkykhoahoc dk ON (
+            (bt.id_khoahoc = dk.id_khoahoc AND bt.id_lop IS NULL) OR 
+            (bt.id_lop = dk.id_lop AND bt.id_lop IS NOT NULL)
+        )
+        WHERE dk.id_hocvien = ? 
+        AND dk.trang_thai = 'da xac nhan' 
+        AND bt.loai_baitest = 'dau_vao'
+    ";
+    
+    // Kết hợp 2 query bằng UNION
+    $sql_all_placement = "
+        ($sql_public_placement)
+        UNION
+        ($sql_registered_placement)
+        ORDER BY ten_baitest ASC
+    ";
+    
+    $stmt_placement = $conn->prepare($sql_all_placement);
+    $stmt_placement->bind_param("i", $hocvien_id);
+    $stmt_placement->execute();
+    $result_placement = $stmt_placement->get_result();
+    
+    while ($row = $result_placement->fetch_assoc()) {
+        $placement_tests[] = $row;
     }
+    $stmt_placement->close();
 } catch (Exception $e) {
     error_log("Lỗi khi lấy bài test đầu vào: " . $e->getMessage());
 }
 
-// 3. Lấy các bài test định kỳ của các khóa học VÀ CÁC LỚP HỌC đã đăng ký
+// Lấy bài test đầu vào ĐẦU TIÊN để hiển thị CTA (nếu chưa có trình độ)
+$placement_test = !empty($placement_tests) ? $placement_tests[0] : null;
+
+// 3. Lấy các bài test ĐỊNH KỲ từ khóa học/lớp học đã đăng ký
+$periodic_tests = [];
+try {
+    $sql_periodic_tests = "
+        SELECT DISTINCT bt.*
+        FROM baitest bt
+        JOIN dangkykhoahoc dk ON (
+            (bt.id_khoahoc = dk.id_khoahoc AND bt.id_lop IS NULL) OR 
+            (bt.id_lop = dk.id_lop AND bt.id_lop IS NOT NULL)
+        )
+        WHERE dk.id_hocvien = ? 
+        AND dk.trang_thai = 'da xac nhan' 
+        AND bt.loai_baitest = 'dinh_ky'
+        ORDER BY bt.ngay_tao DESC, bt.ten_baitest ASC
+    ";
+    $stmt_periodic = $conn->prepare($sql_periodic_tests);
+    $stmt_periodic->bind_param("i", $hocvien_id);
+    $stmt_periodic->execute();
+    $result_periodic = $stmt_periodic->get_result();
+    while ($row = $result_periodic->fetch_assoc()) {
+        $periodic_tests[] = $row;
+    }
+    $stmt_periodic->close();
+} catch (Exception $e) {
+    error_log("Lỗi khi lấy bài test định kỳ: " . $e->getMessage());
+}
+
+// 4. Lấy các bài test ÔN TẬP từ khóa học/lớp học đã đăng ký
 $course_tests = [];
 try {
     $sql_course_tests = "
         SELECT DISTINCT bt.*
         FROM baitest bt
-        JOIN dangkykhoahoc dk ON (bt.id_khoahoc = dk.id_khoahoc OR bt.id_lop = dk.id_lop)
-        WHERE dk.id_hocvien = ? AND dk.trang_thai = 'da xac nhan' AND bt.loai_baitest = 'dinh_ky'
+        JOIN dangkykhoahoc dk ON (
+            (bt.id_khoahoc = dk.id_khoahoc AND bt.id_lop IS NULL) OR 
+            (bt.id_lop = dk.id_lop AND bt.id_lop IS NOT NULL)
+        )
+        WHERE dk.id_hocvien = ? 
+        AND dk.trang_thai = 'da xac nhan' 
+        AND bt.loai_baitest = 'on_tap'
         ORDER BY bt.ten_baitest ASC
     ";
     $stmt_course_tests = $conn->prepare($sql_course_tests);
@@ -274,14 +344,19 @@ try {
     }
     $stmt_course_tests->close();
 } catch (Exception $e) {
-    error_log("Lỗi khi lấy bài test khóa học: " . $e->getMessage());
+    error_log("Lỗi khi lấy bài test ôn tập khóa học: " . $e->getMessage());
 }
 
-// 4. Lấy các bài test ôn tập công khai với phân trang
+// 5. Lấy các bài test ôn tập CÔNG KHAI (không thuộc khóa học hoặc lớp cụ thể) với phân trang, tìm kiếm và lọc
 $practice_tests = [];
 $total_practice_tests = 0;
 $total_practice_pages = 1;
 $practice_current_page = 1;
+
+// Lấy tham số tìm kiếm và lọc
+$search_keyword = isset($_GET['search']) ? trim($_GET['search']) : '';
+$filter_time = isset($_GET['filter_time']) ? $_GET['filter_time'] : '';
+$sort_by = isset($_GET['sort_by']) ? $_GET['sort_by'] : 'name_asc';
 
 try {
     // Pagination settings
@@ -289,18 +364,88 @@ try {
     $practice_current_page = isset($_GET['test_page']) ? max(1, intval($_GET['test_page'])) : 1;
     $offset = ($practice_current_page - 1) * $tests_per_page;
 
-    // Count total practice tests
-    $count_result = $conn->query("SELECT COUNT(*) as total FROM baitest WHERE loai_baitest = 'on_tap'");
-    if ($count_result) {
-        $count_row = $count_result->fetch_assoc();
-        $total_practice_tests = $count_row['total'];
-        $total_practice_pages = ceil($total_practice_tests / $tests_per_page);
+    // Xây dựng câu truy vấn với điều kiện tìm kiếm và lọc
+    // CHỈ LẤY BÀI TEST CÔNG KHAI: loai_baitest = 'on_tap' VÀ không thuộc khóa học/lớp cụ thể
+    $where_conditions = ["loai_baitest = 'on_tap'", "id_khoahoc IS NULL", "id_lop IS NULL"];
+    $params = [];
+    $param_types = "";
+
+    // Tìm kiếm theo tên
+    if (!empty($search_keyword)) {
+        $where_conditions[] = "ten_baitest LIKE ?";
+        $params[] = "%{$search_keyword}%";
+        $param_types .= "s";
     }
 
-    // Fetch practice tests with LIMIT
-    $sql_practice = "SELECT * FROM baitest WHERE loai_baitest = 'on_tap' ORDER BY ten_baitest ASC LIMIT ? OFFSET ?";
+    // Lọc theo thời gian
+    if (!empty($filter_time)) {
+        if ($filter_time === 'short') {
+            $where_conditions[] = "thoi_gian <= 20";
+        } elseif ($filter_time === 'medium') {
+            $where_conditions[] = "thoi_gian > 20 AND thoi_gian <= 40";
+        } elseif ($filter_time === 'long') {
+            $where_conditions[] = "thoi_gian > 40";
+        }
+    }
+
+    $where_clause = implode(" AND ", $where_conditions);
+
+    // Sắp xếp
+    $order_by = "ten_baitest ASC"; // Mặc định
+    switch ($sort_by) {
+        case 'name_asc':
+            $order_by = "ten_baitest ASC";
+            break;
+        case 'name_desc':
+            $order_by = "ten_baitest DESC";
+            break;
+        case 'time_asc':
+            $order_by = "thoi_gian ASC";
+            break;
+        case 'time_desc':
+            $order_by = "thoi_gian DESC";
+            break;
+        case 'newest':
+            $order_by = "ngay_tao DESC";
+            break;
+        case 'oldest':
+            $order_by = "ngay_tao ASC";
+            break;
+    }
+
+    // Count total practice tests với điều kiện
+    $count_sql = "SELECT COUNT(*) as total FROM baitest WHERE {$where_clause}";
+    if (!empty($params)) {
+        $stmt_count = $conn->prepare($count_sql);
+        if (!empty($param_types)) {
+            $stmt_count->bind_param($param_types, ...$params);
+        }
+        $stmt_count->execute();
+        $count_result = $stmt_count->get_result();
+        if ($count_row = $count_result->fetch_assoc()) {
+            $total_practice_tests = $count_row['total'];
+        }
+        $stmt_count->close();
+    } else {
+        $count_result = $conn->query($count_sql);
+        if ($count_result) {
+            $count_row = $count_result->fetch_assoc();
+            $total_practice_tests = $count_row['total'];
+        }
+    }
+    
+    $total_practice_pages = ceil($total_practice_tests / $tests_per_page);
+
+    // Fetch practice tests với điều kiện
+    $sql_practice = "SELECT * FROM baitest WHERE {$where_clause} ORDER BY {$order_by} LIMIT ? OFFSET ?";
     $stmt_practice = $conn->prepare($sql_practice);
-    $stmt_practice->bind_param("ii", $tests_per_page, $offset);
+    
+    // Bind parameters
+    $params[] = $tests_per_page;
+    $params[] = $offset;
+    $param_types .= "ii";
+    
+    $stmt_practice->bind_param($param_types, ...$params);
     $stmt_practice->execute();
     $result_practice_tests = $stmt_practice->get_result();
 
@@ -974,20 +1119,264 @@ function render_test_card_v2($test, $conn, $aos_delay = 0)
             font-size: 13px;
         }
     }
+
+    /* --- Search and Filter Styles --- */
+    .search-filter-container {
+        background: var(--neutral-white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-soft);
+        padding: 25px;
+        margin-bottom: 30px;
+        border: 1px solid var(--border-color);
+    }
+
+    .search-filter-form {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr auto;
+        gap: 15px;
+        align-items: end;
+    }
+
+    .form-group-search {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-group-search label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-group-search label i {
+        color: var(--brand-color);
+        font-size: 16px;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+    }
+
+    .search-input-wrapper i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--neutral-gray);
+        font-size: 16px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 15px 12px 45px;
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        background: var(--neutral-white);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--brand-color);
+        box-shadow: 0 0 0 3px rgba(13, 179, 59, 0.1);
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 15px;
+        background: var(--neutral-white);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--brand-color);
+        box-shadow: 0 0 0 3px rgba(13, 179, 59, 0.1);
+    }
+
+    .search-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-search,
+    .btn-reset {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    .btn-search {
+        background: var(--brand-color);
+        color: var(--neutral-white);
+    }
+
+    .btn-search:hover {
+        background: var(--brand-color-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(13, 179, 59, 0.3);
+    }
+
+    .btn-reset {
+        background: var(--neutral-light);
+        color: var(--neutral-gray);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-reset:hover {
+        background: #e9ecef;
+        border-color: var(--neutral-gray);
+        transform: translateY(-2px);
+    }
+
+    .active-filters {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .active-filters-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--neutral-gray);
+    }
+
+    .filter-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        background: var(--brand-color);
+        color: var(--neutral-white);
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .filter-badge i {
+        font-size: 12px;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--neutral-white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .no-results i {
+        font-size: 64px;
+        color: var(--neutral-gray);
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .no-results h3 {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 10px;
+    }
+
+    .no-results p {
+        font-size: 16px;
+        color: var(--neutral-gray);
+    }
+
+    /* Responsive Search Filter */
+    @media (max-width: 991px) {
+        .search-filter-form {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .form-group-search:first-child {
+            grid-column: 1 / -1;
+        }
+
+        .search-buttons {
+            grid-column: 1 / -1;
+            justify-content: flex-end;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .search-filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .search-buttons {
+            flex-direction: column;
+        }
+
+        .btn-search,
+        .btn-reset {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .active-filters {
+            justify-content: center;
+        }
+    }
 </style>
 
-<div class="tests-container-v2"> <?php if ($placement_test && !$trinh_do_hocvien): ?>
-        <div class="placement-test-cta-v2" data-aos="zoom-in">
-            <h2><i class="fa-solid fa-rocket"></i> Kiểm tra trình độ đầu vào!</h2>
-            <p>Xác định năng lực hiện tại của bạn chỉ với bài kiểm tra ngắn.</p>
-            <a href="index.php?nav=question_detail&id_baitest=<?php echo $placement_test['id_baitest']; ?>" class="cta-button-v2">
-                <i class="fa-solid fa-play"></i> Làm bài ngay
-            </a>
+<div class="tests-container-v2"> 
+    <?php if (!empty($placement_tests)): ?>
+        <h2 class="tests-section-title">
+            <i class="fa-solid fa-clipboard-check"></i> Bài test đầu vào
+        </h2>
+        <div class="tests-grid">
+            <?php
+            $delay = 0;
+            foreach ($placement_tests as $test) {
+                render_test_card_v2($test, $conn, $delay);
+                $delay += 100;
+            }
+            ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($periodic_tests)): ?>
+        <h2 class="tests-section-title">
+            <i class="fa-solid fa-calendar-check"></i> Bài kiểm tra định kỳ
+        </h2>
+        <div class="tests-grid">
+            <?php
+            $delay = 0;
+            foreach ($periodic_tests as $test) {
+                render_test_card_v2($test, $conn, $delay);
+                $delay += 100;
+            }
+            ?>
         </div>
     <?php endif; ?>
 
     <?php if (!empty($course_tests)): ?>
-        <h2 class="tests-section-title">Bài kiểm tra khóa học</h2>
+        <h2 class="tests-section-title">
+            <i class="fa-solid fa-graduation-cap"></i> Bài ôn tập của khóa học & lớp học
+        </h2>
         <div class="tests-grid">
             <?php
             $delay = 0;
@@ -999,7 +1388,125 @@ function render_test_card_v2($test, $conn, $aos_delay = 0)
         </div>
     <?php endif; ?>
 
-    <h2 class="tests-section-title">Bài ôn tập tự do</h2>
+    <h2 class="tests-section-title">
+        <i class="fa-solid fa-book-open"></i> Bài ôn tập công khai
+    </h2>
+    
+    <!-- Search and Filter Section -->
+    <div class="search-filter-container" data-aos="fade-up">
+        <form method="GET" action="index.php" class="search-filter-form">
+            <input type="hidden" name="nav" value="question">
+            
+            <!-- Search Input -->
+            <div class="form-group-search">
+                <label for="search">
+                    <i class="fas fa-search"></i>
+                    Tìm kiếm bài test
+                </label>
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input 
+                        type="text" 
+                        id="search" 
+                        name="search" 
+                        class="search-input" 
+                        placeholder="Nhập tên bài test..." 
+                        value="<?php echo htmlspecialchars($search_keyword); ?>"
+                    >
+                </div>
+            </div>
+
+            <!-- Time Filter -->
+            <div class="form-group-search">
+                <label for="filter_time">
+                    <i class="fas fa-clock"></i>
+                    Thời gian
+                </label>
+                <select id="filter_time" name="filter_time" class="filter-select">
+                    <option value="">Tất cả</option>
+                    <option value="short" <?php echo $filter_time === 'short' ? 'selected' : ''; ?>>Ngắn (≤ 20 phút)</option>
+                    <option value="medium" <?php echo $filter_time === 'medium' ? 'selected' : ''; ?>>Trung bình (20-40 phút)</option>
+                    <option value="long" <?php echo $filter_time === 'long' ? 'selected' : ''; ?>>Dài (> 40 phút)</option>
+                </select>
+            </div>
+
+            <!-- Sort By -->
+            <div class="form-group-search">
+                <label for="sort_by">
+                    <i class="fas fa-sort"></i>
+                    Sắp xếp
+                </label>
+                <select id="sort_by" name="sort_by" class="filter-select">
+                    <option value="name_asc" <?php echo $sort_by === 'name_asc' ? 'selected' : ''; ?>>Tên A-Z</option>
+                    <option value="name_desc" <?php echo $sort_by === 'name_desc' ? 'selected' : ''; ?>>Tên Z-A</option>
+                    <option value="time_asc" <?php echo $sort_by === 'time_asc' ? 'selected' : ''; ?>>Thời gian tăng dần</option>
+                    <option value="time_desc" <?php echo $sort_by === 'time_desc' ? 'selected' : ''; ?>>Thời gian giảm dần</option>
+                    <option value="newest" <?php echo $sort_by === 'newest' ? 'selected' : ''; ?>>Mới nhất</option>
+                    <option value="oldest" <?php echo $sort_by === 'oldest' ? 'selected' : ''; ?>>Cũ nhất</option>
+                </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="search-buttons">
+                <button type="submit" class="btn-search">
+                    <i class="fas fa-search"></i>
+                    Tìm kiếm
+                </button>
+                <a href="index.php?nav=question" class="btn-reset">
+                    <i class="fas fa-rotate-right"></i>
+                    Đặt lại
+                </a>
+            </div>
+        </form>
+
+        <!-- Active Filters Display -->
+        <?php if (!empty($search_keyword) || !empty($filter_time) || $sort_by !== 'name_asc'): ?>
+            <div class="active-filters">
+                <span class="active-filters-label">
+                    <i class="fas fa-filter"></i>
+                    Bộ lọc đang áp dụng:
+                </span>
+                
+                <?php if (!empty($search_keyword)): ?>
+                    <span class="filter-badge">
+                        <i class="fas fa-search"></i>
+                        "<?php echo htmlspecialchars($search_keyword); ?>"
+                    </span>
+                <?php endif; ?>
+                
+                <?php if (!empty($filter_time)): ?>
+                    <span class="filter-badge">
+                        <i class="fas fa-clock"></i>
+                        <?php 
+                            $time_labels = [
+                                'short' => 'Ngắn (≤ 20 phút)',
+                                'medium' => 'Trung bình (20-40 phút)',
+                                'long' => 'Dài (> 40 phút)'
+                            ];
+                            echo $time_labels[$filter_time] ?? $filter_time;
+                        ?>
+                    </span>
+                <?php endif; ?>
+                
+                <?php if ($sort_by !== 'name_asc'): ?>
+                    <span class="filter-badge">
+                        <i class="fas fa-sort"></i>
+                        <?php 
+                            $sort_labels = [
+                                'name_desc' => 'Tên Z-A',
+                                'time_asc' => 'Thời gian tăng dần',
+                                'time_desc' => 'Thời gian giảm dần',
+                                'newest' => 'Mới nhất',
+                                'oldest' => 'Cũ nhất'
+                            ];
+                            echo $sort_labels[$sort_by] ?? 'Tên A-Z';
+                        ?>
+                    </span>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
     <div class="tests-grid">
         <?php
         if (!empty($practice_tests)) {
@@ -1009,13 +1516,37 @@ function render_test_card_v2($test, $conn, $aos_delay = 0)
                 $delay += 100;
             }
         } else {
-            echo '<p class="text-muted text-center w-100">Chưa có bài ôn tập nào.</p>'; // Thông báo nếu không có bài
+            echo '<div class="no-results" style="grid-column: 1 / -1;">
+                    <i class="fas fa-search"></i>
+                    <h3>Không tìm thấy bài test nào</h3>
+                    <p>Vui lòng thử lại với từ khóa hoặc bộ lọc khác</p>
+                  </div>';
         }
         ?>
     </div>
 
     <!-- Pagination for Practice Tests -->
     <?php if ($total_practice_pages > 1): ?>
+        <?php
+        // Build query string for pagination
+        $pagination_params = [
+            'nav' => 'question'
+        ];
+        if (!empty($search_keyword)) {
+            $pagination_params['search'] = $search_keyword;
+        }
+        if (!empty($filter_time)) {
+            $pagination_params['filter_time'] = $filter_time;
+        }
+        if ($sort_by !== 'name_asc') {
+            $pagination_params['sort_by'] = $sort_by;
+        }
+        
+        function build_pagination_url($params, $page) {
+            $params['test_page'] = $page;
+            return 'index.php?' . http_build_query($params) . '#practice-tests';
+        }
+        ?>
         <div class="question-pagination-container" data-aos="fade-up">
             <div class="question-pagination">
                 <?php
@@ -1023,7 +1554,7 @@ function render_test_card_v2($test, $conn, $aos_delay = 0)
                 if ($practice_current_page > 1):
                     $prev_page = $practice_current_page - 1;
                 ?>
-                    <a href="index.php?nav=question&test_page=<?php echo $prev_page; ?>#practice-tests" class="question-pagination-btn question-pagination-prev">
+                    <a href="<?php echo build_pagination_url($pagination_params, $prev_page); ?>" class="question-pagination-btn question-pagination-prev">
                         <i class="fas fa-chevron-left"></i>
                         <span>Trước</span>
                     </a>
@@ -1044,14 +1575,14 @@ function render_test_card_v2($test, $conn, $aos_delay = 0)
                     // First page
                     if ($start > 1):
                     ?>
-                        <a href="index.php?nav=question&test_page=1#practice-tests" class="question-pagination-number">1</a>
+                        <a href="<?php echo build_pagination_url($pagination_params, 1); ?>" class="question-pagination-number">1</a>
                         <?php if ($start > 2): ?>
                             <span class="question-pagination-dots">...</span>
                         <?php endif; ?>
                     <?php endif; ?>
 
                     <?php for ($i = $start; $i <= $end; $i++): ?>
-                        <a href="index.php?nav=question&test_page=<?php echo $i; ?>#practice-tests"
+                        <a href="<?php echo build_pagination_url($pagination_params, $i); ?>"
                             class="question-pagination-number <?php echo $i == $practice_current_page ? 'active' : ''; ?>">
                             <?php echo $i; ?>
                         </a>
@@ -1062,7 +1593,7 @@ function render_test_card_v2($test, $conn, $aos_delay = 0)
                         <?php if ($end < $total_practice_pages - 1): ?>
                             <span class="question-pagination-dots">...</span>
                         <?php endif; ?>
-                        <a href="index.php?nav=question&test_page=<?php echo $total_practice_pages; ?>#practice-tests" class="question-pagination-number"><?php echo $total_practice_pages; ?></a>
+                        <a href="<?php echo build_pagination_url($pagination_params, $total_practice_pages); ?>" class="question-pagination-number"><?php echo $total_practice_pages; ?></a>
                     <?php endif; ?>
                 </div>
 
@@ -1071,7 +1602,7 @@ function render_test_card_v2($test, $conn, $aos_delay = 0)
                 if ($practice_current_page < $total_practice_pages):
                     $next_page = $practice_current_page + 1;
                 ?>
-                    <a href="index.php?nav=question&test_page=<?php echo $next_page; ?>#practice-tests" class="question-pagination-btn question-pagination-next">
+                    <a href="<?php echo build_pagination_url($pagination_params, $next_page); ?>" class="question-pagination-btn question-pagination-next">
                         <span>Sau</span>
                         <i class="fas fa-chevron-right"></i>
                     </a>
