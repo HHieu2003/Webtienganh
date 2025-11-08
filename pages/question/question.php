@@ -7,14 +7,223 @@ $hocvien_id = $_SESSION['id_hocvien'] ?? null;
 $trinh_do_hocvien = null; // Sẽ được cập nhật sau nếu có
 
 if (!$hocvien_id) {
-    // Thay vì echo script, chuyển hướng an toàn hơn nếu header chưa được gửi
-    if (!headers_sent()) {
-        header('Location: ./pages/login.php?redirect=question');
-        exit;
-    } else {
-        echo "<script>alert('Vui lòng đăng nhập để làm bài kiểm tra!'); window.location.href='./pages/login.php';</script>";
-        exit;
-    }
+    // Hiển thị modal thông báo đẹp thay vì alert
+    ?>
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Yêu cầu đăng nhập</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                overflow: hidden;
+            }
+            
+            .login-required-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                backdrop-filter: blur(10px);
+                z-index: 9999;
+                animation: fadeIn 0.3s ease-out;
+            }
+            
+            .login-required-modal {
+                position: relative;
+                background: white;
+                border-radius: 24px;
+                padding: 50px 40px;
+                max-width: 480px;
+                width: 90%;
+                box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+                animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+                text-align: center;
+            }
+            
+            .login-required-icon {
+                width: 90px;
+                height: 90px;
+                background: linear-gradient(135deg, #0db33b 0%, #0a8a2c 100%);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 25px;
+                box-shadow: 0 10px 30px rgba(13, 179, 59, 0.3);
+                animation: bounceIcon 0.8s ease-out;
+            }
+            
+            .login-required-icon i {
+                font-size: 45px;
+                color: white;
+            }
+            
+            .login-required-title {
+                font-size: 28px;
+                font-weight: 700;
+                color: #212529;
+                margin-bottom: 15px;
+            }
+            
+            .login-required-message {
+                font-size: 16px;
+                color: #6c757d;
+                line-height: 1.6;
+                margin-bottom: 30px;
+            }
+            
+            .login-required-buttons {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .login-btn {
+                padding: 14px 35px;
+                background: linear-gradient(135deg, #0db33b 0%, #0a8a2c 100%);
+                color: white;
+                border: none;
+                border-radius: 50px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                box-shadow: 0 8px 20px rgba(13, 179, 59, 0.3);
+            }
+            
+            .login-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 12px 30px rgba(13, 179, 59, 0.4);
+            }
+            
+            .back-btn {
+                padding: 14px 35px;
+                background: #f8f9fa;
+                color: #6c757d;
+                border: 2px solid #dee2e6;
+                border-radius: 50px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .back-btn:hover {
+                background: #e9ecef;
+                border-color: #adb5bd;
+                transform: translateY(-2px);
+            }
+            
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+                to {
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(50px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            @keyframes bounceIcon {
+                0%, 100% {
+                    transform: scale(1);
+                }
+                25% {
+                    transform: scale(0.9);
+                }
+                50% {
+                    transform: scale(1.1);
+                }
+                75% {
+                    transform: scale(0.95);
+                }
+            }
+            
+            @media (max-width: 576px) {
+                .login-required-modal {
+                    padding: 40px 25px;
+                }
+                
+                .login-required-title {
+                    font-size: 24px;
+                }
+                
+                .login-required-buttons {
+                    flex-direction: column;
+                }
+                
+                .login-btn, .back-btn {
+                    width: 100%;
+                    justify-content: center;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="login-required-overlay">
+            <div class="login-required-modal">
+                <div class="login-required-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h2 class="login-required-title">Yêu cầu đăng nhập</h2>
+                <p class="login-required-message">
+                    Bạn cần đăng nhập để truy cập bài kiểm tra trắc nghiệm.<br>
+                    Vui lòng đăng nhập hoặc đăng ký tài khoản để tiếp tục!
+                </p>
+                <div class="login-required-buttons">
+                    <a href="./pages/login.php?redirect=question" class="login-btn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Đăng nhập ngay
+                    </a>
+                    <a href="./index.php" class="back-btn">
+                        <i class="fas fa-home"></i>
+                        Về trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit;
 }
 
 // --- Lấy thông tin học viên và các bài test ---

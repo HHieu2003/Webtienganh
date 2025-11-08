@@ -79,6 +79,8 @@ if (!isset($_SESSION['has_counted'])) {
     </div>
     <!-- ✅ THÊM CHATBOT WIDGET -->
 
+    <?php include('./chatbot/chatbot_widget.php'); ?>
+    <?php include(dirname(__FILE__) . '/pages/contact-icon/contact-widget.php'); ?>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
