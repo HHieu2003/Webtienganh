@@ -4,16 +4,28 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+// Kiểm tra quyền giảng viên
+if (!isset($_SESSION['id_giangvien'])) {
+    header('Location: ../../index.php');
+    exit();
+}
+
+$id_giangvien = $_SESSION['id_giangvien'];
+
 // --- XỬ LÝ TÌM KIẾM ---
 $search_term = $_GET['search'] ?? '';
 $sql_search = "";
-$params = [];
-$types = "";
+$params = [$id_giangvien]; // Luôn có id_giangvien ở đầu
+$types = "i";
+
+// Thêm điều kiện tìm kiếm
 if (!empty($search_term)) {
-    $sql_search = " WHERE bt.ten_baitest LIKE ? OR kh.ten_khoahoc LIKE ? OR lh.ten_lop LIKE ?";
+    $sql_search = " AND (bt.ten_baitest LIKE ? OR kh.ten_khoahoc LIKE ? OR lh.ten_lop LIKE ?)";
     $search_param = "%" . $search_term . "%";
-    $params = [$search_param, $search_param, $search_param];
-    $types = "sss";
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $types .= "sss";
 }
 
 // --- Pagination settings ---
@@ -27,20 +39,16 @@ $sql_count = "
     FROM baitest bt 
     LEFT JOIN khoahoc kh ON bt.id_khoahoc = kh.id_khoahoc
     LEFT JOIN lop_hoc lh ON bt.id_lop = lh.id_lop
+    WHERE bt.id_lop IN (SELECT id_lop FROM lop_hoc WHERE id_giangvien = ?)
     $sql_search
 ";
 
-if (!empty($params)) {
-    $stmt_count = $conn->prepare($sql_count);
-    $stmt_count->bind_param($types, ...$params);
-    $stmt_count->execute();
-    $count_result = $stmt_count->get_result();
-    $total_tests = $count_result->fetch_assoc()['total'];
-    $stmt_count->close();
-} else {
-    $count_result = $conn->query($sql_count);
-    $total_tests = $count_result->fetch_assoc()['total'];
-}
+$stmt_count = $conn->prepare($sql_count);
+$stmt_count->bind_param($types, ...$params);
+$stmt_count->execute();
+$count_result = $stmt_count->get_result();
+$total_tests = $count_result->fetch_assoc()['total'];
+$stmt_count->close();
 
 $total_pages = ceil($total_tests / $tests_per_page);
 
@@ -54,29 +62,36 @@ $sql = "
     FROM baitest bt 
     LEFT JOIN khoahoc kh ON bt.id_khoahoc = kh.id_khoahoc
     LEFT JOIN lop_hoc lh ON bt.id_lop = lh.id_lop
+    WHERE bt.id_lop IN (SELECT id_lop FROM lop_hoc WHERE id_giangvien = ?)
     $sql_search
     ORDER BY bt.id_baitest DESC
     LIMIT ? OFFSET ?
 ";
 
-if (!empty($params)) {
-    $stmt = $conn->prepare($sql);
-    $params[] = $tests_per_page;
-    $params[] = $offset;
-    $types .= "ii";
-    $stmt->bind_param($types, ...$params);
-    $stmt->execute();
-    $result = $stmt->get_result();
-} else {
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ii", $tests_per_page, $offset);
-    $stmt->execute();
-    $result = $stmt->get_result();
-}
+$stmt = $conn->prepare($sql);
+$params[] = $tests_per_page;
+$params[] = $offset;
+$types .= "ii";
+$stmt->bind_param($types, ...$params);
+$stmt->execute();
+$result = $stmt->get_result();
 
-// Lấy danh sách khóa học cho các modal
-$courses = $conn->query("SELECT id_khoahoc, ten_khoahoc FROM khoahoc ORDER BY ten_khoahoc");
-$courses_for_edit_modal = $conn->query("SELECT id_khoahoc, ten_khoahoc FROM khoahoc ORDER BY ten_khoahoc");
+// Lấy danh sách khóa học mà giảng viên đang dạy
+$courses = $conn->query("
+    SELECT DISTINCT kh.id_khoahoc, kh.ten_khoahoc 
+    FROM khoahoc kh
+    INNER JOIN lop_hoc lh ON kh.id_khoahoc = lh.id_khoahoc
+    WHERE lh.id_giangvien = {$id_giangvien}
+    ORDER BY kh.ten_khoahoc
+");
+
+$courses_for_edit_modal = $conn->query("
+    SELECT DISTINCT kh.id_khoahoc, kh.ten_khoahoc 
+    FROM khoahoc kh
+    INNER JOIN lop_hoc lh ON kh.id_khoahoc = lh.id_khoahoc
+    WHERE lh.id_giangvien = {$id_giangvien}
+    ORDER BY kh.ten_khoahoc
+");
 
 function get_test_type_badge($type)
 {

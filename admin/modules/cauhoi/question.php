@@ -2,6 +2,11 @@
 // File: admin/modules/cauhoi/question.php
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
 
+// Kiểm tra quyền: Admin hoặc Giảng viên
+$is_admin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'];
+$is_teacher = isset($_SESSION['id_giangvien']);
+$id_giangvien = $_SESSION['id_giangvien'] ?? null;
+
 // --- Search and Filter parameters ---
 $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
 $test_type_filter = isset($_GET['test_type']) ? trim($_GET['test_type']) : '';
@@ -32,6 +37,13 @@ if (!empty($test_type_filter)) {
 if (!empty($course_filter) && $course_filter !== '') {
     $where_conditions[] = "bt.id_khoahoc = ?";
     $params[] = intval($course_filter);
+    $types .= "i";
+}
+
+// Nếu là giảng viên (không phải admin), CHỈ hiển thị bài test thuộc lớp mà giảng viên dạy
+if ($is_teacher && !$is_admin) {
+    $where_conditions[] = "bt.id_lop IN (SELECT id_lop FROM lop_hoc WHERE id_giangvien = ?)";
+    $params[] = $id_giangvien;
     $types .= "i";
 }
 
