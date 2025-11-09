@@ -1,66 +1,93 @@
 <?php
-$form_message = '';
-$form_message_type = ''; // 'success' hoặc 'error'
+require('./config/PHPMailer/src/Exception.php');
+require('./config/PHPMailer/src/PHPMailer.php');
+require('./config/PHPMailer/src/SMTP.php');
+require('./config/sendmail.php');
+include('./config/config.php');
+// Kiểm tra nếu form được gửi bằng phương thức POST
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Lấy dữ liệu từ form và đảm bảo an toàn
+    $ten_hocvien = $conn->real_escape_string($_POST['ten_hocvien']);
+    $so_dien_thoai = $conn->real_escape_string($_POST['so_dien_thoai']);
+    $email = $conn->real_escape_string($_POST['email']);
+    $khung_gio = $conn->real_escape_string($_POST['khung_gio']);
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_consult'])) {
-    // Lấy dữ liệu từ form và làm sạch
-    $ten_hocvien = trim($_POST['ten_hocvien']);
-    $so_dien_thoai = trim($_POST['so_dien_thoai']);
-    $email = trim($_POST['email']);
-    $khung_gio = $_POST['khung_gio'];
-
-    // Kiểm tra các trường bắt buộc
+    // Kiểm tra nếu các trường bắt buộc không trống
     if (empty($ten_hocvien) || empty($so_dien_thoai) || empty($khung_gio)) {
-        $form_message = "Vui lòng điền đầy đủ thông tin bắt buộc!";
-        $form_message_type = 'error';
-    }
-    // Validate số điện thoại (10-11 số, bắt đầu bằng 0)
-    elseif (!preg_match('/^0[0-9]{9,10}$/', $so_dien_thoai)) {
-        $form_message = "Số điện thoại không hợp lệ! Vui lòng nhập đúng định dạng (10-11 số, bắt đầu bằng 0).";
-        $form_message_type = 'error';
-    }
-    // Validate email nếu có nhập
-    elseif (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $form_message = "Địa chỉ email không hợp lệ! Vui lòng kiểm tra lại.";
-        $form_message_type = 'error';
-    }
-    // Kiểm tra tên học viên (chỉ chữ cái và khoảng trắng, ít nhất 2 ký tự)
-    elseif (!preg_match('/^[a-zA-ZÀ-ỹ\s]{2,}$/u', $ten_hocvien)) {
-        $form_message = "Họ và tên không hợp lệ! Vui lòng chỉ nhập chữ cái (tối thiểu 2 ký tự).";
-        $form_message_type = 'error';
-    }
-    else {
-        // Kiểm tra số điện thoại đã tồn tại trong 24h gần đây (tránh spam)
-        $sql_check = "SELECT id FROM tuvan WHERE so_dien_thoai = ? AND ngay_gui >= DATE_SUB(NOW(), INTERVAL 24 HOUR)";
-        $stmt_check = $conn->prepare($sql_check);
-        $stmt_check->bind_param("s", $so_dien_thoai);
-        $stmt_check->execute();
-        $result_check = $stmt_check->get_result();
-        
-        if ($result_check->num_rows > 0) {
-            $form_message = "Bạn đã gửi yêu cầu tư vấn trong 24h qua. Vui lòng chờ chúng tôi liên hệ!";
-            $form_message_type = 'error';
-            $stmt_check->close();
-        } else {
-            $stmt_check->close();
-            
-            // Sử dụng prepared statements để chống SQL Injection
-            $sql_form = "INSERT INTO tuvan (ten_hocvien, so_dien_thoai, email, khung_gio) VALUES (?, ?, ?, ?)";
-            $stmt_form = $conn->prepare($sql_form);
-            $stmt_form->bind_param("ssss", $ten_hocvien, $so_dien_thoai, $email, $khung_gio);
+        echo "Vui lòng điền đầy đủ thông tin bắt buộc!";
+    } else {
+        // Câu lệnh SQL để chèn dữ liệu vào bảng
+        $sql = "INSERT INTO tuvan (ten_hocvien, so_dien_thoai, email, khung_gio) 
+                VALUES ('$ten_hocvien', '$so_dien_thoai', '$email', '$khung_gio')";
 
-            if ($stmt_form->execute()) {
-                $form_message = "Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.";
-                $form_message_type = 'success';
-            } else {
-                $form_message = "Lỗi: Không thể gửi yêu cầu. Vui lòng thử lại.";
-                $form_message_type = 'error';
-            }
-            $stmt_form->close();
+        // Thực thi câu lệnh SQL
+        if ($conn->query($sql) === TRUE) {
+            $to = $email;
+
+            $subject = "Cảm ơn bạn đã đăng ký tư vấn từ Tiếng Anh Fighter ";
+        // --- NỘI DUNG EMAIL ĐÃ CHỈNH SỬA SANG HTML ---
+            $message = "
+                <html>
+                <head>
+                    <title>$subject</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                        }
+                        .container {
+                            width: 90%;
+                            margin: 20px auto;
+                            padding: 25px;
+                            border: 1px solid #ddd;
+                            border-radius: 8px;
+                            background-color: #f9f9f9;
+                        }
+                        .header {
+                            font-size: 24px;
+                            font-weight: bold;
+                            color: #0db33b; /* Màu xanh lá cây chủ đạo của bạn */
+                        }
+                        .content p {
+                            margin-bottom: 15px;
+                        }
+                        .footer {
+                            margin-top: 20px;
+                            font-size: 0.9em;
+                            color: #777;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <div class='header'>
+                            Chào $ten_hocvien,
+                        </div>
+                        <div class='content'>
+                            <p>Cảm ơn bạn đã đăng ký nhận tư vấn từ trung tâm <strong>Tiếng Anh Fighter</strong>.</p>
+                            <p>Chúng tôi đã nhận được thông tin của bạn và sẽ liên hệ với bạn trong thời gian sớm nhất qua số điện thoại <strong>$so_dien_thoai</strong> vào khung giờ <strong>$khung_gio</strong>.</p>
+                            <p>Nếu cần hỗ trợ gấp, bạn có thể liên hệ trực tiếp với chúng tôi qua hotline.</p>
+                        </div>
+                        <div class='footer'>
+                            <p>Trân trọng,<br>Trung Tâm Tiếng Anh Fighter</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            ";
+           
+            sendmail($to, $subject, $message);
+        } else {
+            echo "Lỗi: " . $sql . "<br>" . $conn->error;
         }
     }
 }
+
 ?>
+
+
+                
+       
 
 <div class="consult-section-final">
     <div class="consult-bg-shapes">
@@ -103,15 +130,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_consult'])) {
             <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
                 <div class="final-form-wrapper">
                     <h3 class="final-form-title">Nhận tư vấn miễn phí</h3>
-                    <form action="<?php echo htmlspecialchars($_SERVER["REQUEST_URI"]); ?>#consult-form" method="post" id="consult-form">
-
-                        <?php if (!empty($form_message)) : ?>
-                            <div class="final-alert final-alert-<?php echo $form_message_type; ?>">
-                                <?php echo $form_message; ?>
-                            </div>
-                        <?php endif; ?>
-
-                        
+                    <form action="" method="post" id="consult-form">
+                
                         <div class="form-group mb-3">
                             <input type="text" name="ten_hocvien" class="final-form-control" placeholder="Họ và Tên *" required pattern="[a-zA-ZÀ-ỹ\s]{2,}" title="Vui lòng chỉ nhập chữ cái (tối thiểu 2 ký tự)">
                         </div>

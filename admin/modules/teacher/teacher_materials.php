@@ -6,7 +6,7 @@ if (session_status() == PHP_SESSION_NONE) {
 if (!isset($_SESSION['is_teacher']) || !$_SESSION['is_teacher']) die("Truy cập bị từ chối.");
 
 $id_giangvien = $_SESSION['id_giangvien'];
-$selected_lop_id = $_GET['lop_id'] ?? null;
+$selected_lop_id = $_GET['lop_id'] ?? 'all'; // Mặc định hiển thị tất cả
 
 // Lấy danh sách các lớp học của giảng viên để tạo bộ lọc
 $sql_classes = "SELECT id_lop, ten_lop FROM lop_hoc WHERE id_giangvien = ? AND trang_thai = 'dang hoc' ORDER BY ten_lop";
@@ -17,11 +17,24 @@ $result_classes = $stmt_classes->get_result();
 $classes_list = $result_classes->fetch_all(MYSQLI_ASSOC);
 $stmt_classes->close();
 
-$materials = [];
+$materials = null;
 $is_owner = false;
 $selected_class_name = '';
+$show_all = ($selected_lop_id === 'all' || $selected_lop_id === '');
 
-if ($selected_lop_id) {
+if ($show_all) {
+    // Hiển thị tất cả học liệu của tất cả lớp học của giảng viên
+    $sql_materials = "SELECT hl.id_hoclieu, hl.tieu_de, hl.loai_file, hl.duong_dan_file, hl.ngay_dang, lh.ten_lop 
+                      FROM hoc_lieu hl
+                      INNER JOIN lop_hoc lh ON hl.id_lop = lh.id_lop
+                      WHERE lh.id_giangvien = ? 
+                      ORDER BY hl.ngay_dang DESC";
+    $stmt_materials = $conn->prepare($sql_materials);
+    $stmt_materials->bind_param("i", $id_giangvien);
+    $stmt_materials->execute();
+    $materials = $stmt_materials->get_result();
+    $stmt_materials->close();
+} elseif ($selected_lop_id) {
     // Bảo mật: Kiểm tra lớp học có thuộc giảng viên không
     $stmt_check_owner = $conn->prepare("SELECT ten_lop FROM lop_hoc WHERE id_lop = ? AND id_giangvien = ?");
     $stmt_check_owner->bind_param("si", $selected_lop_id, $id_giangvien);
@@ -39,6 +52,7 @@ if ($selected_lop_id) {
         $stmt_materials->bind_param("s", $selected_lop_id);
         $stmt_materials->execute();
         $materials = $stmt_materials->get_result();
+        $stmt_materials->close();
     }
 }
 
@@ -179,6 +193,7 @@ function get_file_type_details($file_type)
         font-size: 0.85rem;
         color: var(--gray-text);
         margin-bottom: 1.5rem;
+        line-height: 1.6;
     }
 
     .material-actions {
@@ -194,9 +209,17 @@ function get_file_type_details($file_type)
 </style>
 
 <div class="container-fluid">
+    <?php if (isset($_SESSION['message'])): ?>
+        <div class="alert alert-<?php echo $_SESSION['message']['type']; ?> alert-dismissible fade show" role="alert">
+            <?php echo $_SESSION['message']['text']; ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php unset($_SESSION['message']); ?>
+    <?php endif; ?>
+    
     <div class="page-header animated-item">
         <h1 class="title-color mb-0" style="border:none; padding-bottom: 0;">Quản lý Học liệu</h1>
-        <?php if ($selected_lop_id && $is_owner): ?>
+        <?php if ($selected_lop_id && !$show_all && $is_owner): ?>
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addMaterialModal">
                 <i class="fa-solid fa-plus me-2"></i> Thêm học liệu
             </button>
@@ -210,7 +233,7 @@ function get_file_type_details($file_type)
                 <label for="class-filter" class="col-lg-3 col-form-label fw-bold">Chọn lớp học để quản lý:</label>
                 <div class="col-lg-9">
                     <select name="lop_id" id="class-filter" class="form-select" onchange="this.form.submit()">
-                        <option value="">-- Vui lòng chọn một lớp --</option>
+                        <option value="all" <?php echo $show_all ? 'selected' : ''; ?>>🌐 Xem toàn bộ học liệu</option>
                         <?php foreach ($classes_list as $class): ?>
                             <option value="<?php echo $class['id_lop']; ?>" <?php echo ($selected_lop_id == $class['id_lop']) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($class['ten_lop']); ?>
@@ -222,7 +245,49 @@ function get_file_type_details($file_type)
         </form>
     </div>
 
-    <?php if ($selected_lop_id): ?>
+    <?php if ($show_all): ?>
+        <!-- Hiển thị toàn bộ học liệu -->
+        <?php if ($materials && $materials->num_rows > 0): ?>
+            <div class="row g-4">
+                <?php
+                $index = 0;
+                while ($material = $materials->fetch_assoc()):
+                    $file_details = get_file_type_details($material['loai_file']);
+                ?>
+                    <div class="col-xl-3 col-lg-4 col-md-6 animated-item" style="animation-delay: <?php echo $index++ * 70; ?>ms;" id="material-card-<?php echo $material['id_hoclieu']; ?>">
+                        <div class="material-card">
+                            <div class="file-icon-wrapper" style="background-color: <?php echo $file_details['color']; ?>1A;">
+                                <i class="file-icon-bg fa-solid <?php echo $file_details['icon']; ?>" style="color: <?php echo $file_details['color']; ?>;"></i>
+                                <div class="file-icon-main" style="background-color: <?php echo $file_details['color']; ?>;">
+                                    <i class="fa-solid <?php echo $file_details['icon']; ?>"></i>
+                                </div>
+                            </div>
+                            <div class="material-details">
+                                <h5 class="material-title"><?php echo htmlspecialchars($material['tieu_de']); ?></h5>
+                                <p class="material-date">
+                                    <i class="fa-solid fa-school me-1"></i><?php echo htmlspecialchars($material['ten_lop']); ?><br>
+                                    <i class="fa-solid fa-calendar me-1"></i>Ngày đăng: <?php echo date("d/m/Y", strtotime($material['ngay_dang'])); ?>
+                                </p>
+                                <div class="material-actions">
+                                    <a href="../../<?php echo htmlspecialchars($material['duong_dan_file']); ?>" class="btn btn-sm btn-primary btn-material" download target="_blank">
+                                        <i class="fa-solid fa-download me-2"></i>Tải về
+                                    </a>
+                                    <button onclick="deleteMaterial(<?php echo $material['id_hoclieu']; ?>)" class="btn btn-sm btn-outline-danger btn-material" title="Xóa">
+                                        <i class="fa-solid fa-trash me-2"></i>Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+        <?php else: ?>
+            <div class="alert alert-light text-center mt-4 animated-item">
+                <i class="fa-solid fa-folder-open fa-3x mb-3 text-muted"></i>
+                <p class="mb-0">Bạn chưa có học liệu nào. <br>Hãy chọn một lớp học và bắt đầu thêm học liệu!</p>
+            </div>
+        <?php endif; ?>
+    <?php elseif ($selected_lop_id): ?>
         <?php if ($is_owner): ?>
             <?php if ($materials->num_rows > 0): ?>
                 <div class="row g-4">
@@ -243,7 +308,7 @@ function get_file_type_details($file_type)
                                     <h5 class="material-title"><?php echo htmlspecialchars($material['tieu_de']); ?></h5>
                                     <p class="material-date">Ngày đăng: <?php echo date("d/m/Y", strtotime($material['ngay_dang'])); ?></p>
                                     <div class="material-actions">
-                                        <a href="../<?php echo htmlspecialchars($material['duong_dan_file']); ?>" class="btn btn-sm btn-primary btn-material" download>
+                                        <a href="../../<?php echo htmlspecialchars($material['duong_dan_file']); ?>" class="btn btn-sm btn-primary btn-material" download target="_blank">
                                             <i class="fa-solid fa-download me-2"></i>Tải về
                                         </a>
                                         <button onclick="deleteMaterial(<?php echo $material['id_hoclieu']; ?>)" class="btn btn-sm btn-outline-danger btn-material" title="Xóa">
@@ -264,11 +329,6 @@ function get_file_type_details($file_type)
         <?php else: ?>
             <div class="alert alert-danger text-center mt-4 animated-item">Bạn không có quyền truy cập học liệu của lớp này.</div>
         <?php endif; ?>
-    <?php else: ?>
-        <div class="alert alert-info text-center mt-4 animated-item">
-            <i class="fa-solid fa-arrow-up fa-3x mb-3 text-muted"></i>
-            <p class="mb-0">Vui lòng chọn một lớp học từ menu ở trên để xem hoặc thêm học liệu.</p>
-        </div>
     <?php endif; ?>
 </div>
 

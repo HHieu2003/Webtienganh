@@ -6,23 +6,7 @@ if (!isset($_SESSION['id_hocvien'])) {
 
 $id_hocvien = $_SESSION['id_hocvien'];
 
-// --- Pagination settings ---
-$results_per_page = 8;
-$current_page = isset($_GET['result_page']) ? max(1, intval($_GET['result_page'])) : 1;
-$offset = ($current_page - 1) * $results_per_page;
-
-// --- Count total test results ---
-$sql_count = "SELECT COUNT(*) as total FROM ketquabaitest WHERE id_hocvien = ?";
-$stmt_count = $conn->prepare($sql_count);
-$stmt_count->bind_param("i", $id_hocvien);
-$stmt_count->execute();
-$count_result = $stmt_count->get_result();
-$total_results = $count_result->fetch_assoc()['total'];
-$stmt_count->close();
-
-$total_pages = ceil($total_results / $results_per_page);
-
-// Lấy danh sách kết quả bài kiểm tra của học viên với phân trang
+// Lấy tất cả kết quả bài kiểm tra của học viên
 $sql_results = "
     SELECT 
         kq.id_ketqua,
@@ -34,10 +18,9 @@ $sql_results = "
     JOIN baitest bt ON kq.id_baitest = bt.id_baitest
     WHERE kq.id_hocvien = ?
     ORDER BY kq.ngay_lam_bai DESC
-    LIMIT ? OFFSET ?
 ";
 $stmt = $conn->prepare($sql_results);
-$stmt->bind_param("iii", $id_hocvien, $results_per_page, $offset);
+$stmt->bind_param("i", $id_hocvien);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -351,68 +334,6 @@ function get_progress_bar_class($percentage)
             ?>
         </div>
 
-        <?php if ($total_pages > 1): ?>
-            <!-- Pagination -->
-            <div class="result-pagination-container">
-                <div class="result-pagination">
-                    <!-- Previous Button -->
-                    <a href="?nav=ketquakiemtra&result_page=<?php echo max(1, $current_page - 1); ?>"
-                        class="result-pagination-btn <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
-                        <i class="fas fa-chevron-left"></i>
-                        <span>Trước</span>
-                    </a>
-
-                    <!-- Page Numbers -->
-                    <div class="result-pagination-numbers">
-                        <?php
-                        $start_page = max(1, $current_page - 2);
-                        $end_page = min($total_pages, $current_page + 2);
-
-                        if ($start_page > 1) {
-                            echo '<a href="?nav=ketquakiemtra&result_page=1" class="result-pagination-number">1</a>';
-                            if ($start_page > 2) {
-                                echo '<span class="result-pagination-dots">...</span>';
-                            }
-                        }
-
-                        for ($i = $start_page; $i <= $end_page; $i++) {
-                            $active_class = ($i == $current_page) ? 'active' : '';
-                            echo '<a href="?nav=ketquakiemtra&result_page=' . $i . '" class="result-pagination-number ' . $active_class . '">' . $i . '</a>';
-                        }
-
-                        if ($end_page < $total_pages) {
-                            if ($end_page < $total_pages - 1) {
-                                echo '<span class="result-pagination-dots">...</span>';
-                            }
-                            echo '<a href="?nav=ketquakiemtra&result_page=' . $total_pages . '" class="result-pagination-number">' . $total_pages . '</a>';
-                        }
-                        ?>
-                    </div>
-
-                    <!-- Next Button -->
-                    <a href="?nav=ketquakiemtra&result_page=<?php echo min($total_pages, $current_page + 1); ?>"
-                        class="result-pagination-btn <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
-                        <span>Sau</span>
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                </div>
-
-                <!-- Pagination Info -->
-                <div class="result-pagination-info">
-                    <i class="fas fa-clipboard-check"></i>
-                    <span>
-                        Hiển thị
-                        <strong><?php echo min($offset + 1, $total_results); ?></strong>
-                        <span class="separator">-</span>
-                        <strong><?php echo min($offset + $results_per_page, $total_results); ?></strong>
-                        <span class="separator">/</span>
-                        <strong><?php echo $total_results; ?></strong>
-                        kết quả
-                    </span>
-                </div>
-            </div>
-        <?php endif; ?>
-
     <?php else: ?>
         <div class="alert alert-light text-center">
             <i class="fa-solid fa-file-circle-xmark fa-3x mb-3 text-muted"></i>
@@ -442,22 +363,6 @@ function get_progress_bar_class($percentage)
 
         progressBars.forEach(bar => {
             observer.observe(bar);
-        });
-
-        // Smooth scroll to top when clicking result pagination
-        const resultPaginationLinks = document.querySelectorAll('.result-pagination-number, .result-pagination-btn');
-        resultPaginationLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                setTimeout(() => {
-                    const contentPane = document.querySelector('.content-pane');
-                    if (contentPane) {
-                        contentPane.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-                }, 100);
-            });
         });
     });
 </script>

@@ -1,12 +1,12 @@
 <?php
-// File: admin/modules/add_material.php
-include('../../../config/config.php');
+// File: admin/modules/teacher/add_material.php
 session_start();
+include('../../../config/config.php');
 
 // --- KIỂM TRA ĐIỀU KIỆN BAN ĐẦU ---
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['id_giangvien'])) {
     // Nếu không phải POST request hoặc giảng viên chưa đăng nhập, chuyển hướng
-    header('Location: ../admin.php?nav=teacher_materials');
+    header('Location: ../../admin.php?nav=teacher_materials');
     exit();
 }
 
@@ -17,7 +17,7 @@ $tieu_de = $_POST['tieu_de'] ?? '';
 // --- KIỂM TRA DỮ LIỆU ĐẦU VÀO ---
 if (empty($id_lop) || empty($tieu_de) || !isset($_FILES['hoc_lieu_file']) || $_FILES['hoc_lieu_file']['error'] !== UPLOAD_ERR_OK) {
     $_SESSION['message'] = ['type' => 'danger', 'text' => 'Lỗi: Vui lòng điền đầy đủ thông tin và chọn file.'];
-    header('Location: ../admin.php?nav=teacher_materials&lop_id=' . $id_lop);
+    header('Location: ../../admin.php?nav=teacher_materials&lop_id=' . $id_lop);
     exit();
 }
 
@@ -28,7 +28,7 @@ $result_check = $stmt_check->get_result();
 if ($result_check->num_rows === 0) {
     // Nếu không có kết quả, tức giảng viên không sở hữu lớp này
     $_SESSION['message'] = ['type' => 'danger', 'text' => 'Lỗi: Bạn không có quyền thêm học liệu cho lớp này.'];
-    header('Location: ../admin.php?nav=teacher_materials');
+    header('Location: ../../admin.php?nav=teacher_materials');
     exit();
 }
 $stmt_check->close();
@@ -38,7 +38,7 @@ $stmt_check->close();
 $file = $_FILES['hoc_lieu_file'];
 $file_name = time() . '_' . basename($file['name']);
 $file_type = strtoupper(pathinfo($file_name, PATHINFO_EXTENSION));
-$target_dir = "../../uploads/materials/";
+$target_dir = "../../../uploads/materials/";
 
 if (!is_dir($target_dir)) { mkdir($target_dir, 0777, true); }
 
