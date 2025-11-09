@@ -5,8 +5,6 @@ header('Content-Type: application/json');
 
 if (isset($_GET['id_hocvien'])) {
     $id_hocvien = (int)$_GET['id_hocvien'];
-
-    // Câu lệnh SQL đã được sửa lại cho đúng
     $sql = "SELECT 
                 kh.ten_khoahoc, 
                 gv.ten_giangvien, 

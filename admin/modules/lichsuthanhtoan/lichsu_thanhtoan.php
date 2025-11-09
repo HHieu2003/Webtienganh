@@ -1,5 +1,4 @@
 <?php
-// PHP logic để lấy dữ liệu (giữ nguyên)
 $search_term = $_GET['search'] ?? '';
 $sql_search = "";
 $params = [];

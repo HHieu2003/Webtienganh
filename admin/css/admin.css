@@ -1,6 +1,3 @@
-/* ==================================================================
-   CSS MỚI CHO TRANG QUẢN TRỊ - GIAO DIỆN SÁNG & HIỆN ĐẠI
-================================================================== */
 
 /* --- Cài đặt biến màu và Global --- */
 :root {
@@ -40,7 +37,7 @@ a {
     min-height: 100vh;
 }
 
-/* --- Thanh điều hướng bên trái (Sidebar) - ĐÃ THIẾT KẾ LẠI --- */
+/* --- Thanh điều hướng bên trái (Sidebar) */
 .admin-sidebar {
     width: 265px;
     background-color: var(--sidebar-bg);
@@ -70,9 +67,12 @@ a {
     padding-top: 15px;
     overflow-y: auto;
     overflow-x: hidden;
-    max-height: calc(100vh - 80px); /* 80px là chiều cao của sidebar-header */
-    scroll-behavior: smooth; /* Smooth scrolling */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    max-height: calc(100vh - 80px);
+    /* 80px là chiều cao của sidebar-header */
+    scroll-behavior: smooth;
+    /* Smooth scrolling */
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling on iOS */
 }
 
 /* Custom Scrollbar cho Menu */
@@ -125,7 +125,7 @@ a {
     list-style: none;
     padding: 0;
     margin: 0 10px;
-    padding-bottom: 20px; /* Thêm khoảng trống ở cuối */
+    padding-bottom: 20px;
 }
 
 .admin-nav ul li a {
@@ -202,7 +202,6 @@ a {
     color: var(--brand-color);
 }
 
-/* --- Các phần còn lại giữ nguyên style --- */
 .admin-main {
     flex-grow: 1;
     display: flex;
@@ -321,16 +320,19 @@ a {
     font-size: 36px;
     font-weight: 700;
 }
+
 /* ======================================================= */
 /* === BỔ SUNG CSS CHO RESPONSIVE SIDEBAR === */
 /* ======================================================= */
 
 .admin-header .header-left {
-    display: none; /* Ẩn nút hamburger trên desktop */
+    display: none;
+    /* Ẩn nút hamburger trên desktop */
 }
 
 .sidebar-close-btn {
-    display: none; /* Ẩn nút X trên desktop */
+    display: none;
+    /* Ẩn nút X trên desktop */
     position: absolute;
     top: 10px;
     right: 15px;
@@ -347,12 +349,13 @@ a {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     z-index: 1040;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
 }
+
 .sidebar-overlay.show {
     opacity: 1;
     visibility: visible;
@@ -372,7 +375,7 @@ a {
 
 /* Table Header - Green Theme instead of Dark */
 .table thead.table-dark {
-        background: linear-gradient(135deg, #5aebcc 0%, #5a9ddd 100%);
+    background: linear-gradient(135deg, #5aebcc 0%, #5a9ddd 100%);
     color: white;
 }
 
@@ -540,13 +543,15 @@ a {
         height: 100vh;
         transition: transform 0.3s ease-in-out;
     }
+
     .admin-sidebar.show {
         transform: translateX(0);
     }
-    
+
     /* Menu scroll trên mobile */
     .admin-nav {
-        max-height: calc(100vh - 120px); /* Trừ header và padding */
+        max-height: calc(100vh - 120px);
+        /* Trừ header và padding */
         overflow-y: auto;
     }
 
@@ -559,7 +564,8 @@ a {
     }
 
     .admin-header .header-left {
-        display: block; /* Hiện nút hamburger trên mobile */
+        display: block;
+        /* Hiện nút hamburger trên mobile */
     }
 
     .menu-toggle {
@@ -571,7 +577,8 @@ a {
     }
 
     .sidebar-close-btn {
-        display: block; /* Hiện nút X trong sidebar trên mobile */
+        display: block;
+        /* Hiện nút X trong sidebar trên mobile */
     }
 }
 
@@ -580,48 +587,48 @@ a {
     .admin-content {
         padding: 1rem;
     }
-    
+
     .admin-header {
         padding: 0.75rem 1rem;
     }
-    
+
     .header-right a {
         font-size: 0.9rem;
         padding: 0.5rem 0.75rem;
     }
-    
+
     .header-right a i {
         margin-right: 0.25rem;
     }
-    
+
     .card {
         margin-bottom: 1rem;
     }
-    
+
     .card-header {
         padding: 0.75rem 1rem;
     }
-    
+
     .card-body {
         padding: 1rem;
     }
-    
+
     /* Table responsive improvements */
     .table-responsive {
         border: 1px solid var(--border-color);
         border-radius: 0.25rem;
     }
-    
+
     .table {
         margin-bottom: 0;
     }
-    
+
     /* Form improvements */
     .form-control,
     .form-select {
         font-size: 0.9rem;
     }
-    
+
     .btn {
         padding: 0.5rem 1rem;
         font-size: 0.9rem;
@@ -633,96 +640,97 @@ a {
     .admin-content {
         padding: 0.75rem;
     }
-    
+
     .admin-header {
         padding: 0.5rem 0.75rem;
     }
-    
+
     .admin-header .header-right a span {
-        display: none; /* Hide "Đăng xuất" text, keep only icon */
+        display: none;
+        /* Hide "Đăng xuất" text, keep only icon */
     }
-    
+
     .admin-header .header-right a i {
         margin-right: 0;
         font-size: 1.25rem;
     }
-    
+
     .card {
         border-radius: 0.5rem;
     }
-    
+
     .card-header {
         padding: 0.5rem 0.75rem;
     }
-    
+
     .card-header h4 {
         font-size: 0.95rem;
     }
-    
+
     .card-body {
         padding: 0.75rem;
     }
-    
+
     /* Sidebar improvements */
     .sidebar-header {
         font-size: 1.25rem;
         padding: 1rem;
     }
-    
+
     .admin-nav ul {
         margin: 0 5px;
     }
-    
+
     .admin-nav ul li a {
         padding: 12px 15px;
         font-size: 0.9rem;
     }
-    
+
     .admin-nav ul li a .fa-solid {
         font-size: 1rem;
     }
-    
+
     /* Form improvements */
     .form-label {
         font-size: 0.85rem;
         margin-bottom: 0.25rem;
     }
-    
+
     .form-control,
     .form-select,
     .btn {
         font-size: 0.85rem;
         padding: 0.5rem 0.75rem;
     }
-    
+
     .btn-sm {
         padding: 0.25rem 0.5rem;
         font-size: 0.75rem;
     }
-    
+
     /* Badge improvements */
     .badge {
         font-size: 0.7rem;
         padding: 0.25em 0.5em;
     }
-    
+
     /* Modal improvements */
     .modal-dialog {
         margin: 0.5rem;
     }
-    
+
     .modal-header {
         padding: 0.75rem;
     }
-    
+
     .modal-title {
         font-size: 1rem;
     }
-    
+
     .modal-body {
         padding: 0.75rem;
     }
-    
+
     .modal-footer {
         padding: 0.5rem 0.75rem;
     }
@@ -733,19 +741,19 @@ a {
     .admin-content {
         padding: 0.5rem;
     }
-    
+
     .card-header h4 {
         font-size: 0.85rem;
     }
-    
+
     .card-header h4 i {
         font-size: 0.8rem;
     }
-    
+
     .table {
         font-size: 0.75rem;
     }
-    
+
     .table th,
     .table td {
         padding: 0.4rem 0.2rem;

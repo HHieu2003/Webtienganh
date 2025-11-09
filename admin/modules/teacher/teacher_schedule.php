@@ -1,6 +1,8 @@
 <?php
 // File: admin/modules/teacher/teacher_schedule.php
-if (session_status() == PHP_SESSION_NONE) { session_start(); }
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 if (!isset($_SESSION['is_teacher']) || !$_SESSION['is_teacher']) die("Truy cập bị từ chối.");
 
 $id_giangvien = $_SESSION['id_giangvien'];
@@ -67,7 +69,8 @@ $stmt->close();
     /* Container chính không bị tràn */
     .container-fluid {
         max-width: 100%;
-        overflow-x: hidden; /* Ngăn tràn ngang */
+        overflow-x: hidden;
+        /* Ngăn tràn ngang */
     }
 
     /* Week navigation - không scroll */
@@ -81,7 +84,8 @@ $stmt->close();
         background-color: #fff;
         border-radius: 12px;
         box-shadow: var(--shadow);
-        max-width: 100%; /* Giới hạn chiều rộng */
+        max-width: 100%;
+        /* Giới hạn chiều rộng */
     }
 
     /* Wrapper bảng - CHỈ PHẦN NÀY có scroll */
@@ -90,10 +94,13 @@ $stmt->close();
         padding: 10px;
         border-radius: 12px;
         box-shadow: var(--shadow);
-        overflow-x: auto; /* Cho phép scroll ngang */
+        overflow-x: auto;
+        /* Cho phép scroll ngang */
         overflow-y: visible;
-        max-width: 100%; /* Giới hạn trong container */
-        -webkit-overflow-scrolling: touch; /* Smooth scroll trên iOS */
+        max-width: 100%;
+        /* Giới hạn trong container */
+        -webkit-overflow-scrolling: touch;
+        /* Smooth scroll trên iOS */
     }
 
     /* Custom scrollbar cho bảng */
@@ -119,11 +126,12 @@ $stmt->close();
     .weekly-schedule-table {
         border-collapse: collapse;
         width: 100%;
-        min-width: 950px; /* Đặt chiều rộng tối thiểu để bảng rộng hơn viewport */
+        min-width: 950px;
+        /* Đặt chiều rộng tối thiểu để bảng rộng hơn viewport */
         table-layout: fixed;
     }
 
-    .weekly-schedule-table th, 
+    .weekly-schedule-table th,
     .weekly-schedule-table td {
         border: 1px solid var(--border-color);
         padding: 10px;
@@ -155,14 +163,16 @@ $stmt->close();
     }
 
     .weekly-schedule-table thead .session-cell {
-        z-index: 12; /* Header + sticky cần z-index cao hơn */
+        z-index: 12;
+        /* Header + sticky cần z-index cao hơn */
     }
 
     /* Các cột ngày trong tuần */
     .weekly-schedule-table th:not(.session-cell),
     .weekly-schedule-table td:not(.session-cell) {
         min-width: 180px;
-        width: calc((100% - 100px) / 7); /* Chia đều 7 cột */
+        width: calc((100% - 100px) / 7);
+        /* Chia đều 7 cột */
     }
 
     .schedule-item {
@@ -176,19 +186,19 @@ $stmt->close();
         word-wrap: break-word;
     }
 
-    .schedule-item p { 
+    .schedule-item p {
         margin: 0 0 5px 0;
         word-break: break-word;
     }
 
-    .schedule-item .time { 
-        font-weight: bold; 
-        color: var(--brand-color-dark); 
+    .schedule-item .time {
+        font-weight: bold;
+        color: var(--brand-color-dark);
     }
 
-    .no-schedule-dot { 
-        font-size: 24px; 
-        color: #ced4da; 
+    .no-schedule-dot {
+        font-size: 24px;
+        color: #ced4da;
     }
 
     /* Header section không scroll */
@@ -204,13 +214,14 @@ $stmt->close();
             gap: 15px;
         }
 
-        .week-navigation > * {
+        .week-navigation>* {
             width: 100%;
             text-align: center;
         }
 
         .weekly-schedule-table {
-            min-width: 900px; /* Giảm chiều rộng tối thiểu trên mobile */
+            min-width: 900px;
+            /* Giảm chiều rộng tối thiểu trên mobile */
         }
 
         .weekly-schedule-table th:not(.session-cell),
@@ -261,18 +272,18 @@ $stmt->close();
 
     <!-- Week navigation - không scroll -->
     <div class="week-navigation animated-card">
-        <a href="?nav=teacher_schedule&date=<?php echo $prev_week_dt->format('Y-m-d'); ?>" 
-           class="btn btn-outline-secondary">
+        <a href="?nav=teacher_schedule&date=<?php echo $prev_week_dt->format('Y-m-d'); ?>"
+            class="btn btn-outline-secondary">
             <i class="fa-solid fa-chevron-left"></i> Tuần trước
         </a>
         <div class="d-flex align-items-center gap-2">
             <label for="date-picker" class="col-form-label text-nowrap">Chọn ngày:</label>
-            <input type="date" class="form-control form-control-sm" id="date-picker" 
-                   value="<?php echo $start_of_week_dt->format('Y-m-d'); ?>">
+            <input type="date" class="form-control form-control-sm" id="date-picker"
+                value="<?php echo $start_of_week_dt->format('Y-m-d'); ?>">
             <a href="?nav=teacher_schedule" class="btn btn-sm btn-primary text-nowrap">Hôm nay</a>
         </div>
-        <a href="?nav=teacher_schedule&date=<?php echo $next_week_dt->format('Y-m-d'); ?>" 
-           class="btn btn-outline-secondary">
+        <a href="?nav=teacher_schedule&date=<?php echo $next_week_dt->format('Y-m-d'); ?>"
+            class="btn btn-outline-secondary">
             Tuần sau <i class="fa-solid fa-chevron-right"></i>
         </a>
     </div>
@@ -303,19 +314,19 @@ $stmt->close();
                                     <?php foreach ($schedule_matrix[$session][$day] as $item): ?>
                                         <div class="schedule-item">
                                             <p class="time">
-                                                <i class="fa-solid fa-clock"></i> 
+                                                <i class="fa-solid fa-clock"></i>
                                                 <?php echo date("H:i", strtotime($item['gio_bat_dau'])) . ' - ' . date("H:i", strtotime($item['gio_ket_thuc'])); ?>
                                             </p>
                                             <p>
-                                                <i class="fa-solid fa-book-open"></i> 
+                                                <i class="fa-solid fa-book-open"></i>
                                                 <?php echo htmlspecialchars($item['ten_khoahoc']); ?>
                                             </p>
                                             <p>
-                                                <i class="fa-solid fa-school"></i> 
+                                                <i class="fa-solid fa-school"></i>
                                                 <strong><?php echo htmlspecialchars($item['ten_lop']); ?></strong>
                                             </p>
                                             <p>
-                                                <i class="fa-solid fa-map-marker-alt"></i> 
+                                                <i class="fa-solid fa-map-marker-alt"></i>
                                                 <?php echo htmlspecialchars($item['phong_hoc']); ?>
                                             </p>
                                         </div>

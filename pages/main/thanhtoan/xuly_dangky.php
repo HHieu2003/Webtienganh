@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 break; // Thoát vòng lặp bên ngoài
             }
         }
-        
+
         // Nếu phát hiện trùng lặp, báo lỗi và dừng lại
         if ($conflict_found) {
             echo "<script>
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $existing_order = $result_pending->fetch_assoc();
         $existing_dangky_id = $existing_order['id_dangky'];
         $stmt_check_pending->close();
-        
+
         $sql_update_time = "UPDATE dangkykhoahoc SET thoi_gian_tao = NOW(), id_lop = ?, ghi_chu = ? WHERE id_dangky = ?";
         $stmt_update_time = $conn->prepare($sql_update_time);
         $stmt_update_time->bind_param("ssi", $id_lop, $ghi_chu, $existing_dangky_id);
@@ -121,4 +121,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     header("Location: ../../../index.php");
     exit();
 }
-?>

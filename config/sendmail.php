@@ -28,7 +28,6 @@ try {
     $mail->setFrom('hieutran170621@gmail.com', 'Huu Hieu');
     $mail->addAddress($to);     //Add a recipient
    
-    
     //Content
     $mail->isHTML(true);                                  //Set email format to HTML
     $mail->Subject = $subject;

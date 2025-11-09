@@ -98,14 +98,13 @@ function get_payment_status_badge($status)
 {
     // Chuẩn hóa trạng thái về chữ thường để so sánh
     switch (strtolower(trim($status))) {
-        case 'Đã thanh toán' :
-        case 'Đã hoàn thành' :
+        case 'Đã thanh toán':
+        case 'Đã hoàn thành':
             return '<span class="badge status-badge status-success">Thành công</span>';
         case 'Đã hủy':
             return '<span class="badge status-badge status-pending">Đã hủy</span>';
         default:
             return '<span class="badge status-badge status-pending">Đang chờ</span>';
-            
     }
 }
 ?>
@@ -258,7 +257,7 @@ function get_payment_status_badge($status)
 
     /* Payment History Pagination Styles */
     .payment-pagination-container {
-     
+
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -291,13 +290,13 @@ function get_payment_status_badge($status)
         text-decoration: none;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     }
 
     .payment-pagination-btn:hover:not(.disabled) {
         background: #fff;
         transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
         color: var(--primary-color-dark);
     }
 
@@ -322,7 +321,7 @@ function get_payment_status_badge($status)
         justify-content: center;
         background: rgba(255, 255, 255, 0.2);
         color: #fff;
-        border: 2px solid rgba(255,255,255,0.3);
+        border: 2px solid rgba(255, 255, 255, 0.3);
         border-radius: 50%;
         font-size: 14px;
         font-weight: 700;
@@ -334,9 +333,9 @@ function get_payment_status_badge($status)
     .payment-pagination-number:hover {
         background: rgba(255, 255, 255, 0.95);
         color: var(--primary-color);
-        border-color: rgba(255,255,255,0.8);
+        border-color: rgba(255, 255, 255, 0.8);
         transform: translateY(-2px) scale(1.1);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
     }
 
     .payment-pagination-number.active {
@@ -344,17 +343,24 @@ function get_payment_status_badge($status)
         color: var(--primary-color-dark);
         border-color: #fff;
         transform: scale(1.15);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         animation: paymentPagePulse 0.4s ease;
     }
 
     @keyframes paymentPagePulse {
-        0%, 100% { transform: scale(1.15); }
-        50% { transform: scale(1.25); }
+
+        0%,
+        100% {
+            transform: scale(1.15);
+        }
+
+        50% {
+            transform: scale(1.25);
+        }
     }
 
     .payment-pagination-dots {
-        color: rgba(255,255,255,0.6);
+        color: rgba(255, 255, 255, 0.6);
         font-weight: bold;
         padding: 0 5px;
     }
@@ -536,8 +542,8 @@ function get_payment_status_badge($status)
                         $prev_link .= "&month={$filter_month}&year={$filter_year}";
                     }
                     ?>
-                    <a href="<?php echo $prev_link; ?>" 
-                       class="payment-pagination-btn <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
+                    <a href="<?php echo $prev_link; ?>"
+                        class="payment-pagination-btn <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
                         <i class="fas fa-chevron-left"></i>
                         <span>Trước</span>
                     </a>
@@ -582,8 +588,8 @@ function get_payment_status_badge($status)
                         $next_link .= "&month={$filter_month}&year={$filter_year}";
                     }
                     ?>
-                    <a href="<?php echo $next_link; ?>" 
-                       class="payment-pagination-btn <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
+                    <a href="<?php echo $next_link; ?>"
+                        class="payment-pagination-btn <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
                         <span>Sau</span>
                         <i class="fas fa-chevron-right"></i>
                     </a>
@@ -593,7 +599,7 @@ function get_payment_status_badge($status)
                 <div class="payment-pagination-info">
                     <i class="fas fa-receipt"></i>
                     <span>
-                        Hiển thị 
+                        Hiển thị
                         <strong><?php echo min($offset + 1, $total_payments); ?></strong>
                         <span class="separator">-</span>
                         <strong><?php echo min($offset + $payments_per_page, $total_payments); ?></strong>
@@ -614,18 +620,21 @@ function get_payment_status_badge($status)
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Smooth scroll to top when clicking payment pagination
-    const paymentPaginationLinks = document.querySelectorAll('.payment-pagination-number, .payment-pagination-btn');
-    paymentPaginationLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            setTimeout(() => {
-                const contentPane = document.querySelector('.content-pane');
-                if (contentPane) {
-                    contentPane.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 100);
+    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth scroll to top when clicking payment pagination
+        const paymentPaginationLinks = document.querySelectorAll('.payment-pagination-number, .payment-pagination-btn');
+        paymentPaginationLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                setTimeout(() => {
+                    const contentPane = document.querySelector('.content-pane');
+                    if (contentPane) {
+                        contentPane.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }, 100);
+            });
         });
     });
-});
 </script>

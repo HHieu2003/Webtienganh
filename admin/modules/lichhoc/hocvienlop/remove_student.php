@@ -13,7 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($id_hocvien > 0 && $lop_id) {
         $conn->begin_transaction();
         try {
-            // Trigger trong CSDL sẽ tự động xử lý việc giảm sĩ số và xóa tiến độ
             $sql_remove = "UPDATE dangkykhoahoc SET id_lop = NULL WHERE id_hocvien = ? AND id_lop = ?";
             $stmt_remove = $conn->prepare($sql_remove);
             $stmt_remove->bind_param('is', $id_hocvien, $lop_id);

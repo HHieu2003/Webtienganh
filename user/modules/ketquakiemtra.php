@@ -42,7 +42,8 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 // Hàm để xác định màu sắc của progress bar dựa trên tỷ lệ
-function get_progress_bar_class($percentage) {
+function get_progress_bar_class($percentage)
+{
     if ($percentage >= 80) return 'bg-success';
     if ($percentage >= 50) return 'bg-info';
     return 'bg-warning';
@@ -51,8 +52,15 @@ function get_progress_bar_class($percentage) {
 
 <style>
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .result-card {
@@ -66,9 +74,11 @@ function get_progress_bar_class($percentage) {
         animation: fadeInUp 0.5s ease-out forwards;
         transition: box-shadow 0.3s ease;
     }
+
     .result-card:hover {
         box-shadow: var(--shadow-hover);
     }
+
     .result-header {
         display: flex;
         justify-content: space-between;
@@ -76,33 +86,40 @@ function get_progress_bar_class($percentage) {
         gap: 15px;
         margin-bottom: 15px;
     }
+
     .result-header h5 {
         font-size: 18px;
         font-weight: 600;
         margin: 0;
     }
+
     .result-header .date {
         font-size: 14px;
         color: var(--gray-text);
         flex-shrink: 0;
     }
+
     .result-body {
         display: flex;
         align-items: center;
         gap: 20px;
     }
+
     .result-body .score {
         font-size: 24px;
         font-weight: 700;
         color: var(--primary-color-dark);
     }
+
     .result-body .progress-container {
         flex-grow: 1;
     }
+
     .progress {
         height: 12px;
         border-radius: 50px;
     }
+
     .progress-bar {
         border-radius: 50px;
         font-weight: 600;
@@ -110,7 +127,7 @@ function get_progress_bar_class($percentage) {
         line-height: 12px;
         color: #fff;
         text-align: center;
-        transition: width 1.5s ease-in-out; 
+        transition: width 1.5s ease-in-out;
     }
 
     /* Test Results Pagination Styles - GIỐNG LICHSUTHANHTOAN */
@@ -147,13 +164,13 @@ function get_progress_bar_class($percentage) {
         text-decoration: none;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     }
 
     .result-pagination-btn:hover:not(.disabled) {
         background: #fff;
         transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
         color: var(--primary-color-dark);
     }
 
@@ -178,7 +195,7 @@ function get_progress_bar_class($percentage) {
         justify-content: center;
         background: rgba(255, 255, 255, 0.2);
         color: #fff;
-        border: 2px solid rgba(255,255,255,0.3);
+        border: 2px solid rgba(255, 255, 255, 0.3);
         border-radius: 50%;
         font-size: 14px;
         font-weight: 700;
@@ -190,9 +207,9 @@ function get_progress_bar_class($percentage) {
     .result-pagination-number:hover {
         background: rgba(255, 255, 255, 0.95);
         color: var(--primary-color);
-        border-color: rgba(255,255,255,0.8);
+        border-color: rgba(255, 255, 255, 0.8);
         transform: translateY(-2px) scale(1.1);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
     }
 
     .result-pagination-number.active {
@@ -200,17 +217,24 @@ function get_progress_bar_class($percentage) {
         color: var(--primary-color-dark);
         border-color: #fff;
         transform: scale(1.15);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         animation: resultPagePulse 0.4s ease;
     }
 
     @keyframes resultPagePulse {
-        0%, 100% { transform: scale(1.15); }
-        50% { transform: scale(1.25); }
+
+        0%,
+        100% {
+            transform: scale(1.15);
+        }
+
+        50% {
+            transform: scale(1.25);
+        }
     }
 
     .result-pagination-dots {
-        color: rgba(255,255,255,0.6);
+        color: rgba(255, 255, 255, 0.6);
         font-weight: bold;
         padding: 0 5px;
     }
@@ -294,9 +318,9 @@ function get_progress_bar_class($percentage) {
 
     <?php if ($result->num_rows > 0): ?>
         <div class="results-list">
-            <?php 
+            <?php
             $index = 0;
-            while ($row = $result->fetch_assoc()): 
+            while ($row = $result->fetch_assoc()):
                 $correct_answers = (int)$row['diem'];
                 $total_questions = (int)$row['total_questions'];
                 $percentage = ($total_questions > 0) ? round(($correct_answers / $total_questions) * 100) : 0;
@@ -310,9 +334,9 @@ function get_progress_bar_class($percentage) {
                         <div class="score" title="Số câu đúng"><?php echo $correct_answers; ?>/<?php echo $total_questions; ?></div>
                         <div class="progress-container">
                             <div class="progress" role="progressbar">
-                                <div class="progress-bar <?php echo get_progress_bar_class($percentage); ?>" 
-                                     data-final-width="<?php echo $percentage; ?>" 
-                                     style="width: 0%;"><?php echo $percentage; ?>%
+                                <div class="progress-bar <?php echo get_progress_bar_class($percentage); ?>"
+                                    data-final-width="<?php echo $percentage; ?>"
+                                    style="width: 0%;"><?php echo $percentage; ?>%
                                 </div>
                             </div>
                         </div>
@@ -321,9 +345,9 @@ function get_progress_bar_class($percentage) {
                         </a>
                     </div>
                 </div>
-            <?php 
+            <?php
                 $index++;
-            endwhile; 
+            endwhile;
             ?>
         </div>
 
@@ -332,8 +356,8 @@ function get_progress_bar_class($percentage) {
             <div class="result-pagination-container">
                 <div class="result-pagination">
                     <!-- Previous Button -->
-                    <a href="?nav=ketquakiemtra&result_page=<?php echo max(1, $current_page - 1); ?>" 
-                       class="result-pagination-btn <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
+                    <a href="?nav=ketquakiemtra&result_page=<?php echo max(1, $current_page - 1); ?>"
+                        class="result-pagination-btn <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
                         <i class="fas fa-chevron-left"></i>
                         <span>Trước</span>
                     </a>
@@ -366,8 +390,8 @@ function get_progress_bar_class($percentage) {
                     </div>
 
                     <!-- Next Button -->
-                    <a href="?nav=ketquakiemtra&result_page=<?php echo min($total_pages, $current_page + 1); ?>" 
-                       class="result-pagination-btn <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
+                    <a href="?nav=ketquakiemtra&result_page=<?php echo min($total_pages, $current_page + 1); ?>"
+                        class="result-pagination-btn <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
                         <span>Sau</span>
                         <i class="fas fa-chevron-right"></i>
                     </a>
@@ -377,7 +401,7 @@ function get_progress_bar_class($percentage) {
                 <div class="result-pagination-info">
                     <i class="fas fa-clipboard-check"></i>
                     <span>
-                        Hiển thị 
+                        Hiển thị
                         <strong><?php echo min($offset + 1, $total_results); ?></strong>
                         <span class="separator">-</span>
                         <strong><?php echo min($offset + $results_per_page, $total_results); ?></strong>
@@ -398,37 +422,42 @@ function get_progress_bar_class($percentage) {
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Progress bar animation
-    const progressBars = document.querySelectorAll('.progress-bar');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const bar = entry.target;
-                const finalWidth = bar.getAttribute('data-final-width');
-                setTimeout(() => {
-                    bar.style.width = finalWidth + '%';
-                }, 100);
-                observer.unobserve(bar);
-            }
-        });
-    }, { threshold: 0.5 });
-
-    progressBars.forEach(bar => {
-        observer.observe(bar);
-    });
-
-    // Smooth scroll to top when clicking result pagination
-    const resultPaginationLinks = document.querySelectorAll('.result-pagination-number, .result-pagination-btn');
-    resultPaginationLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            setTimeout(() => {
-                const contentPane = document.querySelector('.content-pane');
-                if (contentPane) {
-                    contentPane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.addEventListener('DOMContentLoaded', function() {
+        // Progress bar animation
+        const progressBars = document.querySelectorAll('.progress-bar');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const bar = entry.target;
+                    const finalWidth = bar.getAttribute('data-final-width');
+                    setTimeout(() => {
+                        bar.style.width = finalWidth + '%';
+                    }, 100);
+                    observer.unobserve(bar);
                 }
-            }, 100);
+            });
+        }, {
+            threshold: 0.5
+        });
+
+        progressBars.forEach(bar => {
+            observer.observe(bar);
+        });
+
+        // Smooth scroll to top when clicking result pagination
+        const resultPaginationLinks = document.querySelectorAll('.result-pagination-number, .result-pagination-btn');
+        resultPaginationLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                setTimeout(() => {
+                    const contentPane = document.querySelector('.content-pane');
+                    if (contentPane) {
+                        contentPane.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }, 100);
+            });
         });
     });
-});
 </script>

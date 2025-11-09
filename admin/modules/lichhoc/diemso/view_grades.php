@@ -293,7 +293,6 @@ while ($row = $diemSoResult->fetch_assoc()) {
                     this.disabled = false; // Kích hoạt lại nút sau khi hoàn tất
                 });
         });
-        // *** KẾT THÚC NÂNG CẤP ***
 
         document.getElementById('add-grade-type-btn').addEventListener('click', function() {
             const newGradeTypeInput = document.getElementById('new-grade-type');

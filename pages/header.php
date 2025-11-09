@@ -693,7 +693,6 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
             <li><a href="./index.php?nav=contact">Liên Hệ</a></li>
         </ul>
 
-        <!-- PHẦN MỚI: Action Icons cho Mobile -->
         <div class="mobile-action-icons">
             <div class="action-icon-item" onclick="toggleMobileNotification()">
                 <i class="fa-solid fa-bell"></i>
@@ -708,7 +707,6 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
     </div>
     <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
 
-    <!-- PHẦN MỚI: Mobile Notification Dropdown -->
     <div class="mobile-notification-dropdown" id="mobile-notification-dropdown">
         <div class="mobile-notification-header">
             <h5>Thông Báo</h5>
@@ -882,10 +880,6 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
                 loadAndMarkNotifications();
             }
         }
-
-        // ========================================================== 
-        // PHẦN MỚI: SCRIPT CHO MOBILE NOTIFICATION
-        // ========================================================== 
         function toggleMobileNotification() {
             const dropdown = document.getElementById('mobile-notification-dropdown');
             const overlay = document.getElementById('mobile-nav-overlay');

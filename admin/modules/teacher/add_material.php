@@ -21,9 +21,6 @@ if (empty($id_lop) || empty($tieu_de) || !isset($_FILES['hoc_lieu_file']) || $_F
     exit();
 }
 
-// ================================================================
-// === BỔ SUNG BẢO MẬT: XÁC THỰC GIẢNG VIÊN CÓ QUYỀN VỚI LỚP HỌC NÀY KHÔNG ===
-// ================================================================
 $stmt_check = $conn->prepare("SELECT id_lop FROM lop_hoc WHERE id_lop = ? AND id_giangvien = ?");
 $stmt_check->bind_param("si", $id_lop, $id_giangvien);
 $stmt_check->execute();

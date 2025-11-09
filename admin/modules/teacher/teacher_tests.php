@@ -322,13 +322,13 @@ function get_test_type_badge($type)
         text-decoration: none;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
     .teacher-test-pagination-btn:hover:not(.disabled) {
         background: #fff;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
         color: #0a8a2c;
     }
 
@@ -353,7 +353,7 @@ function get_test_type_badge($type)
         justify-content: center;
         background: rgba(255, 255, 255, 0.2);
         color: #fff;
-        border: 2px solid rgba(255,255,255,0.3);
+        border: 2px solid rgba(255, 255, 255, 0.3);
         border-radius: 50%;
         font-size: 13px;
         font-weight: 700;
@@ -365,9 +365,9 @@ function get_test_type_badge($type)
     .teacher-test-pagination-number:hover {
         background: rgba(255, 255, 255, 0.95);
         color: #0db33b;
-        border-color: rgba(255,255,255,0.8);
+        border-color: rgba(255, 255, 255, 0.8);
         transform: translateY(-1px) scale(1.05);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .teacher-test-pagination-number.active {
@@ -375,11 +375,11 @@ function get_test_type_badge($type)
         color: #0a8a2c;
         border-color: #fff;
         transform: scale(1.08);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     }
 
     .teacher-test-pagination-dots {
-        color: rgba(255,255,255,0.6);
+        color: rgba(255, 255, 255, 0.6);
         font-weight: bold;
         padding: 0 3px;
         font-size: 12px;
@@ -574,8 +574,8 @@ function get_test_type_badge($type)
                     $prev_link = "?nav=question&test_page=" . max(1, $current_page - 1);
                     if (!empty($search_term)) $prev_link .= "&search=" . urlencode($search_term);
                     ?>
-                    <a href="<?php echo $prev_link; ?>" 
-                       class="teacher-test-pagination-btn <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
+                    <a href="<?php echo $prev_link; ?>"
+                        class="teacher-test-pagination-btn <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
                         <i class="fas fa-chevron-left"></i>
                         <span>Trước</span>
                     </a>
@@ -618,8 +618,8 @@ function get_test_type_badge($type)
                     $next_link = "?nav=question&test_page=" . min($total_pages, $current_page + 1);
                     if (!empty($search_term)) $next_link .= "&search=" . urlencode($search_term);
                     ?>
-                    <a href="<?php echo $next_link; ?>" 
-                       class="teacher-test-pagination-btn <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
+                    <a href="<?php echo $next_link; ?>"
+                        class="teacher-test-pagination-btn <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
                         <span>Sau</span>
                         <i class="fas fa-chevron-right"></i>
                     </a>
@@ -629,7 +629,7 @@ function get_test_type_badge($type)
                 <div class="teacher-test-pagination-info">
                     <i class="fas fa-clipboard-check"></i>
                     <span>
-                        Hiển thị 
+                        Hiển thị
                         <strong><?php echo min($offset + 1, $total_tests); ?></strong>
                         <span class="separator">-</span>
                         <strong><?php echo min($offset + $tests_per_page, $total_tests); ?></strong>
@@ -770,7 +770,10 @@ function get_test_type_badge($type)
                 const container = document.querySelector('.teacher-test-container') || document.querySelector('.row.mt-3');
                 if (container) {
                     setTimeout(() => {
-                        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        container.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
                     }, 100);
                 }
             });

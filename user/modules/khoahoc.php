@@ -21,10 +21,9 @@ switch ($filter) {
         // Đã hoàn thành: là các lớp có trạng thái 'da xong'
         $where_clause = "AND lh.trang_thai = 'da xong'";
         break;
-    // 'all' sẽ không thêm điều kiện nào khác
+        // 'all' sẽ không thêm điều kiện nào khác
 }
 
-// --- CẬP NHẬT CÂU TRUY VẤN: Lấy thêm ten_lop ---
 $sql = "
     SELECT 
         dk.id_dangky, 
@@ -50,7 +49,8 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 // Hàm để tạo badge trạng thái mới
-function get_status_badge_new($status) {
+function get_status_badge_new($status)
+{
     if ($status === 'dang hoc') {
         return '<span class="badge status-badge status-active">Đang học</span>';
     } elseif ($status === 'da xong') {
@@ -64,9 +64,17 @@ function get_status_badge_new($status) {
 
 <style>
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
+
     .filter-buttons {
         background: #fff;
         padding: 10px;
@@ -74,12 +82,14 @@ function get_status_badge_new($status) {
         display: inline-flex;
         box-shadow: var(--shadow);
     }
+
     .filter-buttons .btn {
         border-radius: 50px;
         font-weight: 500;
         border: none;
         padding: 8px 20px;
     }
+
     .filter-buttons .btn.active {
         background-color: var(--primary-color);
         color: white;
@@ -98,14 +108,16 @@ function get_status_badge_new($status) {
         animation: fadeInUp 0.5s ease-out forwards;
         border: 1px solid var(--border-color);
     }
+
     .my-course-card:hover {
         transform: translateY(-8px);
         box-shadow: var(--shadow-hover);
     }
-    
+
     .card-image {
         position: relative;
     }
+
     .card-image img {
         width: 100%;
         height: 180px;
@@ -113,20 +125,34 @@ function get_status_badge_new($status) {
         border-top-left-radius: var(--border-radius);
         border-top-right-radius: var(--border-radius);
     }
+
     .card-status {
         position: absolute;
         top: 15px;
         right: 15px;
     }
+
     .status-badge {
         font-size: 13px;
         padding: 6px 12px;
         font-weight: 600;
         border-radius: 50px;
     }
-    .status-active { background-color: #d1e7dd; color: #0f5132; }
-    .status-completed { background-color: #e2e3e5; color: #41464b; }
-    .status-pending { background-color: #fff3cd; color: #664d03; }
+
+    .status-active {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .status-completed {
+        background-color: #e2e3e5;
+        color: #41464b;
+    }
+
+    .status-pending {
+        background-color: #fff3cd;
+        color: #664d03;
+    }
 
     .card-content {
         padding: 20px;
@@ -134,31 +160,37 @@ function get_status_badge_new($status) {
         display: flex;
         flex-direction: column;
     }
+
     .card-content h3 {
         font-size: 18px;
         font-weight: 600;
         margin-bottom: 10px;
         line-height: 1.4;
     }
+
     .card-content .course-meta {
         font-size: 14px;
         color: var(--gray-text);
         margin-bottom: 7px;
-        flex-grow: 1; /* Đẩy thanh tiến độ xuống dưới */
+        flex-grow: 1;
+        /* Đẩy thanh tiến độ xuống dưới */
     }
+
     .card-content .course-meta p {
         margin-bottom: 5px;
     }
+
     .card-content .course-meta i {
         margin-right: 8px;
         color: var(--primary-color);
         width: 16px;
         text-align: center;
     }
-    
+
     .progress-info {
         margin-top: 5px;
     }
+
     .progress-info .info {
         display: flex;
         justify-content: space-between;
@@ -166,11 +198,12 @@ function get_status_badge_new($status) {
         margin-bottom: 5px;
         color: var(--gray-text);
     }
-    
+
     .card-actions {
         padding: 20px;
         border-top: 1px solid var(--border-color);
     }
+
     .btn-primary-custom {
         background-color: var(--primary-color);
         color: #fff;
@@ -182,6 +215,7 @@ function get_status_badge_new($status) {
         transition: all 0.3s ease;
         text-align: center;
     }
+
     .btn-primary-custom:hover {
         background-color: var(--primary-color-dark);
         color: #fff;
@@ -201,9 +235,9 @@ function get_status_badge_new($status) {
     <div class="course-list-container">
         <?php if ($result->num_rows > 0): ?>
             <div class="row g-4">
-                <?php 
+                <?php
                 $index = 0;
-                while ($row = $result->fetch_assoc()): 
+                while ($row = $result->fetch_assoc()):
                     $progress = $row['tien_do'] ?? 0;
                 ?>
                     <div class="col-md-6 col-lg-4">
@@ -222,7 +256,7 @@ function get_status_badge_new($status) {
                                     <p><i class="fa-solid fa-school"></i> <strong>Lớp:</strong> <?php echo htmlspecialchars($row['ten_lop'] ?? 'N/A'); ?></p>
                                     <p><i class="fa-solid fa-chalkboard-user"></i> <strong>GV:</strong> <?php echo htmlspecialchars($row['ten_giangvien'] ?? 'Chưa xếp'); ?></p>
                                 </div>
-                                
+
                                 <div class="progress-info">
                                     <div class="info">
                                         <span>Tiến độ</span>
@@ -239,20 +273,20 @@ function get_status_badge_new($status) {
                                 <?php elseif ($row['trang_thai_lop'] === 'da xong'): ?>
                                     <a href="dashboard.php?nav=bangdiem" class="btn btn-outline-secondary w-100">Xem lại kết quả</a>
                                 <?php else: ?>
-                                     <span class="text-muted d-block text-center">Chưa có hoạt động</span>
+                                    <span class="text-muted d-block text-center">Chưa có hoạt động</span>
                                 <?php endif; ?>
                             </div>
                         </div>
                     </div>
-                <?php 
+                <?php
                     $index++;
-                endwhile; 
+                endwhile;
                 ?>
             </div>
         <?php else: ?>
             <div class="alert alert-light text-center mt-4">
-                 <i class="fa-solid fa-box-open fa-3x mb-3 text-muted"></i>
-                 <p class="mb-0">Không có khóa học nào trong mục này.</p>
+                <i class="fa-solid fa-box-open fa-3x mb-3 text-muted"></i>
+                <p class="mb-0">Không có khóa học nào trong mục này.</p>
             </div>
         <?php endif; ?>
     </div>

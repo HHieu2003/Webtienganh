@@ -1,10 +1,4 @@
 <?php
-/**
- * Configuration file for Hoc Cung AI
- * Gemini AI Integration
- */
-
-// Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }

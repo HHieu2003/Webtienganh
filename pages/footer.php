@@ -34,7 +34,7 @@ if (isset($conn)) {
                     </div>
                 </a>
                 <p class="about-text">Nền tảng học Tiếng Anh toàn diện, giúp bạn tự tin chinh phục mọi mục tiêu học tập và sự nghiệp.</p>
-                
+
                 <div class="ai-assistant-info">
                     <h5><i class="fa-solid fa-brain"></i> Hybrid AI Assistant</h5>
                     <p><strong>2-in-1:</strong> Tư vấn khóa học + Dạy tiếng Anh</p>
@@ -42,7 +42,7 @@ if (isset($conn)) {
                         <i class="fa-solid fa-comment"></i> Chat Ngay
                     </button>
                 </div>
-                
+
                 <div class="social-icons">
                     <a href="https://facebook.com/englishfighter" aria-label="Facebook" title="Facebook">
                         <i class="fa-brands fa-facebook-f"></i>
@@ -68,9 +68,9 @@ if (isset($conn)) {
                     <li><a href="./pages/login.php">Đăng nhập / Đăng ký</a></li>
                     <li><a href="./index.php?nav=lecturers">Đội ngũ giảng viên</a></li>
                 </ul>
-                
+
                 <img class="logo-footer-small" src="./images/logofooter.png" alt="Logo Bộ Công Thương">
-             
+
             </div>
 
             <div class="footer-content contact-info">
@@ -93,7 +93,7 @@ if (isset($conn)) {
                         <span>Giờ làm việc: 8:00 - 22:00 hàng ngày</span>
                     </li>
                 </ul>
-                
+
                 <div class="quick-stats">
                     <h5><i class="fa-solid fa-chart-line"></i> Thống Kê Live</h5>
                     <div class="stats-grid">
@@ -111,7 +111,7 @@ if (isset($conn)) {
                         </div>
                     </div>
                 </div>
-                
+
             </div>
         </div>
     </div>
@@ -144,41 +144,41 @@ if (isset($conn)) {
         duration: 1000,
         once: true,
     });
-    
+
     // Hiệu ứng đếm số với easing
     function animateCounter(elementId, targetValue, duration = 1500) {
         const element = document.getElementById(elementId);
         if (!element) return;
-        
+
         const startValue = 0;
         const startTime = performance.now();
-        
+
         function easeOutCubic(t) {
             return 1 - Math.pow(1 - t, 3);
         }
-        
+
         function updateCounter(currentTime) {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
             const easedProgress = easeOutCubic(progress);
             const currentValue = Math.floor(startValue + (targetValue - startValue) * easedProgress);
-            
+
             element.textContent = currentValue.toLocaleString();
-            
+
             if (progress < 1) {
                 requestAnimationFrame(updateCounter);
             } else {
                 element.textContent = parseInt(targetValue).toLocaleString();
             }
         }
-        
+
         requestAnimationFrame(updateCounter);
     }
 
     // Initialize everything
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Initializing footer stats...');
-        
+
         // Lấy dữ liệu từ các biến PHP đã được truy vấn ở đầu file
         const totalViews = <?php echo (int)$total_views; ?>;
         const totalCourses = <?php echo (int)$total_courses; ?>;
@@ -188,14 +188,12 @@ if (isset($conn)) {
         animateCounter('footer-total-views', totalViews);
         animateCounter('footer-total-courses', totalCourses);
         animateCounter('footer-total-students', totalStudents);
-        
+
         console.log('✅ Footer stats loaded');
     });
-
 </script>
 
 <style>
-    /* CSS gốc của bạn không cần thay đổi, tôi giữ nguyên ở đây */
     :root {
         --brand-color: #0db33b;
         --teacher-color: #3498db;
@@ -547,11 +545,14 @@ if (isset($conn)) {
         transform: translateY(-1px);
     }
 
-    
+
     @keyframes hybridPulse {
-        0%, 100% {
+
+        0%,
+        100% {
             box-shadow: 0 4px 12px rgba(13, 179, 59, 0.3) !important;
         }
+
         50% {
             box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5) !important;
         }
@@ -608,7 +609,7 @@ if (isset($conn)) {
             border-radius: 0 !important;
             transform-origin: center !important;
         }
-        
+
         #chatbot-toggler {
             right: 20px !important;
             bottom: 20px !important;

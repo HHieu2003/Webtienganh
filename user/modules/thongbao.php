@@ -74,8 +74,15 @@ foreach ($notifications as $notification) {
 
 <style>
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .timeline {
@@ -112,7 +119,7 @@ foreach ($notifications as $notification) {
         position: relative;
         left: -20px;
     }
-    
+
     .timeline-item {
         position: relative;
         margin-bottom: 15px;
@@ -122,11 +129,13 @@ foreach ($notifications as $notification) {
         border: 1px solid var(--border-color);
         transition: box-shadow 0.3s ease;
     }
+
     .timeline-item:hover {
         box-shadow: var(--shadow);
     }
 
-    .timeline-item:before { /* The dot on the timeline */
+    .timeline-item:before {
+        /* The dot on the timeline */
         content: '';
         position: absolute;
         top: 25px;
@@ -137,12 +146,13 @@ foreach ($notifications as $notification) {
         background-color: #fff;
         border: 4px solid var(--primary-color);
     }
-    
+
     /* Làm nổi bật thông báo chưa đọc */
     .timeline-item.unread {
         background-color: var(--primary-color-light);
         border-left: 4px solid var(--primary-color);
     }
+
     .timeline-item.unread:before {
         background-color: var(--primary-color);
     }
@@ -175,9 +185,10 @@ foreach ($notifications as $notification) {
     .timeline-item-content {
         color: var(--gray-text);
         margin-bottom: 10px;
-        padding-left: 55px; /* Thẳng hàng với tiêu đề */
+        padding-left: 55px;
+        /* Thẳng hàng với tiêu đề */
     }
-    
+
     .timeline-item-footer {
         font-size: 13px;
         color: #999;
@@ -187,7 +198,7 @@ foreach ($notifications as $notification) {
 
     /* Notification Pagination Styles */
     .notif-pagination-container {
-  
+
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -220,13 +231,13 @@ foreach ($notifications as $notification) {
         text-decoration: none;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     }
 
     .notif-pagination-btn:hover:not(.disabled) {
         background: #fff;
         transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
         color: var(--primary-color-dark);
     }
 
@@ -251,7 +262,7 @@ foreach ($notifications as $notification) {
         justify-content: center;
         background: rgba(255, 255, 255, 0.2);
         color: #fff;
-        border: 2px solid rgba(255,255,255,0.3);
+        border: 2px solid rgba(255, 255, 255, 0.3);
         border-radius: 50%;
         font-size: 14px;
         font-weight: 700;
@@ -263,9 +274,9 @@ foreach ($notifications as $notification) {
     .notif-pagination-number:hover {
         background: rgba(255, 255, 255, 0.95);
         color: var(--primary-color);
-        border-color: rgba(255,255,255,0.8);
+        border-color: rgba(255, 255, 255, 0.8);
         transform: translateY(-2px) scale(1.1);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
     }
 
     .notif-pagination-number.active {
@@ -273,17 +284,24 @@ foreach ($notifications as $notification) {
         color: var(--primary-color-dark);
         border-color: #fff;
         transform: scale(1.15);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         animation: notifPagePulse 0.4s ease;
     }
 
     @keyframes notifPagePulse {
-        0%, 100% { transform: scale(1.15); }
-        50% { transform: scale(1.25); }
+
+        0%,
+        100% {
+            transform: scale(1.15);
+        }
+
+        50% {
+            transform: scale(1.25);
+        }
     }
 
     .notif-pagination-dots {
-        color: rgba(255,255,255,0.6);
+        color: rgba(255, 255, 255, 0.6);
         font-weight: bold;
         padding: 0 5px;
     }
@@ -366,13 +384,13 @@ foreach ($notifications as $notification) {
 
     <?php if (!empty($grouped_notifications)): ?>
         <ul class="timeline">
-            <?php 
+            <?php
             $delay_index = 0;
-            foreach ($grouped_notifications as $date_group => $notifications_in_group): 
+            foreach ($grouped_notifications as $date_group => $notifications_in_group):
             ?>
                 <li class="timeline-group" style="animation-delay: <?php echo $delay_index * 150; ?>ms;">
                     <div class="timeline-group-header"><?php echo $date_group; ?></div>
-                    <?php foreach ($notifications_in_group as $notification): 
+                    <?php foreach ($notifications_in_group as $notification):
                         // Kiểm tra xem thông báo có phải là chưa đọc không để thêm class CSS
                         $is_unread_class = ($notification['trang_thai'] === 'chưa đọc') ? 'unread' : '';
                     ?>
@@ -390,15 +408,15 @@ foreach ($notifications as $notification) {
                         </div>
                     <?php endforeach; ?>
                 </li>
-            <?php 
+            <?php
                 $delay_index++;
-            endforeach; 
+            endforeach;
             ?>
         </ul>
     <?php else: ?>
         <div class="alert alert-info text-center">
-             <i class="fa-solid fa-bell-slash fa-2x mb-3"></i>
-             <p class="mb-0">Bạn chưa có thông báo nào.</p>
+            <i class="fa-solid fa-bell-slash fa-2x mb-3"></i>
+            <p class="mb-0">Bạn chưa có thông báo nào.</p>
         </div>
     <?php endif; ?>
 
@@ -407,8 +425,8 @@ foreach ($notifications as $notification) {
         <div class="notif-pagination-container">
             <div class="notif-pagination">
                 <!-- Previous Button -->
-                <a href="?nav=thongbao&notif_page=<?php echo max(1, $current_page - 1); ?>" 
-                   class="notif-pagination-btn <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
+                <a href="?nav=thongbao&notif_page=<?php echo max(1, $current_page - 1); ?>"
+                    class="notif-pagination-btn <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
                     <i class="fas fa-chevron-left"></i>
                     <span>Trước</span>
                 </a>
@@ -441,8 +459,8 @@ foreach ($notifications as $notification) {
                 </div>
 
                 <!-- Next Button -->
-                <a href="?nav=thongbao&notif_page=<?php echo min($total_pages, $current_page + 1); ?>" 
-                   class="notif-pagination-btn <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
+                <a href="?nav=thongbao&notif_page=<?php echo min($total_pages, $current_page + 1); ?>"
+                    class="notif-pagination-btn <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
                     <span>Sau</span>
                     <i class="fas fa-chevron-right"></i>
                 </a>
@@ -452,7 +470,7 @@ foreach ($notifications as $notification) {
             <div class="notif-pagination-info">
                 <i class="fas fa-bell"></i>
                 <span>
-                    Hiển thị 
+                    Hiển thị
                     <strong><?php echo min($offset + 1, $total_notifications); ?></strong>
                     <span class="separator">-</span>
                     <strong><?php echo min($offset + $notifications_per_page, $total_notifications); ?></strong>
@@ -466,18 +484,21 @@ foreach ($notifications as $notification) {
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Smooth scroll to top when clicking notification pagination
-    const notifPaginationLinks = document.querySelectorAll('.notif-pagination-number, .notif-pagination-btn');
-    notifPaginationLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            setTimeout(() => {
-                const contentPane = document.querySelector('.content-pane');
-                if (contentPane) {
-                    contentPane.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 100);
+    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth scroll to top when clicking notification pagination
+        const notifPaginationLinks = document.querySelectorAll('.notif-pagination-number, .notif-pagination-btn');
+        notifPaginationLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                setTimeout(() => {
+                    const contentPane = document.querySelector('.content-pane');
+                    if (contentPane) {
+                        contentPane.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }, 100);
+            });
         });
     });
-});
 </script>

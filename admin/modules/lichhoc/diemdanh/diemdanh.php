@@ -94,7 +94,6 @@ while ($row = $diemDanhResult->fetch_assoc()) {
         display: none;
     }
 
-    /* === BẮT ĐẦU SỬA LỖI RESPONSIVE === */
     @media (max-width: 767.98px) {
 
         .attendance-table th:first-child,
@@ -200,7 +199,6 @@ while ($row = $diemDanhResult->fetch_assoc()) {
             checkbox.checked = checkState;
         });
     }
-    // Giữ nguyên các phần JavaScript khác của bạn...
 </script>
 
 <script>

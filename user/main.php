@@ -2,7 +2,6 @@
 // Lấy giá trị của 'nav' từ URL, nếu không có thì mặc định là rỗng để tải trang 'home'
 $nav = $_GET['nav'] ?? '';
 
-// Sử dụng switch-case để code dễ đọc và bảo trì hơn
 switch ($nav) {
     case 'khoahoc':
         include("modules/khoahoc.php");
@@ -48,11 +47,9 @@ switch ($nav) {
         include("modules/ketquakiemtra.php");
         break;
 
-    // --- THÊM DÒNG NÀY VÀO ---
     case 'view_submission':
         include("modules/view_test_submission.php");
         break;
-    // -------------------------
 
     case 'thongbao':
         include("modules/thongbao.php");

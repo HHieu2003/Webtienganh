@@ -38,20 +38,15 @@ if ($temp == 'courses') {
     include("modules/giangvien/manage_lecturers.php");
 } else if ($temp == 'hoclieu') {
     include("modules/hoclieu/manage_hoclieu.php");
-}
- else if ($temp == 'baiviet') {
+} else if ($temp == 'baiviet') {
     include("modules/baiviet/manage_posts.php");
-}
-else if ($temp == 'view_submission_admin') {
-    include("modules/cauhoi/view_submission_admin.php"); 
-}
-
- else if ($temp == 'thongke') {
+} else if ($temp == 'view_submission_admin') {
+    include("modules/cauhoi/view_submission_admin.php");
+} else if ($temp == 'thongke') {
     include("modules/thongke/baocao.php");
-// ===================================
+    // ===================================
 
-} 
-else {
+} else {
     include("modules/home.php");
 }
 ?>

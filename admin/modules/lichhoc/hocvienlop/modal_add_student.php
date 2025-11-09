@@ -1,17 +1,51 @@
 <style>
-    #student-list-container { max-height: 350px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem; }
-    .student-item { display: flex; align-items: center; padding: 0.75rem 1rem; border-radius: 6px; transition: background-color 0.2s ease; }
-    .student-item:hover { background-color: #f8f9fa; }
-    .student-item input[type="checkbox"] { transform: scale(1.2); margin-right: 1rem; }
-    .student-item label { cursor: pointer; width: 100%; }
-    .student-item .student-name { font-weight: 500; color: var(--dark-text); }
-    .student-item .student-email { font-size: 0.85rem; color: var(--gray-text); }
+    #student-list-container {
+        max-height: 350px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.5rem;
+    }
+
+    .student-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+    }
+
+    .student-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .student-item input[type="checkbox"] {
+        transform: scale(1.2);
+        margin-right: 1rem;
+    }
+
+    .student-item label {
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .student-item .student-name {
+        font-weight: 500;
+        color: var(--dark-text);
+    }
+
+    .student-item .student-email {
+        font-size: 0.85rem;
+        color: var(--gray-text);
+    }
 </style>
 
 <div class="modal fade" id="addStudentToClassModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title"><i class="fa-solid fa-user-plus me-2"></i>Thêm học viên vào lớp</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa-solid fa-user-plus me-2"></i>Thêm học viên vào lớp</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
             <form id="addStudentToClassForm">
                 <input type="hidden" name="id_lop" value="<?php echo htmlspecialchars($lop_id ?? ''); ?>">
                 <div class="modal-body">

@@ -1,6 +1,8 @@
 <?php
 // File: admin/modules/teacher/teacher_materials.php
-if (session_status() == PHP_SESSION_NONE) { session_start(); }
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 if (!isset($_SESSION['is_teacher']) || !$_SESSION['is_teacher']) die("Truy cập bị từ chối.");
 
 $id_giangvien = $_SESSION['id_giangvien'];
@@ -30,7 +32,7 @@ if ($selected_lop_id) {
         $selected_class_name = $class_info['ten_lop'];
     }
     $stmt_check_owner->close();
-    
+
     if ($is_owner) {
         $sql_materials = "SELECT id_hoclieu, tieu_de, loai_file, duong_dan_file, ngay_dang FROM hoc_lieu WHERE id_lop = ? ORDER BY ngay_dang DESC";
         $stmt_materials = $conn->prepare($sql_materials);
@@ -41,25 +43,49 @@ if ($selected_lop_id) {
 }
 
 // Hàm trợ giúp để lấy icon và màu sắc dựa trên loại file
-function get_file_type_details($file_type) {
-    $file_type = strtolower($file_type ?? ''); 
+function get_file_type_details($file_type)
+{
+    $file_type = strtolower($file_type ?? '');
     switch ($file_type) {
-        case 'pdf': return ['icon' => 'fa-file-pdf', 'color' => '#E53E3E'];
-        case 'doc': case 'docx': return ['icon' => 'fa-file-word', 'color' => '#3B82F6'];
-        case 'xls': case 'xlsx': return ['icon' => 'fa-file-excel', 'color' => '#10B981'];
-        case 'ppt': case 'pptx': return ['icon' => 'fa-file-powerpoint', 'color' => '#D69E2E'];
-        case 'mp4': case 'mov': case 'avi': return ['icon' => 'fa-file-video', 'color' => '#8B5CF6'];
-        case 'jpg': case 'png': case 'jpeg': case 'gif': return ['icon' => 'fa-file-image', 'color' => '#4299E1'];
-        default: return ['icon' => 'fa-file-alt', 'color' => '#718096'];
+        case 'pdf':
+            return ['icon' => 'fa-file-pdf', 'color' => '#E53E3E'];
+        case 'doc':
+        case 'docx':
+            return ['icon' => 'fa-file-word', 'color' => '#3B82F6'];
+        case 'xls':
+        case 'xlsx':
+            return ['icon' => 'fa-file-excel', 'color' => '#10B981'];
+        case 'ppt':
+        case 'pptx':
+            return ['icon' => 'fa-file-powerpoint', 'color' => '#D69E2E'];
+        case 'mp4':
+        case 'mov':
+        case 'avi':
+            return ['icon' => 'fa-file-video', 'color' => '#8B5CF6'];
+        case 'jpg':
+        case 'png':
+        case 'jpeg':
+        case 'gif':
+            return ['icon' => 'fa-file-image', 'color' => '#4299E1'];
+        default:
+            return ['icon' => 'fa-file-alt', 'color' => '#718096'];
     }
 }
 ?>
 
 <style>
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
+
     .animated-item {
         opacity: 0;
         animation: fadeInUp 0.5s ease-out forwards;
@@ -85,7 +111,7 @@ function get_file_type_details($file_type) {
     .material-card {
         background-color: #fff;
         border-radius: 15px;
-        box-shadow: 0 5px 25px rgba(0,0,0,0.07);
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
         display: flex;
         flex-direction: column;
         height: 100%;
@@ -94,9 +120,10 @@ function get_file_type_details($file_type) {
         position: relative;
         overflow: hidden;
     }
+
     .material-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 12px 35px rgba(0,0,0,0.1);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
         border-color: var(--brand-color);
     }
 
@@ -107,11 +134,13 @@ function get_file_type_details($file_type) {
         padding: 2.5rem 1rem;
         position: relative;
     }
+
     .file-icon-bg {
         font-size: 5rem;
         opacity: 0.1;
         position: absolute;
     }
+
     .file-icon-main {
         font-size: 3rem;
         color: #fff;
@@ -121,7 +150,7 @@ function get_file_type_details($file_type) {
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
     .material-details {
@@ -132,6 +161,7 @@ function get_file_type_details($file_type) {
         text-align: center;
         border-top: 1px solid var(--border-color);
     }
+
     .material-title {
         font-size: 1.1rem;
         font-weight: 600;
@@ -141,18 +171,22 @@ function get_file_type_details($file_type) {
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        min-height: 44px; /* 2 lines height */
+        min-height: 44px;
+        /* 2 lines height */
     }
+
     .material-date {
         font-size: 0.85rem;
         color: var(--gray-text);
         margin-bottom: 1.5rem;
     }
+
     .material-actions {
         margin-top: auto;
         display: flex;
         gap: 0.75rem;
     }
+
     .btn-material {
         flex-grow: 1;
         font-weight: 500;
@@ -177,7 +211,7 @@ function get_file_type_details($file_type) {
                 <div class="col-lg-9">
                     <select name="lop_id" id="class-filter" class="form-select" onchange="this.form.submit()">
                         <option value="">-- Vui lòng chọn một lớp --</option>
-                        <?php foreach($classes_list as $class): ?>
+                        <?php foreach ($classes_list as $class): ?>
                             <option value="<?php echo $class['id_lop']; ?>" <?php echo ($selected_lop_id == $class['id_lop']) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($class['ten_lop']); ?>
                             </option>
@@ -192,9 +226,9 @@ function get_file_type_details($file_type) {
         <?php if ($is_owner): ?>
             <?php if ($materials->num_rows > 0): ?>
                 <div class="row g-4">
-                    <?php 
+                    <?php
                     $index = 0;
-                    while($material = $materials->fetch_assoc()): 
+                    while ($material = $materials->fetch_assoc()):
                         $file_details = get_file_type_details($material['loai_file']);
                     ?>
                         <div class="col-xl-3 col-lg-4 col-md-6 animated-item" style="animation-delay: <?php echo $index++ * 70; ?>ms;" id="material-card-<?php echo $material['id_hoclieu']; ?>">
@@ -239,66 +273,70 @@ function get_file_type_details($file_type) {
 </div>
 
 <?php if ($selected_lop_id && $is_owner): ?>
-<div class="modal fade" id="addMaterialModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Thêm Học liệu cho lớp <?php echo htmlspecialchars($selected_class_name); ?></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal fade" id="addMaterialModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm Học liệu cho lớp <?php echo htmlspecialchars($selected_class_name); ?></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="modules/teacher/add_material.php" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="id_lop" value="<?php echo $selected_lop_id; ?>">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="tieu_de" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tệp học liệu <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control" name="hoc_lieu_file" required>
+                            <div class="form-text">Hỗ trợ nhiều định dạng: PDF, DOCX, PNG, JPG, MP4...</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Tải lên</button>
+                    </div>
+                </form>
             </div>
-            <form action="modules/teacher/add_material.php" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="id_lop" value="<?php echo $selected_lop_id; ?>">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Tiêu đề <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="tieu_de" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tệp học liệu <span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" name="hoc_lieu_file" required>
-                        <div class="form-text">Hỗ trợ nhiều định dạng: PDF, DOCX, PNG, JPG, MP4...</div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary">Tải lên</button>
-                </div>
-            </form>
         </div>
     </div>
-</div>
 <?php endif; ?>
 
 <script>
-function deleteMaterial(materialId) {
-    Swal.fire({
-        title: 'Bạn có chắc chắn?',
-        text: "Bạn sẽ xóa vĩnh viễn học liệu này!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Chắc chắn xóa!',
-        cancelButtonText: 'Hủy'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('./modules/hoclieu/delete_hoclieu.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id_hoclieu: materialId })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    Swal.fire('Đã xóa!', data.message, 'success');
-                    const card = document.getElementById(`material-card-${materialId}`);
-                    if (card) card.remove();
-                } else {
-                    Swal.fire('Lỗi!', data.message, 'error');
-                }
-            })
-            .catch(error => Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ.', 'error'));
-        }
-    });
-}
+    function deleteMaterial(materialId) {
+        Swal.fire({
+            title: 'Bạn có chắc chắn?',
+            text: "Bạn sẽ xóa vĩnh viễn học liệu này!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Chắc chắn xóa!',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('./modules/hoclieu/delete_hoclieu.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id_hoclieu: materialId
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire('Đã xóa!', data.message, 'success');
+                            const card = document.getElementById(`material-card-${materialId}`);
+                            if (card) card.remove();
+                        } else {
+                            Swal.fire('Lỗi!', data.message, 'error');
+                        }
+                    })
+                    .catch(error => Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ.', 'error'));
+            }
+        });
+    }
 </script>

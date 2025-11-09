@@ -53,4 +53,3 @@ echo $output;
 
 $conn->close();
 exit();
-?>

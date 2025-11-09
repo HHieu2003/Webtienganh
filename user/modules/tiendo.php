@@ -160,7 +160,6 @@ $stmt->close();
                 }
             });
 
-            // *** SỬA LỖI JAVASCRIPT TẠI ĐÂY ***
             const percentageEl = document.querySelector(`#progress-card-${index} .chart-percentage`);
             if (percentageEl) {
                 const targetPercentage = parseFloat(percentageEl.getAttribute('data-percentage'));

@@ -5,7 +5,34 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 
 if (!isset($_SESSION['id_hocvien'])) {
-    echo "<script>alert('Vui lòng đăng nhập để đăng ký khóa học!'); window.location.href='pages/login.php';</script>";
+    echo "
+    <html>
+    <head>
+        <title>Yêu cầu đăng nhập</title>
+        <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+        <style>body { font-family: sans-serif; }</style>
+    </head>
+    <body>
+        <script>
+            Swal.fire({
+                title: 'Yêu cầu đăng nhập',
+                text: 'Vui lòng đăng nhập để đăng ký khóa học!',
+                icon: 'warning',
+                confirmButtonText: 'Đăng nhập ngay',
+                confirmButtonColor: '#0db33b',
+                showCancelButton: true,
+                cancelButtonText: 'Hủy',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'pages/login.php';
+                } else {
+                    window.location.href = 'index.php';
+                }
+            });
+        </script>
+    </body>
+    </html>";
     exit();
 }
 

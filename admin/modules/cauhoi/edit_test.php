@@ -29,9 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
     
-    // Bỏ logic ép NULL cho test đầu vào - cho phép gán khóa học/lớp học
-    // Test đầu vào giờ có thể công khai (NULL) hoặc gán cho khóa học/lớp cụ thể
-    
     // Kiểm tra xem id_lop có tồn tại trong bảng lop_hoc không (chỉ khi id_lop không NULL)
     if ($id_lop !== NULL) {
         $check_sql = "SELECT id_lop FROM lop_hoc WHERE id_lop = ?";

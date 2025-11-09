@@ -1,6 +1,8 @@
 <?php
 // File: admin/modules/teacher/teacher_notifications.php
-if (session_status() == PHP_SESSION_NONE) { session_start(); }
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 if (!isset($_SESSION['is_teacher']) || !$_SESSION['is_teacher']) die("Truy cập bị từ chối.");
 
 $id_giangvien = $_SESSION['id_giangvien'];
@@ -98,13 +100,22 @@ $history = $stmt_history->get_result();
 
 <style>
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
+
     .animated-item {
         opacity: 0;
         animation: fadeInUp 0.5s ease-out forwards;
     }
+
     .notification-card {
         background-color: #fff;
         border-radius: 12px;
@@ -115,10 +126,12 @@ $history = $stmt_history->get_result();
         flex-direction: column;
         height: 100%;
     }
+
     .notification-card:hover {
         transform: translateY(-5px);
         box-shadow: var(--shadow-hover);
     }
+
     .card-header-custom {
         padding: 15px 20px;
         border-bottom: 1px solid var(--border-color);
@@ -126,18 +139,21 @@ $history = $stmt_history->get_result();
         justify-content: space-between;
         align-items: center;
     }
+
     .card-title-custom {
         font-weight: 600;
         margin: 0;
         font-size: 1.1rem;
         color: var(--brand-color-dark);
     }
+
     .card-body-custom {
         padding: 20px;
         flex-grow: 1;
         font-size: 0.95rem;
         color: #555;
     }
+
     .card-body-custom .content-preview {
         display: -webkit-box;
         -webkit-line-clamp: 3;
@@ -146,6 +162,7 @@ $history = $stmt_history->get_result();
         text-overflow: ellipsis;
         min-height: 60px;
     }
+
     .card-footer-custom {
         padding: 15px 20px;
         background-color: #f8f9fa;
@@ -155,12 +172,14 @@ $history = $stmt_history->get_result();
         align-items: center;
         font-size: 0.85rem;
     }
+
     .meta-item {
         display: flex;
         align-items: center;
         gap: 8px;
         color: var(--text-color-light);
     }
+
     .meta-item i {
         color: var(--brand-color);
     }
@@ -171,7 +190,7 @@ $history = $stmt_history->get_result();
         padding: 20px;
         border-radius: 12px;
         margin-bottom: 25px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         border: 1px solid #dee2e6;
     }
 
@@ -251,13 +270,13 @@ $history = $stmt_history->get_result();
         text-decoration: none;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     }
 
     .teacher-notif-pagination-btn:hover:not(.disabled) {
         background: #fff;
         transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
         color: #0a8a2c;
     }
 
@@ -282,7 +301,7 @@ $history = $stmt_history->get_result();
         justify-content: center;
         background: rgba(255, 255, 255, 0.2);
         color: #fff;
-        border: 2px solid rgba(255,255,255,0.3);
+        border: 2px solid rgba(255, 255, 255, 0.3);
         border-radius: 50%;
         font-size: 14px;
         font-weight: 700;
@@ -294,9 +313,9 @@ $history = $stmt_history->get_result();
     .teacher-notif-pagination-number:hover {
         background: rgba(255, 255, 255, 0.95);
         color: #0db33b;
-        border-color: rgba(255,255,255,0.8);
+        border-color: rgba(255, 255, 255, 0.8);
         transform: translateY(-2px) scale(1.1);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
     }
 
     .teacher-notif-pagination-number.active {
@@ -304,17 +323,24 @@ $history = $stmt_history->get_result();
         color: #0a8a2c;
         border-color: #fff;
         transform: scale(1.15);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         animation: teacherNotifPagePulse 0.4s ease;
     }
 
     @keyframes teacherNotifPagePulse {
-        0%, 100% { transform: scale(1.15); }
-        50% { transform: scale(1.25); }
+
+        0%,
+        100% {
+            transform: scale(1.15);
+        }
+
+        50% {
+            transform: scale(1.25);
+        }
     }
 
     .teacher-notif-pagination-dots {
-        color: rgba(255,255,255,0.6);
+        color: rgba(255, 255, 255, 0.6);
         font-weight: bold;
         padding: 0 5px;
     }
@@ -409,23 +435,23 @@ $history = $stmt_history->get_result();
     <div class="search-filter-bar">
         <form method="GET" class="row g-3 align-items-end">
             <input type="hidden" name="nav" value="teacher_notifications">
-            
+
             <div class="col-md-5">
                 <label for="search" class="form-label"><i class="fas fa-search me-1"></i> Tìm kiếm</label>
-                <input type="text" name="search" id="search" class="form-control" 
-                       placeholder="Nhập tiêu đề thông báo..." 
-                       value="<?php echo htmlspecialchars($search_query); ?>">
+                <input type="text" name="search" id="search" class="form-control"
+                    placeholder="Nhập tiêu đề thông báo..."
+                    value="<?php echo htmlspecialchars($search_query); ?>">
             </div>
 
             <div class="col-md-3">
                 <label for="class_id" class="form-label"><i class="fas fa-filter me-1"></i> Lọc theo lớp</label>
                 <select name="class_id" id="class_id" class="form-select">
                     <option value="">Tất cả lớp học</option>
-                    <?php 
+                    <?php
                     mysqli_data_seek($my_classes, 0);
-                    while($class = $my_classes->fetch_assoc()): 
-                        $notification_status = $class['notification_count'] > 0 
-                            ? '(' . $class['notification_count'] . ' thông báo)' 
+                    while ($class = $my_classes->fetch_assoc()):
+                        $notification_status = $class['notification_count'] > 0
+                            ? '(' . $class['notification_count'] . ' thông báo)'
                             : '(Không có thông báo)';
                     ?>
                         <option value="<?php echo $class['id_lop']; ?>" <?php echo ($class_filter == $class['id_lop']) ? 'selected' : ''; ?>>
@@ -460,21 +486,21 @@ $history = $stmt_history->get_result();
                         "<?php echo htmlspecialchars($search_query); ?>"
                     </span>
                 <?php endif; ?>
-                <?php if (!empty($class_filter)): 
+                <?php if (!empty($class_filter)):
                     mysqli_data_seek($my_classes, 0);
                     $class_found = false;
-                    while($class = $my_classes->fetch_assoc()): 
-                        if(intval($class['id_lop']) == intval($class_filter)):
+                    while ($class = $my_classes->fetch_assoc()):
+                        if (intval($class['id_lop']) == intval($class_filter)):
                             $class_found = true;
                 ?>
-                    <span class="stat-item">
-                        <i class="fas fa-school"></i>
-                        <?php echo htmlspecialchars($class['ten_lop']); ?>
-                    </span>
-                <?php 
+                            <span class="stat-item">
+                                <i class="fas fa-school"></i>
+                                <?php echo htmlspecialchars($class['ten_lop']); ?>
+                            </span>
+                <?php
                         endif;
                     endwhile;
-                endif; 
+                endif;
                 ?>
                 <span class="stat-item">
                     <i class="fas fa-bell"></i>
@@ -486,23 +512,23 @@ $history = $stmt_history->get_result();
 
     <?php if ($history->num_rows > 0): ?>
         <div class="row g-4">
-            <?php 
+            <?php
             $index = 0;
-            while ($row = $history->fetch_assoc()): 
+            while ($row = $history->fetch_assoc()):
                 $unique_id = md5($row['tieu_de'] . $row['ngay_tao'] . $row['id_lop']);
             ?>
                 <div class="col-lg-4 col-md-6 animated-item" style="animation-delay: <?php echo $index++ * 70; ?>ms;" id="notification-card-<?php echo $unique_id; ?>">
                     <div class="notification-card">
                         <div class="card-header-custom">
                             <h5 class="card-title-custom"><?php echo htmlspecialchars($row['tieu_de']); ?></h5>
-                            <button class="btn btn-sm btn-outline-danger" 
-                                    onclick="deleteNotification(
+                            <button class="btn btn-sm btn-outline-danger"
+                                onclick="deleteNotification(
                                         '<?php echo htmlspecialchars(addslashes($row['tieu_de'])); ?>', 
                                         '<?php echo htmlspecialchars($row['id_lop']); ?>', 
                                         '<?php echo htmlspecialchars($row['ngay_tao']); ?>',
                                         '<?php echo $unique_id; ?>'
                                     )"
-                                    title="Xóa nhóm thông báo này">
+                                title="Xóa nhóm thông báo này">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
@@ -528,8 +554,8 @@ $history = $stmt_history->get_result();
                     if (!empty($search_query)) $prev_link .= "&search=" . urlencode($search_query);
                     if (!empty($class_filter)) $prev_link .= "&class_id=" . urlencode($class_filter);
                     ?>
-                    <a href="<?php echo $prev_link; ?>" 
-                       class="teacher-notif-pagination-btn <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
+                    <a href="<?php echo $prev_link; ?>"
+                        class="teacher-notif-pagination-btn <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
                         <i class="fas fa-chevron-left"></i>
                         <span>Trước</span>
                     </a>
@@ -576,8 +602,8 @@ $history = $stmt_history->get_result();
                     if (!empty($search_query)) $next_link .= "&search=" . urlencode($search_query);
                     if (!empty($class_filter)) $next_link .= "&class_id=" . urlencode($class_filter);
                     ?>
-                    <a href="<?php echo $next_link; ?>" 
-                       class="teacher-notif-pagination-btn <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
+                    <a href="<?php echo $next_link; ?>"
+                        class="teacher-notif-pagination-btn <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
                         <span>Sau</span>
                         <i class="fas fa-chevron-right"></i>
                     </a>
@@ -587,7 +613,7 @@ $history = $stmt_history->get_result();
                 <div class="teacher-notif-pagination-info">
                     <i class="fas fa-bell"></i>
                     <span>
-                        Hiển thị 
+                        Hiển thị
                         <strong><?php echo min($offset + 1, $total_notifications); ?></strong>
                         <span class="separator">-</span>
                         <strong><?php echo min($offset + $notifications_per_page, $total_notifications); ?></strong>
@@ -604,13 +630,13 @@ $history = $stmt_history->get_result();
             <i class="fa-solid fa-bell-slash fa-3x mb-3 text-muted"></i>
             <h5 class="mb-2">Không tìm thấy thông báo</h5>
             <p class="mb-3 text-muted">
-                <?php 
-                if (!empty($search_query) && !empty($class_filter)): 
+                <?php
+                if (!empty($search_query) && !empty($class_filter)):
                     // Lấy tên lớp
                     mysqli_data_seek($my_classes, 0);
                     $class_name = '';
-                    while($class = $my_classes->fetch_assoc()): 
-                        if(intval($class['id_lop']) == intval($class_filter)):
+                    while ($class = $my_classes->fetch_assoc()):
+                        if (intval($class['id_lop']) == intval($class_filter)):
                             $class_name = $class['ten_lop'];
                             break;
                         endif;
@@ -619,12 +645,12 @@ $history = $stmt_history->get_result();
                     Không tìm thấy thông báo nào với tiêu đề "<strong><?php echo htmlspecialchars($search_query); ?></strong>" trong lớp "<strong><?php echo htmlspecialchars($class_name); ?></strong>".
                 <?php elseif (!empty($search_query)): ?>
                     Không tìm thấy thông báo nào với tiêu đề "<strong><?php echo htmlspecialchars($search_query); ?></strong>".
-                <?php elseif (!empty($class_filter)): 
+                <?php elseif (!empty($class_filter)):
                     // Lấy tên lớp
                     mysqli_data_seek($my_classes, 0);
                     $class_name = '';
-                    while($class = $my_classes->fetch_assoc()): 
-                        if(intval($class['id_lop']) == intval($class_filter)):
+                    while ($class = $my_classes->fetch_assoc()):
+                        if (intval($class['id_lop']) == intval($class_filter)):
                             $class_name = $class['ten_lop'];
                             break;
                         endif;
@@ -668,9 +694,11 @@ $history = $stmt_history->get_result();
                             <div class="form-floating">
                                 <select name="id_lop" class="form-select" required>
                                     <option value="" selected disabled>-- Vui lòng chọn lớp --</option>
-                                    <?php if ($my_classes->num_rows > 0): mysqli_data_seek($my_classes, 0); while($class = $my_classes->fetch_assoc()): ?>
+                                    <?php if ($my_classes->num_rows > 0): mysqli_data_seek($my_classes, 0);
+                                        while ($class = $my_classes->fetch_assoc()): ?>
                                             <option value="<?php echo htmlspecialchars($class['id_lop']); ?>"><?php echo htmlspecialchars($class['ten_lop']); ?></option>
-                                    <?php endwhile; else: ?><option disabled>Bạn chưa có lớp học nào đang hoạt động</option><?php endif; ?>
+                                        <?php endwhile;
+                                    else: ?><option disabled>Bạn chưa có lớp học nào đang hoạt động</option><?php endif; ?>
                                 </select>
                                 <label>Gửi đến lớp *</label>
                             </div>
@@ -683,7 +711,7 @@ $history = $stmt_history->get_result();
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary" id="submit-notification-btn" <?php if($my_classes->num_rows == 0) echo 'disabled'; ?>>
+                    <button type="submit" class="btn btn-primary" id="submit-notification-btn" <?php if ($my_classes->num_rows == 0) echo 'disabled'; ?>>
                         <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                         Gửi đi
                     </button>
@@ -707,23 +735,29 @@ $history = $stmt_history->get_result();
         }).then((result) => {
             if (result.isConfirmed) {
                 fetch('./modules/teacher/teacher_delete_notification.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tieu_de, id_lop, ngay_tao })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire('Đã xóa!', data.message, 'success');
-                        const card = document.getElementById(`notification-card-${card_id}`);
-                        if (card) {
-                            card.remove();
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            tieu_de,
+                            id_lop,
+                            ngay_tao
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire('Đã xóa!', data.message, 'success');
+                            const card = document.getElementById(`notification-card-${card_id}`);
+                            if (card) {
+                                card.remove();
+                            }
+                        } else {
+                            Swal.fire('Lỗi!', data.message, 'error');
                         }
-                    } else {
-                        Swal.fire('Lỗi!', data.message, 'error');
-                    }
-                })
-                .catch(error => Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ.', 'error'));
+                    })
+                    .catch(error => Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ.', 'error'));
             }
         });
     }
@@ -734,48 +768,50 @@ $history = $stmt_history->get_result();
         const form = document.getElementById('sendNotificationForm_teacher');
         const submitBtn = document.getElementById('submit-notification-btn');
         const spinner = submitBtn.querySelector('.spinner-border');
-        
-        document.getElementById('addNotificationModal').addEventListener('shown.bs.modal', function () {
+
+        document.getElementById('addNotificationModal').addEventListener('shown.bs.modal', function() {
             if (CKEDITOR.instances.noi_dung_editor_teacher) {
                 CKEDITOR.instances.noi_dung_editor_teacher.destroy(true);
             }
-            CKEDITOR.replace('noi_dung_editor_teacher', { height: 250 });
+            CKEDITOR.replace('noi_dung_editor_teacher', {
+                height: 250
+            });
             editor = CKEDITOR.instances.noi_dung_editor_teacher;
         });
 
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             if (editor) editor.updateElement();
-            
+
             submitBtn.disabled = true;
             spinner.classList.remove('d-none');
 
             const formData = new FormData(this);
 
             fetch('./modules/teacher/teacher_send_notification.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    addNotificationModal.hide();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Đã gửi!',
-                        text: data.message,
-                        timer: 2000,
-                        showConfirmButton: false
-                    }).then(() => location.reload());
-                } else {
-                    Swal.fire('Lỗi!', data.message, 'error');
-                }
-            })
-            .catch(error => Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ.', 'error'))
-            .finally(() => {
-                submitBtn.disabled = false;
-                spinner.classList.add('d-none');
-            });
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        addNotificationModal.hide();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Đã gửi!',
+                            text: data.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => location.reload());
+                    } else {
+                        Swal.fire('Lỗi!', data.message, 'error');
+                    }
+                })
+                .catch(error => Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ.', 'error'))
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    spinner.classList.add('d-none');
+                });
         });
 
         // Smooth scroll when clicking pagination
@@ -783,7 +819,10 @@ $history = $stmt_history->get_result();
         teacherNotifPaginationLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 setTimeout(() => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
                 }, 100);
             });
         });

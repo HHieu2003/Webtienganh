@@ -28,7 +28,6 @@ if (!$baitest) {
     exit();
 }
 
-// --- LOGIC MỚI: Lấy câu hỏi và đáp án riêng biệt ---
 
 // 1. Lấy tất cả câu hỏi (bao gồm cả loại câu hỏi)
 $sql_questions = "SELECT id_cauhoi, noi_dung, loai_cauhoi FROM cauhoi WHERE id_baitest = ? ORDER BY id_cauhoi";
@@ -62,7 +61,6 @@ if (!empty($mc_question_ids)) {
     }
     $stmt_answers->close();
 }
-// --- KẾT THÚC LOGIC MỚI ---
 ?>
 
 <style>

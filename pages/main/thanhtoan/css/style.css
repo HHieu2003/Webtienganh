@@ -37,9 +37,6 @@ body {
     }
 }
 
-/* =======================================================
-   STYLE MỚI CHO TRANG XÁC NHẬN (dangkykhoahoc.php)
-   ======================================================= */
 .form-container {
     width: 100%;
     max-width: 900px;
@@ -48,7 +45,6 @@ body {
 }
 
 .container-inner {
-    display: flex;
     background: var(--white);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
@@ -109,7 +105,7 @@ body {
 .action-side {
     flex: 0 0 320px;
     background-color: #f3f7f8;
-    padding: 40px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -192,12 +188,6 @@ body {
     color: var(--dark-text);
 }
 
-
-/* ===================================================
-   STYLE CŨ CHO TRANG THANH TOÁN (checkout.php)
-   =================================================== */
-
-/* --- Dùng .payment-container để style riêng cho trang checkout --- */
 .payment-container {
     animation: fadeIn 0.8s ease-out;
 }

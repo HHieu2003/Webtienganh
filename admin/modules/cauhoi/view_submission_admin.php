@@ -1,5 +1,4 @@
 <?php
-// File: admin/modules/cauhoi/view_submission_admin.php (Giao diện mới - Tự động mở rộng)
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -139,16 +138,18 @@ $stmt_q->close();
     .accordion-button {
         font-weight: 600;
         padding: 15px 20px;
-        text-align:justify;
+        text-align: justify;
     }
 
     .accordion-button:not(.collapsed) {
         background-color: var(--brand-color-light);
         color: var(--brand-color-dark);
     }
-    
-    .accordion-button:focus { box-shadow: none; }
-    
+
+    .accordion-button:focus {
+        box-shadow: none;
+    }
+
     .accordion-button::after {
         flex-shrink: 0;
         width: 1.25rem;
@@ -165,17 +166,53 @@ $stmt_q->close();
         gap: 10px;
         margin-bottom: 8px;
     }
-    .answer-review-item .icon { font-size: 18px; }
-    .answer-correct { background-color: #d1e7dd; border-color: #a3cfbb; color: #0f5132; }
-    .answer-incorrect { background-color: #f8d7da; border-color: #f1aeb5; color: #721c24; }
-    .answer-chosen-correct { border: 2px solid #198754; }
 
-    .essay-submission-box { background-color: #f8f9fa; border-radius: 8px; padding: 15px; }
-    .essay-submission-box h6 { font-weight: 600; color: #555; }
-    .essay-submission-box .essay-content { white-space: pre-wrap; color: #333; }
+    .answer-review-item .icon {
+        font-size: 18px;
+    }
 
-    .ai-feedback-box { margin-top: 15px; border-top: 2px dashed var(--brand-color); padding-top: 15px; }
-    .ai-feedback-box h6 { font-weight: 600; color: var(--brand-color-dark); }
+    .answer-correct {
+        background-color: #d1e7dd;
+        border-color: #a3cfbb;
+        color: #0f5132;
+    }
+
+    .answer-incorrect {
+        background-color: #f8d7da;
+        border-color: #f1aeb5;
+        color: #721c24;
+    }
+
+    .answer-chosen-correct {
+        border: 2px solid #198754;
+    }
+
+    .essay-submission-box {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    .essay-submission-box h6 {
+        font-weight: 600;
+        color: #555;
+    }
+
+    .essay-submission-box .essay-content {
+        white-space: pre-wrap;
+        color: #333;
+    }
+
+    .ai-feedback-box {
+        margin-top: 15px;
+        border-top: 2px dashed var(--brand-color);
+        padding-top: 15px;
+    }
+
+    .ai-feedback-box h6 {
+        font-weight: 600;
+        color: var(--brand-color-dark);
+    }
 </style>
 
 <div class="container-fluid">
@@ -204,9 +241,9 @@ $stmt_q->close();
             </div>
         </div>
     </div>
-    
+
     <div class="accordion" id="questionsAccordion">
-        <?php 
+        <?php
         $question_number = 1;
         foreach ($questions_data as $id_cauhoi => $data): ?>
             <div class="accordion-item animated-card" style="animation-delay: <?php echo $question_number * 50; ?>ms;">
@@ -219,11 +256,11 @@ $stmt_q->close();
                     <div class="accordion-body">
                         <?php if ($data['loai_cauhoi'] === 'trac_nghiem'): ?>
                             <div>
-                                <?php foreach ($data['answers'] as $answer): 
+                                <?php foreach ($data['answers'] as $answer):
                                     $student_choice_id = $student_answers[$id_cauhoi]['id_dapan_chon'] ?? null;
                                     $is_correct_answer = $answer['la_dung'] == 1;
                                     $is_student_choice = $student_choice_id == $answer['id_dapan'];
-                                    
+
                                     $class = '';
                                     $icon = '<i class="fa-regular fa-circle icon text-muted"></i>';
 
@@ -245,7 +282,8 @@ $stmt_q->close();
                                     </div>
                                 <?php endforeach; ?>
                             </div>
-                        <?php else: // Đây là câu hỏi tự luận ?>
+                        <?php else: // Đây là câu hỏi tự luận 
+                        ?>
                             <div class="essay-submission-box">
                                 <h6><i class="fa-solid fa-pen-nib me-2"></i>Bài làm của học viên:</h6>
                                 <div class="essay-content"><?php echo htmlspecialchars($student_answers[$id_cauhoi]['tra_loi_tu_luan'] ?? 'Học viên chưa trả lời câu hỏi này.'); ?></div>

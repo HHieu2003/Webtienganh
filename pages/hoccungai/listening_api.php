@@ -1,7 +1,6 @@
 <?php
 /**
  * Listening API Handler
- * Process listening exercises with Gemini AI
  */
 
 require_once 'config.php';

@@ -13,7 +13,8 @@ $nav = $_GET['nav'] ?? 'home';
 
 // Lấy ảnh đại diện của học viên
 $student_avatar = '../images/logo.png'; // Ảnh mặc định
-$sql_avatar = "SELECT hinh_anh FROM hocvien WHERE id_hocvien = ?";
+$student_level = ''; // Trình độ học viên
+$sql_avatar = "SELECT hinh_anh, trinh_do FROM hocvien WHERE id_hocvien = ?";
 $stmt_avatar = $conn->prepare($sql_avatar);
 $stmt_avatar->bind_param("i", $id_hocvien);
 $stmt_avatar->execute();
@@ -33,6 +34,7 @@ if ($row_avatar = $result_avatar->fetch_assoc()) {
             $stmt_reset->close();
         }
     }
+    $student_level = $row_avatar['trinh_do'] ?? '';
 }
 $stmt_avatar->close();
 
@@ -121,7 +123,7 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="user.css">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             background-color: var(--light-gray-bg);
@@ -255,6 +257,24 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
             font-weight: 500;
         }
 
+        .student-level-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 8px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .student-level-badge i {
+            font-size: 14px;
+        }
+
         .account-right {
             padding: 30px;
             flex-grow: 1;
@@ -322,7 +342,12 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
                         <img src="<?php echo htmlspecialchars($student_avatar); ?>" alt="Avatar" onerror="this.src='../images/logo.png';">
                     </div>
                     <h3><?php echo htmlspecialchars($ten_hocvien); ?></h3>
-                    <p class="account-level">Học viên</p>
+                    <?php if (!empty($student_level)): ?>
+                        <div class="student-level-badge">
+                            <i class="fa-solid fa-award"></i>
+                            <span><?php echo htmlspecialchars($student_level); ?></span>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <nav class="account-nav">
                     <ul>

@@ -20,7 +20,7 @@ switch ($nav) {
         include("teacher_schedule.php");
         break;
 
-     case 'view_submission_admin': // Thêm case mới để xem chi tiết bài làm
+     case 'view_submission_admin': 
         include("./modules/cauhoi/view_submission_admin.php");
         break;
         

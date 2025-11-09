@@ -1,259 +1,253 @@
-    /* ===== CONTACT SUPPORT WIDGET - PHIÊN BẢN SỬA LỖI HIỂN THỊ (BỊ FOOTER CHE) ===== */
-    :root {
-        --brand-color: #0db33b;
-        --brand-color-dark: #0a8a2c;
-        --white-color: #ffffff;
-        --text-dark: #333;
-        --text-light: #6c757d;
-        --bg-light: #f8f9fa;
-        --border-color: #e9ecef;
-        --shadow-soft: 0 8px 25px rgba(0, 0, 0, 0.08);
-        --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-    }
+:root {
+    --brand-color: #0db33b;
+    --brand-color-dark: #0a8a2c;
+    --white-color: #ffffff;
+    --text-dark: #333;
+    --text-light: #6c757d;
+    --bg-light: #f8f9fa;
+    --border-color: #e9ecef;
+    --shadow-soft: 0 8px 25px rgba(0, 0, 0, 0.08);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
 
-    .contact-support-widget {
-        position: fixed;
-        bottom: 105px;
-        /* Đặt vị trí cao hơn nút Chatbot một chút */
-        right: 35px;
-        /**
-        * SỬA LỖI: Tăng z-index lên 9997.
-        * Con số này đủ cao để nổi lên trên footer và các thành phần khác, 
-        * nhưng vẫn thấp hơn nút chatbot chính (z-index: 9998) để không bị chồng chéo.
-        */
-        z-index: 9997;
-    }
+.contact-support-widget {
+    position: fixed;
+    bottom: 105px;
+    /* Đặt vị trí cao hơn nút Chatbot một chút */
+    right: 35px;
+    z-index: 9997;
+}
 
-    /* --- Nút chính --- */
-    .contact-toggle-button {
-        position: relative;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--brand-color), var(--brand-color-dark));
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 5px 20px rgba(13, 179, 59, 0.3);
-        transition: var(--transition-bounce);
-        color: var(--white-color);
-        border: none;
-    }
+/* --- Nút chính --- */
+.contact-toggle-button {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand-color), var(--brand-color-dark));
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 20px rgba(13, 179, 59, 0.3);
+    transition: var(--transition-bounce);
+    color: var(--white-color);
+    border: none;
+}
 
-    .contact-toggle-button:hover {
-        transform: scale(1.1) rotate(15deg);
-        box-shadow: 0 8px 25px rgba(13, 179, 59, 0.4);
-    }
+.contact-toggle-button:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 8px 25px rgba(13, 179, 59, 0.4);
+}
 
-    /* --- Icon bên trong nút chính (Hiệu ứng chuyển đổi) --- */
-    .contact-button-icon {
-        position: relative;
-        width: 28px;
-        height: 28px;
-        font-size: 24px;
-    }
+/* --- Icon bên trong nút chính (Hiệu ứng chuyển đổi) --- */
+.contact-button-icon {
+    position: relative;
+    width: 28px;
+    height: 28px;
+    font-size: 24px;
+}
 
-    .static-icon,
-    .close-icon {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        transition: transform 0.3s ease, opacity 0.3s ease;
-    }
+.static-icon,
+.close-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
 
-    .static-icon {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-    }
+.static-icon {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
 
-    .close-icon {
-        transform: translate(-50%, -50%) scale(0) rotate(-90deg);
-        opacity: 0;
-    }
+.close-icon {
+    transform: translate(-50%, -50%) scale(0) rotate(-90deg);
+    opacity: 0;
+}
 
-    .contact-support-widget.active .static-icon {
-        transform: translate(-50%, -50%) scale(0) rotate(90deg);
-        opacity: 0;
-    }
+.contact-support-widget.active .static-icon {
+    transform: translate(-50%, -50%) scale(0) rotate(90deg);
+    opacity: 0;
+}
 
-    .contact-support-widget.active .close-icon {
-        transform: translate(-50%, -50%) scale(1) rotate(0deg);
-        opacity: 1;
-    }
+.contact-support-widget.active .close-icon {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 1;
+}
 
-    /* --- Hiệu ứng sóng lan tỏa --- */
-    .pulsation {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background-color: var(--brand-color);
-        opacity: 0.7;
+/* --- Hiệu ứng sóng lan tỏa --- */
+.pulsation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--brand-color);
+    opacity: 0.7;
+    transform: scale(1);
+    animation: pulse-wave 2.5s infinite ease-out;
+}
+
+.pulsation:nth-child(2) {
+    animation-delay: 0.8s;
+}
+
+/* --- Menu Popup --- */
+.contact-popup-menu {
+    position: absolute;
+    bottom: calc(100% + 15px);
+    right: 0;
+    width: 330px;
+    background: var(--white-color);
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.95);
+    transform-origin: bottom right;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contact-popup-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+/* Header của Menu */
+.contact-menu-header {
+    background: linear-gradient(135deg, var(--brand-color), var(--brand-color-dark));
+    color: var(--white-color);
+    padding: 13px;
+    border-radius: 15px 15px 0 0;
+    text-align: center;
+}
+
+.contact-header-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+}
+
+.contact-header-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.contact-menu-header-content h4 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.contact-menu-header-content span {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Danh sách kênh liên hệ */
+.contact-messengers-list {
+    list-style: none;
+    padding: 10px 0;
+    margin: 0;
+}
+
+.contact-messengers-list li a {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    gap: 15px;
+}
+
+.contact-messengers-list li a:hover {
+    background-color: #f1f8f3;
+    transform: translateX(5px);
+}
+
+.contact-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 20px;
+    transition: transform 0.3s ease;
+}
+
+.contact-messengers-list li a:hover .contact-item-icon {
+    transform: scale(1.1);
+}
+
+.contact-item-icon.facebook {
+    background-color: #e7f3ff;
+    color: #1877F2;
+}
+
+.contact-item-icon.zalo {
+    background-color: #e6f3ff;
+}
+
+.contact-item-icon.zalo img {
+    width: 22px;
+    height: 22px;
+}
+
+.contact-item-icon.email {
+    background-color: #f0f0f0;
+    color: #777;
+}
+
+.contact-item-icon.phone {
+    background-color: #e7f7ec;
+    color: var(--brand-color);
+}
+
+.contact-item-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 2px;
+}
+
+.contact-item-subtitle {
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+/* --- Animations --- */
+@keyframes pulse-wave {
+    0% {
         transform: scale(1);
-        animation: pulse-wave 2.5s infinite ease-out;
+        opacity: 0.7;
     }
 
-    .pulsation:nth-child(2) {
-        animation-delay: 0.8s;
-    }
-
-    /* --- Menu Popup --- */
-    .contact-popup-menu {
-        position: absolute;
-        bottom: calc(100% + 15px);
-        right: 0;
-        width: 330px;
-        background: var(--white-color);
-        border-radius: 15px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    100% {
+        transform: scale(2);
         opacity: 0;
-        visibility: hidden;
-        transform: translateY(20px) scale(0.95);
-        transform-origin: bottom right;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+}
+
+/* --- Responsive --- */
+@media (max-width: 480px) {
+    .contact-support-widget {
+        bottom: 86px;
+        right: 20px;
     }
 
-    .contact-popup-menu.show {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0) scale(1);
+    .contact-popup-menu {
+        width: calc(100vw - 30px);
+        right: -15px;
     }
-
-    /* Header của Menu */
-    .contact-menu-header {
-        background: linear-gradient(135deg, var(--brand-color), var(--brand-color-dark));
-        color: var(--white-color);
-        padding: 13px;
-        border-radius: 15px 15px 0 0;
-        text-align: center;
-    }
-
-    .contact-header-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        margin: 0 auto 10px;
-        border: 2px solid rgba(255, 255, 255, 0.7);
-    }
-
-    .contact-header-icon img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 50%;
-    }
-
-    .contact-menu-header-content h4 {
-        font-size: 16px;
-        font-weight: 700;
-        margin-bottom: 2px;
-    }
-
-    .contact-menu-header-content span {
-        font-size: 14px;
-        opacity: 0.9;
-    }
-
-    /* Danh sách kênh liên hệ */
-    .contact-messengers-list {
-        list-style: none;
-        padding: 10px 0;
-        margin: 0;
-    }
-
-    .contact-messengers-list li a {
-        display: flex;
-        align-items: center;
-        padding: 12px 20px;
-        text-decoration: none;
-        color: var(--text-dark);
-        transition: background-color 0.2s ease, transform 0.2s ease;
-        gap: 15px;
-    }
-
-    .contact-messengers-list li a:hover {
-        background-color: #f1f8f3;
-        transform: translateX(5px);
-    }
-
-    .contact-item-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        font-size: 20px;
-        transition: transform 0.3s ease;
-    }
-
-    .contact-messengers-list li a:hover .contact-item-icon {
-        transform: scale(1.1);
-    }
-
-    .contact-item-icon.facebook {
-        background-color: #e7f3ff;
-        color: #1877F2;
-    }
-
-    .contact-item-icon.zalo {
-        background-color: #e6f3ff;
-    }
-
-    .contact-item-icon.zalo img {
-        width: 22px;
-        height: 22px;
-    }
-
-    .contact-item-icon.email {
-        background-color: #f0f0f0;
-        color: #777;
-    }
-
-    .contact-item-icon.phone {
-        background-color: #e7f7ec;
-        color: var(--brand-color);
-    }
-
-    .contact-item-title {
-        font-size: 15px;
-        font-weight: 600;
-        color: var(--text-dark);
-        margin-bottom: 2px;
-    }
-
-    .contact-item-subtitle {
-        font-size: 13px;
-        color: var(--text-light);
-    }
-
-    /* --- Animations --- */
-    @keyframes pulse-wave {
-        0% {
-            transform: scale(1);
-            opacity: 0.7;
-        }
-
-        100% {
-            transform: scale(2);
-            opacity: 0;
-        }
-    }
-
-    /* --- Responsive --- */
-    @media (max-width: 480px) {
-        .contact-support-widget {
-            bottom: 86px;
-            right: 20px;
-        }
-
-        .contact-popup-menu {
-            width: calc(100vw - 30px);
-            right: -15px;
-        }
-    }
+}

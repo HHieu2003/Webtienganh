@@ -1,5 +1,5 @@
 <?php
-// 1. Luôn đặt session_start() ở dòng đầu tiên của file
+// 1. Luôn đặt session_start() ở dòng đầu tiên 
 session_start();
 include('./config/config.php');
 
@@ -24,9 +24,6 @@ if (!isset($_SESSION['has_counted'])) {
 
     $_SESSION['has_counted'] = true;
 }
-// ================================================================
-// === KẾT THÚC: CODE NÂNG CẤP ĐỂ ĐẾM LƯỢT TRUY CẬP DUY NHẤT ===
-// ================================================================
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -41,10 +38,10 @@ if (!isset($_SESSION['has_counted'])) {
 
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./pages/main.css">
-    
+
     <link rel="stylesheet" href="./pages/contact-icon/contact-widget.css">
 
-    
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
@@ -77,7 +74,6 @@ if (!isset($_SESSION['has_counted'])) {
             <?php include('./pages/footer.php'); ?>
         </footer>
     </div>
-    <!-- ✅ THÊM CHATBOT WIDGET -->
 
     <?php include('./chatbot/chatbot_widget.php'); ?>
     <?php include(dirname(__FILE__) . '/pages/contact-icon/contact-widget.php'); ?>
@@ -87,10 +83,9 @@ if (!isset($_SESSION['has_counted'])) {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script>
-        AOS.init(
-{
-    once: true
-}
+        AOS.init({
+                once: true
+            }
 
         );
     </script>

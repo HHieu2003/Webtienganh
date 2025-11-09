@@ -146,31 +146,82 @@ $stmt->close();
         width: 100%;
         min-width: 900px;
         /* Chiều rộng tối thiểu để bảng không bị co lại */
-        
+
     }
-.weekly-schedule-table {
-    table-layout: fixed;
-    width: 100%;
-}
 
-/* Tùy chỉnh chiều rộng từng cột */
-.weekly-schedule-table thead th:nth-child(2) { width: 170px; } /* Thứ Ba */
-.weekly-schedule-table thead th:nth-child(3) { width: 170px; } /* Thứ Tư */
-.weekly-schedule-table thead th:nth-child(4) { width: 170px; } /* Thứ Năm */
-.weekly-schedule-table thead th:nth-child(5) { width: 170px; } /* Thứ Sáu */
-.weekly-schedule-table thead th:nth-child(6) { width: 170px; } /* Thứ Bảy */
-.weekly-schedule-table thead th:nth-child(7) { width: 170px; } /* Chủ Nhật */
-.weekly-schedule-table thead th:nth-child(8) { width: 170px; } /* Chủ Nhật */
+    .weekly-schedule-table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    /* Tùy chỉnh chiều rộng từng cột */
+    .weekly-schedule-table thead th:nth-child(2) {
+        width: 170px;
+    }
+
+    /* Thứ Ba */
+    .weekly-schedule-table thead th:nth-child(3) {
+        width: 170px;
+    }
+
+    /* Thứ Tư */
+    .weekly-schedule-table thead th:nth-child(4) {
+        width: 170px;
+    }
+
+    /* Thứ Năm */
+    .weekly-schedule-table thead th:nth-child(5) {
+        width: 170px;
+    }
+
+    /* Thứ Sáu */
+    .weekly-schedule-table thead th:nth-child(6) {
+        width: 170px;
+    }
+
+    /* Thứ Bảy */
+    .weekly-schedule-table thead th:nth-child(7) {
+        width: 170px;
+    }
+
+    /* Chủ Nhật */
+    .weekly-schedule-table thead th:nth-child(8) {
+        width: 170px;
+    }
+
+    /* Chủ Nhật */
 
 
-/* Áp dụng cho td tương ứng */
-.weekly-schedule-table tbody td:nth-child(2) { width: 170px; }
-.weekly-schedule-table tbody td:nth-child(3) { width: 170px; }
-.weekly-schedule-table tbody td:nth-child(4) { width: 170px; }
-.weekly-schedule-table tbody td:nth-child(5) { width: 170px; }
-.weekly-schedule-table tbody td:nth-child(6) { width: 170px; }
-.weekly-schedule-table tbody td:nth-child(7) { width: 170px; }
-.weekly-schedule-table thead th:nth-child(8) { width: 170px; } /* Chủ Nhật */
+    /* Áp dụng cho td tương ứng */
+    .weekly-schedule-table tbody td:nth-child(2) {
+        width: 170px;
+    }
+
+    .weekly-schedule-table tbody td:nth-child(3) {
+        width: 170px;
+    }
+
+    .weekly-schedule-table tbody td:nth-child(4) {
+        width: 170px;
+    }
+
+    .weekly-schedule-table tbody td:nth-child(5) {
+        width: 170px;
+    }
+
+    .weekly-schedule-table tbody td:nth-child(6) {
+        width: 170px;
+    }
+
+    .weekly-schedule-table tbody td:nth-child(7) {
+        width: 170px;
+    }
+
+    .weekly-schedule-table thead th:nth-child(8) {
+        width: 170px;
+    }
+
+    /* Chủ Nhật */
 
 
     .weekly-schedule-table th,
@@ -191,7 +242,7 @@ $stmt->close();
         z-index: 2;
     }
 
-    
+
     .weekly-schedule-table tbody .session-cell {
         font-weight: 600;
         text-align: center;

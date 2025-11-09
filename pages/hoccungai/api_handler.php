@@ -1,8 +1,4 @@
 <?php
-/**
- * API Handler for Hoc Cung AI
- * Centralized Gemini AI API Communication
- */
 
 require_once 'config.php';
 
@@ -16,9 +12,6 @@ class GeminiAPIHandler {
         $this->apiUrl = GEMINI_API_URL;
     }
 
-    /**
-     * Send request to Gemini API
-     */
     public function sendRequest($prompt, $temperature = 0.7, $maxTokens = 2048) {
         try {
             // Validate inputs

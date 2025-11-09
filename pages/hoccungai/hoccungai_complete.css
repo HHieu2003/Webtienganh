@@ -1,8 +1,3 @@
-/* ================================================
-   HỌC CÙNG AI - COMPLETE CSS
-   Modern, Responsive Design for AI Learning Platform
-   ================================================ */
-
 :root {
     --primary-color: #6366f1;
     --primary-dark: #4f46e5;
@@ -12,26 +7,26 @@
     --warning-color: #f59e0b;
     --error-color: #ef4444;
     --info-color: #3b82f6;
-    
+
     --bg-primary: #ffffff;
     --bg-secondary: #f9fafb;
     --bg-dark: #1f2937;
     --bg-light: #f3f4f6;
-    
+
     --text-primary: #111827;
     --text-secondary: #6b7280;
     --text-light: #9ca3af;
-    
+
     --border-color: #e5e7eb;
     --border-radius: 12px;
     --border-radius-sm: 8px;
     --border-radius-lg: 16px;
-    
+
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    
+
     --transition-speed: 0.3s;
 }
 
@@ -54,11 +49,13 @@ html {
     position: relative;
     width: 100%;
     pointer-events: auto !important;
-    isolation: isolate; /* Create stacking context */
+    isolation: isolate;
+    /* Create stacking context */
 }
 
 .hoccungai-wrapper * {
-    pointer-events: auto !important; /* Ensure all children are clickable */
+    pointer-events: auto !important;
+    /* Ensure all children are clickable */
 }
 
 body.ai-learning-page {
@@ -87,7 +84,8 @@ body.ai-learning-page {
 
 .ai-app-layout {
     display: flex;
-    flex-direction: row; /* Changed from column to row for sidebar */
+    flex-direction: row;
+    /* Changed from column to row for sidebar */
     background: var(--bg-primary);
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-xl);
@@ -140,7 +138,8 @@ body.ai-learning-page {
 
 /* Mobile toggle button (visible on mobile, opens sidebar) */
 .sidebar-mobile-toggle {
-    display: none; /* Hidden on desktop */
+    display: none;
+    /* Hidden on desktop */
     position: fixed;
     top: 20px;
     left: 20px;
@@ -155,7 +154,8 @@ body.ai-learning-page {
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
-    z-index: 250; /* Above content but below sidebar */
+    z-index: 250;
+    /* Above content but below sidebar */
 }
 
 .sidebar-mobile-toggle:hover {
@@ -173,7 +173,8 @@ body.ai-learning-page {
 
 /* Close button (visible on mobile inside sidebar) */
 .sidebar-close-btn {
-    display: none; /* Hidden on desktop */
+    display: none;
+    /* Hidden on desktop */
     background: rgba(255, 255, 255, 0.2);
     border: none;
     color: white;
@@ -267,13 +268,20 @@ body.ai-learning-page {
     right: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
     animation: headerGlow 15s ease-in-out infinite;
 }
 
 @keyframes headerGlow {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    50% { transform: translate(-10%, -10%) rotate(180deg); }
+
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    50% {
+        transform: translate(-10%, -10%) rotate(180deg);
+    }
 }
 
 .header-content {
@@ -299,8 +307,15 @@ body.ai-learning-page {
 }
 
 @keyframes robotBounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 .ai-header p {
@@ -337,7 +352,8 @@ body.ai-learning-page {
 
 .skill-tabs-wrapper {
     display: flex;
-    flex-direction: column; /* Changed from row to column */
+    flex-direction: column;
+    /* Changed from row to column */
     gap: 0.5rem;
 }
 
@@ -404,8 +420,15 @@ body.ai-learning-page {
 }
 
 @keyframes iconPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
 }
 
 /* ================================================
@@ -494,6 +517,7 @@ body.ai-learning-page {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -649,7 +673,7 @@ body.ai-learning-page {
 
 .form-control {
     width: 100%;
-   
+
     font-size: 1rem;
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius-sm);
@@ -670,7 +694,7 @@ textarea.form-control {
 
 select.form-control {
     cursor: pointer;
-  
+
     padding-right: 2.5rem;
 }
 
@@ -689,7 +713,9 @@ select.form-control {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .loading-overlay {
@@ -791,6 +817,7 @@ select.form-control {
         transform: translateX(400px);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -877,7 +904,9 @@ select.form-control {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ================================================
@@ -893,7 +922,7 @@ select.form-control {
     .skill-sidebar {
         width: 240px;
     }
-    
+
     .skill-tab-btn {
         padding: 0.875rem 1rem;
         font-size: 0.9rem;
@@ -910,6 +939,7 @@ select.form-control {
 
 /* Mobile devices - PRIMARY BREAKPOINT */
 @media (max-width: 768px) {
+
     /* Container */
     .ai-container {
         padding: 8px;
@@ -953,7 +983,7 @@ select.form-control {
         padding: 0.6rem 1rem;
         margin-top: 0.75rem;
     }
-    
+
     /* Layout Structure */
     .ai-app-layout {
         flex-direction: column;
@@ -969,14 +999,15 @@ select.form-control {
         width: 85%;
         max-width: 320px;
         height: 100vh;
-        height: 100dvh; /* Dynamic viewport height for mobile browsers */
+        height: 100dvh;
+        /* Dynamic viewport height for mobile browsers */
         transform: translateX(-100%);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 3000;
         box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
         overflow-y: auto;
     }
-    
+
     .skill-sidebar.active {
         transform: translateX(0);
     }
@@ -991,28 +1022,30 @@ select.form-control {
     .sidebar-header h3 {
         font-size: 1.15rem;
     }
-    
+
     /* Show mobile toggle button on mobile (outside sidebar) */
     .sidebar-mobile-toggle {
         display: flex !important;
         align-items: center;
         justify-content: center;
     }
-    
+
     /* Hide toggle button when sidebar is OPEN */
     .ai-app-layout.sidebar-open .sidebar-mobile-toggle {
         opacity: 0;
         pointer-events: none;
         transform: scale(0.8);
     }
-    
+
     /* Close button - Show only when sidebar is OPEN */
     .sidebar-close-btn {
-        display: none !important; /* Hidden by default */
+        display: none !important;
+        /* Hidden by default */
     }
-    
+
     .skill-sidebar.active .sidebar-close-btn {
-        display: flex !important; /* Show when sidebar opens */
+        display: flex !important;
+        /* Show when sidebar opens */
         align-items: center;
         justify-content: center;
     }
@@ -1032,7 +1065,7 @@ select.form-control {
         font-size: 1.3rem;
         min-width: 28px;
     }
-    
+
     .skill-tab-btn span {
         display: inline;
         font-weight: 500;
@@ -1109,7 +1142,8 @@ select.form-control {
     /* Form Elements */
     .form-select,
     .form-control {
-        font-size: 16px !important; /* Prevent zoom on iOS */
+        font-size: 16px !important;
+        /* Prevent zoom on iOS */
         padding: 0.75rem;
     }
 
@@ -1124,7 +1158,7 @@ select.form-control {
         margin-right: -0.5rem;
     }
 
-    .row > [class*='col-'] {
+    .row>[class*='col-'] {
         padding-left: 0.5rem;
         padding-right: 0.5rem;
     }
@@ -1174,11 +1208,11 @@ select.form-control {
         top: 0.75rem;
         right: 0.75rem;
     }
-    
+
     .header-collapse-btn i {
         font-size: 0.95rem;
     }
-    
+
     .ai-header.collapsed {
         padding: 0.625rem 0.875rem;
     }
@@ -1289,7 +1323,8 @@ select.form-control {
     }
 
     .ai-header p {
-        display: none; /* Hide subtitle in landscape to save space */
+        display: none;
+        /* Hide subtitle in landscape to save space */
     }
 
     .skill-sidebar {
@@ -1303,6 +1338,7 @@ select.form-control {
 
 /* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
+
     /* Increase touch target sizes */
     .skill-tab-btn {
         min-height: 48px;
@@ -1325,6 +1361,7 @@ select.form-control {
 
 /* Print styles */
 @media print {
+
     .sidebar-mobile-toggle,
     .sidebar-close-btn,
     .header-collapse-btn,
@@ -1346,28 +1383,86 @@ select.form-control {
    UTILITIES
    ================================================ */
 
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
+.text-center {
+    text-align: center;
+}
 
-.mt-1 { margin-top: 0.5rem; }
-.mt-2 { margin-top: 1rem; }
-.mt-3 { margin-top: 1.5rem; }
-.mt-4 { margin-top: 2rem; }
+.text-left {
+    text-align: left;
+}
 
-.mb-1 { margin-bottom: 0.5rem; }
-.mb-2 { margin-bottom: 1rem; }
-.mb-3 { margin-bottom: 1.5rem; }
-.mb-4 { margin-bottom: 2rem; }
+.text-right {
+    text-align: right;
+}
 
-.d-flex { display: flex; }
-.flex-column { flex-direction: column; }
-.align-items-center { align-items: center; }
-.justify-content-center { justify-content: center; }
-.justify-content-between { justify-content: space-between; }
-.gap-1 { gap: 0.5rem; }
-.gap-2 { gap: 1rem; }
-.gap-3 { gap: 1.5rem; }
+.mt-1 {
+    margin-top: 0.5rem;
+}
 
-.hidden { display: none !important; }
-.visible { display: block !important; }
+.mt-2 {
+    margin-top: 1rem;
+}
+
+.mt-3 {
+    margin-top: 1.5rem;
+}
+
+.mt-4 {
+    margin-top: 2rem;
+}
+
+.mb-1 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-2 {
+    margin-bottom: 1rem;
+}
+
+.mb-3 {
+    margin-bottom: 1.5rem;
+}
+
+.mb-4 {
+    margin-bottom: 2rem;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.justify-content-center {
+    justify-content: center;
+}
+
+.justify-content-between {
+    justify-content: space-between;
+}
+
+.gap-1 {
+    gap: 0.5rem;
+}
+
+.gap-2 {
+    gap: 1rem;
+}
+
+.gap-3 {
+    gap: 1.5rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.visible {
+    display: block !important;
+}

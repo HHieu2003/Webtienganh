@@ -16,8 +16,6 @@ if ($id_giangvien) {
     $result_teacher = $stmt_teacher->get_result();
     if ($row_teacher = $result_teacher->fetch_assoc()) {
         if (!empty($row_teacher['hinh_anh'])) {
-            // Database đã chứa đường dẫn đầy đủ từ gốc: uploads/lecturers/...
-            // Nên chỉ cần thêm ../ để đi từ admin/ về root
             $teacher_avatar = "../" . $row_teacher['hinh_anh'];
         }
     }
@@ -35,7 +33,7 @@ $teaching_management_pages = [
     'question',
     'ds_cauhoi_gv',
     'kqhocvien_gv',
-     'teacher_schedule' 
+    'teacher_schedule'
 ];
 
 $is_teaching_management_active = in_array($current_page, $teaching_management_pages);
@@ -172,12 +170,6 @@ $is_teaching_management_active = in_array($current_page, $teaching_management_pa
         </li>
 
         <hr>
-
-        <!-- <li>
-            <a href="../index.php" target="_blank">
-                <i class="fa-solid fa-globe"></i><span>Xem trang web</span>
-            </a>
-        </li> -->
         <li>
             <a href="modules/logout.php" class="text-danger">
                 <i class="fa-solid fa-right-from-bracket"></i><span>Đăng xuất</span>

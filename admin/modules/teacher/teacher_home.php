@@ -6,14 +6,11 @@ if (session_status() == PHP_SESSION_NONE) {
 if (!isset($_SESSION['is_teacher']) || !$_SESSION['is_teacher']) {
     die("Truy cập bị từ chối.");
 }
-
-// *** SỬA LỖI: Đặt múi giờ mặc định để đảm bảo thời gian chính xác ***
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
 $id_giangvien = $_SESSION['id_giangvien'];
 
 // --- LẤY DỮ LIỆU CHO DASHBOARD ---
-
 // 1. Dữ liệu cho các thẻ thống kê chính
 $total_classes_active = $conn->query("SELECT COUNT(*) as total FROM lop_hoc WHERE id_giangvien = $id_giangvien AND trang_thai = 'dang hoc'")->fetch_assoc()['total'] ?? 0;
 
@@ -580,7 +577,6 @@ $my_classes = $stmt_classes->get_result();
 
                 const timeAfterEnd = now - endTime;
 
-                // *** LOGIC MỚI: Hiển thị ghi chú trước 1h và sau 1h ***
                 if (note) {
                     // Thời gian bắt đầu hiển thị: trước 1 giờ
                     const showStartTime = startTime - oneHourInMs;

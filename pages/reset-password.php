@@ -1,7 +1,7 @@
 <?php
 session_start();
 include("../config/config.php");
-date_default_timezone_set('Asia/Ho_Chi_Minh'); // <-- DÒNG QUAN TRỌNG ĐƯỢC THÊM VÀO
+date_default_timezone_set('Asia/Ho_Chi_Minh'); 
 
 $message = '';
 $message_type = 'danger';

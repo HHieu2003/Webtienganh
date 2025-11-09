@@ -72,9 +72,6 @@
 </div>
 
 <style>
-/* ==========================================================
-   CSS NÂNG CẤP CHO SECTION BÌNH LUẬN - V3.0
-   ========================================================== */
 
 /* --- Bố cục Section với nền trắng và họa tiết --- */
 .testimonial-section-v3 {

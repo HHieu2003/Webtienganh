@@ -1,8 +1,3 @@
-/**
- * HỌC CÙNG AI - COMPLETE JAVASCRIPT
- * Main JavaScript file for AI Learning Platform
- * Version: 3.1
- */
 
 // Global state management
 const AppState = {

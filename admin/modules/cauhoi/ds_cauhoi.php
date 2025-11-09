@@ -34,6 +34,7 @@ $questions = $questions_stmt->get_result();
             opacity: 0;
             transform: translateY(20px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
@@ -62,7 +63,8 @@ $questions = $questions_stmt->get_result();
         box-shadow: var(--shadow);
         margin-bottom: 1.5rem;
         border: 1px solid var(--border-color);
-        overflow: hidden; /* Quan trọng để bo góc hoạt động */
+        overflow: hidden;
+        /* Quan trọng để bo góc hoạt động */
     }
 
     .question-card-header {
@@ -73,7 +75,7 @@ $questions = $questions_stmt->get_result();
         align-items: center;
         border-bottom: 1px solid var(--border-color);
     }
-    
+
     .question-title {
         font-weight: 600;
         color: var(--dark-text);
@@ -89,18 +91,22 @@ $questions = $questions_stmt->get_result();
         padding: 0.3em 0.7em;
         border-radius: 50px;
     }
-    .badge-mc { /* Trắc nghiệm */
+
+    .badge-mc {
+        /* Trắc nghiệm */
         background-color: #e7f3ff;
         color: #0d6efd;
         text-align: center;
         margin-right: 0.5rem;
     }
-    .badge-essay { /* Tự luận */
+
+    .badge-essay {
+        /* Tự luận */
         background-color: #e6f6f4;
         color: #0d9a81;
         margin-right: 0.5rem;
-    
-    text-align: center;
+
+        text-align: center;
 
     }
 
@@ -108,7 +114,7 @@ $questions = $questions_stmt->get_result();
     .answer-list {
         padding: 1.5rem;
     }
-    
+
     .answer-item {
         display: flex;
         justify-content: space-between;
@@ -126,7 +132,7 @@ $questions = $questions_stmt->get_result();
         color: var(--brand-color-dark);
         font-weight: 500;
     }
-    
+
     .answer-item.correct-answer .correct-indicator {
         font-weight: 600;
         font-size: 0.85rem;
@@ -167,53 +173,54 @@ $questions = $questions_stmt->get_result();
             $id_cauhoi = $question['id_cauhoi'];
             $is_essay_question = ($question['loai_cauhoi'] === 'tu_luan');
     ?>
-    <div class="question-card animated-item" id="question-card-<?php echo $id_cauhoi; ?>" style="animation-delay: <?php echo $question_index * 100 + 100; ?>ms;">
-        <div class="question-card-header">
-            <div class="d-flex align-items-center gap-2">
-                <h5 class="question-title">Câu <?php echo $question_index++; ?>: <?php echo htmlspecialchars($question['noi_dung']); ?></h5>
-                <?php if ($is_essay_question): ?>
-                    <span class="question-badge badge-essay">Tự luận</span>
-                <?php else: ?>
-                    <span class="question-badge badge-mc">Trắc nghiệm</span>
-                <?php endif; ?>
-            </div>
-            <div>
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteQuestion(<?php echo $id_cauhoi; ?>)" title="Xóa câu hỏi">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </div>
-        </div>
-        <div class="answer-list">
-            <?php if ($is_essay_question): ?>
-                <div class="alert alert-light text-center">Đây là câu hỏi tự luận, không có đáp án trắc nghiệm.</div>
-            <?php else: ?>
-                <div id="answer-list-<?php echo $id_cauhoi; ?>">
-                    <?php
-                    $answers_stmt = $conn->prepare("SELECT * FROM dapan WHERE id_cauhoi = ? ORDER BY id_dapan");
-                    $answers_stmt->bind_param("i", $id_cauhoi);
-                    $answers_stmt->execute();
-                    $answers = $answers_stmt->get_result();
-                    while($answer = $answers->fetch_assoc()):
-                    ?>
-                    <div id="answer-row-<?php echo $answer['id_dapan']; ?>" class="answer-item <?php echo $answer['la_dung'] ? 'correct-answer' : ''; ?>">
-                        <span class="flex-grow-1"><?php echo htmlspecialchars($answer['noi_dung_dapan']); ?></span>
-                        <?php if($answer['la_dung']) echo '<span class="correct-indicator"><i class="fa-solid fa-check me-1"></i> Đáp án đúng</span>'; ?>
-                        <button class="btn btn-sm btn-outline-danger ms-2" onclick="deleteAnswer(<?php echo $answer['id_dapan']; ?>)" title="Xóa đáp án">
-                            <i class="fa-solid fa-times"></i>
+            <div class="question-card animated-item" id="question-card-<?php echo $id_cauhoi; ?>" style="animation-delay: <?php echo $question_index * 100 + 100; ?>ms;">
+                <div class="question-card-header">
+                    <div class="d-flex align-items-center gap-2">
+                        <h5 class="question-title">Câu <?php echo $question_index++; ?>: <?php echo htmlspecialchars($question['noi_dung']); ?></h5>
+                        <?php if ($is_essay_question): ?>
+                            <span class="question-badge badge-essay">Tự luận</span>
+                        <?php else: ?>
+                            <span class="question-badge badge-mc">Trắc nghiệm</span>
+                        <?php endif; ?>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteQuestion(<?php echo $id_cauhoi; ?>)" title="Xóa câu hỏi">
+                            <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
-                    <?php endwhile; $answers_stmt->close(); ?>
                 </div>
-                <button class="btn btn-primary btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#addAnswerModal" data-question-id="<?php echo $id_cauhoi; ?>">
-                    <i class="fa-solid fa-plus"></i> Thêm đáp án
-                </button>
-            <?php endif; ?>
-        </div>
-    </div>
-    <?php
+                <div class="answer-list">
+                    <?php if ($is_essay_question): ?>
+                        <div class="alert alert-light text-center">Đây là câu hỏi tự luận, không có đáp án trắc nghiệm.</div>
+                    <?php else: ?>
+                        <div id="answer-list-<?php echo $id_cauhoi; ?>">
+                            <?php
+                            $answers_stmt = $conn->prepare("SELECT * FROM dapan WHERE id_cauhoi = ? ORDER BY id_dapan");
+                            $answers_stmt->bind_param("i", $id_cauhoi);
+                            $answers_stmt->execute();
+                            $answers = $answers_stmt->get_result();
+                            while ($answer = $answers->fetch_assoc()):
+                            ?>
+                                <div id="answer-row-<?php echo $answer['id_dapan']; ?>" class="answer-item <?php echo $answer['la_dung'] ? 'correct-answer' : ''; ?>">
+                                    <span class="flex-grow-1"><?php echo htmlspecialchars($answer['noi_dung_dapan']); ?></span>
+                                    <?php if ($answer['la_dung']) echo '<span class="correct-indicator"><i class="fa-solid fa-check me-1"></i> Đáp án đúng</span>'; ?>
+                                    <button class="btn btn-sm btn-outline-danger ms-2" onclick="deleteAnswer(<?php echo $answer['id_dapan']; ?>)" title="Xóa đáp án">
+                                        <i class="fa-solid fa-times"></i>
+                                    </button>
+                                </div>
+                            <?php endwhile;
+                            $answers_stmt->close(); ?>
+                        </div>
+                        <button class="btn btn-primary btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#addAnswerModal" data-question-id="<?php echo $id_cauhoi; ?>">
+                            <i class="fa-solid fa-plus"></i> Thêm đáp án
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php
         endwhile;
     else:
-    ?>
+        ?>
         <div class="alert alert-info text-center animated-item" style="animation-delay: 200ms;">
             <i class="fa-solid fa-folder-open fa-3x mb-3 text-muted"></i>
             <p class="mb-0">Bài test này chưa có câu hỏi nào. Hãy bắt đầu bằng cách thêm câu hỏi mới!</p>
@@ -224,7 +231,9 @@ $questions = $questions_stmt->get_result();
 <div class="modal fade" id="importQuestionsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">Nhập câu hỏi từ File CSV</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header">
+                <h5 class="modal-title">Nhập câu hỏi từ File CSV</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
             <form action="modules/cauhoi/import_questions.php" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="id_baitest_import" value="<?php echo $id_baitest; ?>">
                 <div class="modal-body">
@@ -248,7 +257,9 @@ $questions = $questions_stmt->get_result();
 <div class="modal fade" id="addQuestionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">Thêm câu hỏi mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm câu hỏi mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
             <form id="addQuestionForm">
                 <input type="hidden" name="id_baitest" value="<?php echo $id_baitest; ?>">
                 <div class="modal-body">
@@ -273,7 +284,9 @@ $questions = $questions_stmt->get_result();
 <div class="modal fade" id="addAnswerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">Thêm đáp án mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm đáp án mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
             <form id="addAnswerForm">
                 <input type="hidden" name="id_cauhoi" id="modal_id_cauhoi">
                 <div class="modal-body">
@@ -287,100 +300,113 @@ $questions = $questions_stmt->get_result();
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    // Xử lý khi modal thêm đáp án được mở
-    const addAnswerModal = document.getElementById('addAnswerModal');
-    if (addAnswerModal) {
-        addAnswerModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const questionId = button.getAttribute('data-question-id');
-            const modalQuestionIdInput = addAnswerModal.querySelector('#modal_id_cauhoi');
-            modalQuestionIdInput.value = questionId;
-        });
-    }
+    document.addEventListener("DOMContentLoaded", function() {
+        // Xử lý khi modal thêm đáp án được mở
+        const addAnswerModal = document.getElementById('addAnswerModal');
+        if (addAnswerModal) {
+            addAnswerModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const questionId = button.getAttribute('data-question-id');
+                const modalQuestionIdInput = addAnswerModal.querySelector('#modal_id_cauhoi');
+                modalQuestionIdInput.value = questionId;
+            });
+        }
 
-    // AJAX cho việc xóa câu hỏi
-    window.deleteQuestion = function(questionId) {
-        Swal.fire({
-            title: 'Bạn có chắc chắn?',
-            text: "Xóa câu hỏi này sẽ xóa tất cả các đáp án liên quan. Hành động này không thể khôi phục!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Chắc chắn xóa!',
-            cancelButtonText: 'Hủy'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch('modules/cauhoi/delete_question.php', {
+        // AJAX cho việc xóa câu hỏi
+        window.deleteQuestion = function(questionId) {
+            Swal.fire({
+                title: 'Bạn có chắc chắn?',
+                text: "Xóa câu hỏi này sẽ xóa tất cả các đáp án liên quan. Hành động này không thể khôi phục!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Chắc chắn xóa!',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('modules/cauhoi/delete_question.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: `id_cauhoi=${questionId}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                document.getElementById(`question-card-${questionId}`).remove();
+                                Swal.fire('Đã xóa!', 'Câu hỏi đã được xóa thành công.', 'success');
+                            } else {
+                                Swal.fire('Lỗi!', data.message, 'error');
+                            }
+                        });
+                }
+            });
+        }
+
+        // AJAX cho việc xóa đáp án
+        window.deleteAnswer = function(answerId) {
+            Swal.fire({
+                title: 'Xóa đáp án?',
+                text: "Bạn có chắc muốn xóa đáp án này không?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('modules/cauhoi/delete_answer.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: `id_dapan=${answerId}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                document.getElementById(`answer-row-${answerId}`).remove();
+                            } else {
+                                Swal.fire('Lỗi!', data.message, 'error');
+                            }
+                        });
+                }
+            });
+        }
+
+        // Cập nhật URL action cho các form
+        if (document.getElementById('addQuestionForm')) document.getElementById('addQuestionForm').action = 'modules/cauhoi/add_question.php';
+        if (document.getElementById('addAnswerForm')) document.getElementById('addAnswerForm').action = 'modules/cauhoi/add_answer.php';
+
+        // AJAX cho form thêm đáp án và câu hỏi
+        function handleFormSubmit(form) {
+            const formData = new FormData(form);
+            fetch(form.action, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: `id_cauhoi=${questionId}`
+                    body: formData
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById(`question-card-${questionId}`).remove();
-                        Swal.fire('Đã xóa!', 'Câu hỏi đã được xóa thành công.', 'success');
+                        location.reload();
                     } else {
                         Swal.fire('Lỗi!', data.message, 'error');
                     }
                 });
-            }
-        });
-    }
+        }
 
-    // AJAX cho việc xóa đáp án
-    window.deleteAnswer = function(answerId) {
-        Swal.fire({
-            title: 'Xóa đáp án?',
-            text: "Bạn có chắc muốn xóa đáp án này không?",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Xóa',
-            cancelButtonText: 'Hủy'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch('modules/cauhoi/delete_answer.php', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: `id_dapan=${answerId}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById(`answer-row-${answerId}`).remove();
-                    } else {
-                        Swal.fire('Lỗi!', data.message, 'error');
-                    }
-                });
-            }
-        });
-    }
-    
-    // Cập nhật URL action cho các form
-    if(document.getElementById('addQuestionForm')) document.getElementById('addQuestionForm').action = 'modules/cauhoi/add_question.php';
-    if(document.getElementById('addAnswerForm')) document.getElementById('addAnswerForm').action = 'modules/cauhoi/add_answer.php';
-
-    // AJAX cho form thêm đáp án và câu hỏi
-    function handleFormSubmit(form) {
-        const formData = new FormData(form);
-        fetch(form.action, { method: 'POST', body: formData })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload(); 
-            } else {
-                Swal.fire('Lỗi!', data.message, 'error');
-            }
-        });
-    }
-    
-    if(document.getElementById('addQuestionForm')) {
-        document.getElementById('addQuestionForm').addEventListener('submit', function(e) { e.preventDefault(); handleFormSubmit(this); });
-    }
-    if(document.getElementById('addAnswerForm')) {
-        document.getElementById('addAnswerForm').addEventListener('submit', function(e) { e.preventDefault(); handleFormSubmit(this); });
-    }
-});
+        if (document.getElementById('addQuestionForm')) {
+            document.getElementById('addQuestionForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleFormSubmit(this);
+            });
+        }
+        if (document.getElementById('addAnswerForm')) {
+            document.getElementById('addAnswerForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleFormSubmit(this);
+            });
+        }
+    });
 </script>

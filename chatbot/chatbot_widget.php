@@ -4,7 +4,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// ✅ THÊM LOG ĐỂ DEBUG
 error_log("🔍 Session ID: " . session_id());
 error_log("🔍 Session data: " . print_r($_SESSION, true));
 
@@ -130,8 +129,6 @@ if ($chatbot_userId > 0 && isset($conn)) {
 
 
 </div>
-
-<!-- Pass PHP variables to JavaScript -->
 <script>
     const chatbotUserId = <?php echo $chatbot_userId; ?>;
     const chatbotUserName = <?php echo json_encode($chatbot_userName, JSON_UNESCAPED_UNICODE); ?>;

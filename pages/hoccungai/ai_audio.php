@@ -1,8 +1,4 @@
 <?php
-/**
- * AI AUDIO HANDLER - IMPROVED STANDALONE VERSION
- * Đánh giá phát âm sử dụng Gemini API
- */
 
 header('Content-Type: application/json; charset=utf-8');
 

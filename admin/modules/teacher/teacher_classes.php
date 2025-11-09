@@ -1,6 +1,8 @@
 <?php
 // File: admin/modules/teacher/teacher_classes.php
-if (session_status() == PHP_SESSION_NONE) { session_start(); }
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 if (!isset($_SESSION['is_teacher']) || !$_SESSION['is_teacher']) die("Truy cập bị từ chối.");
 
 $id_giangvien = $_SESSION['id_giangvien'];
@@ -59,9 +61,17 @@ $result = $stmt->get_result();
 
 <style>
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
+
     .animated-item {
         opacity: 0;
         animation: fadeInUp 0.5s ease-out forwards;
@@ -73,7 +83,7 @@ $result = $stmt->get_result();
         padding: 20px;
         border-radius: 12px;
         margin-bottom: 25px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         border: 1px solid #dee2e6;
     }
 
@@ -128,7 +138,7 @@ $result = $stmt->get_result();
     .class-card-new {
         background-color: #fff;
         border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
         display: flex;
         flex-direction: column;
         height: 100%;
@@ -137,9 +147,10 @@ $result = $stmt->get_result();
         position: relative;
         overflow: hidden;
     }
+
     .class-card-new:hover {
         transform: translateY(-8px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         border-color: var(--brand-color);
     }
 
@@ -151,10 +162,13 @@ $result = $stmt->get_result();
         left: 0;
         width: 100%;
         height: 5px;
-        background-color: var(--brand-color); /* Màu xanh cho lớp "Đang học" */
+        background-color: var(--brand-color);
+        /* Màu xanh cho lớp "Đang học" */
     }
+
     .class-card-new.status-completed::before {
-        background-color: #6c757d; /* Màu xám cho lớp "Đã xong" */
+        background-color: #6c757d;
+        /* Màu xám cho lớp "Đã xong" */
     }
 
     .card-content-wrapper {
@@ -174,6 +188,7 @@ $result = $stmt->get_result();
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
+
     .card-subtitle-new {
         font-size: 0.9rem;
         color: var(--gray-text);
@@ -189,27 +204,33 @@ $result = $stmt->get_result();
         border-top: 1px solid var(--border-color);
         border-bottom: 1px solid var(--border-color);
     }
+
     .stat-item .stat-value {
         font-size: 1.0rem;
         font-weight: 600;
         color: var(--brand-color-dark);
     }
+
     .stat-item .stat-label {
         font-size: 0.7rem;
         color: var(--gray-text);
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
-    
+
     .card-footer-actions {
-        margin-top: auto; /* Đẩy footer xuống dưới cùng */
+        margin-top: auto;
+        /* Đẩy footer xuống dưới cùng */
         padding-top: 20px;
     }
+
     .card-footer-actions .btn-group {
         width: 100%;
     }
+
     .card-footer-actions .btn {
-        flex: 1; /* Chia đều không gian cho các nút */
+        flex: 1;
+        /* Chia đều không gian cho các nút */
         padding: 10px 5px;
         font-size: 0.85rem;
         font-weight: 500;
@@ -217,11 +238,25 @@ $result = $stmt->get_result();
 
     /* CSS cho responsive */
     @media (max-width: 576px) {
-        .card-content-wrapper { padding: 20px; }
-        .card-title-new { font-size: 1.1rem; }
-        .stat-item .stat-value { font-size: 1.25rem; }
-        .card-footer-actions .btn { font-size: 0.8rem; }
-        .d-flex.flex-wrap.gap-2 { justify-content: center !important; }
+        .card-content-wrapper {
+            padding: 20px;
+        }
+
+        .card-title-new {
+            font-size: 1.1rem;
+        }
+
+        .stat-item .stat-value {
+            font-size: 1.25rem;
+        }
+
+        .card-footer-actions .btn {
+            font-size: 0.8rem;
+        }
+
+        .d-flex.flex-wrap.gap-2 {
+            justify-content: center !important;
+        }
     }
 </style>
 
@@ -234,12 +269,12 @@ $result = $stmt->get_result();
     <div class="search-filter-bar">
         <form method="GET" class="row g-3 align-items-end">
             <input type="hidden" name="nav" value="teacher_classes">
-            
+
             <div class="col-md-5">
                 <label for="search" class="form-label"><i class="fas fa-search me-1"></i> Tìm kiếm</label>
-                <input type="text" name="search" id="search" class="form-control" 
-                       placeholder="Nhập tên lớp hoặc khóa học..." 
-                       value="<?php echo htmlspecialchars($search_term); ?>">
+                <input type="text" name="search" id="search" class="form-control"
+                    placeholder="Nhập tên lớp hoặc khóa học..."
+                    value="<?php echo htmlspecialchars($search_term); ?>">
             </div>
 
             <div class="col-md-3">
@@ -295,12 +330,12 @@ $result = $stmt->get_result();
 
     <div class="card animated-card">
         <div class="card-body">
-            
+
             <?php if ($result->num_rows > 0): ?>
                 <div class="row g-4">
-                    <?php 
+                    <?php
                     $index = 0;
-                    while ($row = $result->fetch_assoc()): 
+                    while ($row = $result->fetch_assoc()):
                         $status_class = ($row['trang_thai'] === 'da xong') ? 'status-completed' : '';
                     ?>
                         <div class="col-lg-4 col-md-6 animated-item" style="animation-delay: <?php echo $index++ * 70; ?>ms;">
@@ -327,12 +362,12 @@ $result = $stmt->get_result();
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="card-footer-actions">
                                         <div class="btn-group" role="group">
                                             <a href="./admin.php?nav=lichhoc&lop_id=<?php echo $row['id_lop']; ?>&view=schedule" class="btn btn-outline-primary" title="Quản lý Lịch học"><i class="fa-solid fa-calendar-days me-1"></i> <br> Lịch học</a>
                                             <a href="./admin.php?nav=lichhoc&lop_id=<?php echo $row['id_lop']; ?>&view=students" class="btn btn-outline-secondary" title="Danh sách Học viên"><i class="fa-solid fa-users me-1"></i> <br> Học viên</a>
-                                            <a href="./admin.php?nav=lichhoc&lop_id=<?php echo $row['id_lop']; ?>&view=diemdanh" class="btn btn-outline-info" title="Điểm danh"><i class="fa-solid fa-user-check me-1"></i>  <br>Điểm danh</a>
+                                            <a href="./admin.php?nav=lichhoc&lop_id=<?php echo $row['id_lop']; ?>&view=diemdanh" class="btn btn-outline-info" title="Điểm danh"><i class="fa-solid fa-user-check me-1"></i> <br>Điểm danh</a>
                                         </div>
                                     </div>
                                 </div>
@@ -345,14 +380,14 @@ $result = $stmt->get_result();
                     <i class="fa-solid fa-school-circle-xmark fa-3x mb-3 text-muted"></i>
                     <h5 class="mb-2">Không tìm thấy lớp học</h5>
                     <p class="mb-3 text-muted">
-                        <?php 
-                        if (!empty($search_term) && !empty($status_filter)): 
+                        <?php
+                        if (!empty($search_term) && !empty($status_filter)):
                             $status_text = ($status_filter == 'dang hoc') ? 'đang dạy' : 'đã hoàn thành';
                         ?>
                             Không tìm thấy lớp học nào với từ khóa "<strong><?php echo htmlspecialchars($search_term); ?></strong>" ở trạng thái <strong><?php echo $status_text; ?></strong>.
                         <?php elseif (!empty($search_term)): ?>
                             Không tìm thấy lớp học nào với từ khóa "<strong><?php echo htmlspecialchars($search_term); ?></strong>".
-                        <?php elseif (!empty($status_filter)): 
+                        <?php elseif (!empty($status_filter)):
                             $status_text = ($status_filter == 'dang hoc') ? 'đang dạy' : 'đã hoàn thành';
                         ?>
                             Bạn không có lớp học nào ở trạng thái <strong><?php echo $status_text; ?></strong>.

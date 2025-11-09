@@ -1,7 +1,7 @@
 <?php
 session_start();
 include('../config/config.php');
-// Kiểm tra đăng nhập (quan trọng)
+// Kiểm tra đăng nhập 
 if (!isset($_SESSION['is_admin']) && !isset($_SESSION['is_teacher'])) {
     header("Location: ../pages/login.php");
     exit();
@@ -12,7 +12,6 @@ $is_teacher = $_SESSION['is_teacher'] ?? false;
 ?>
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

@@ -31,7 +31,8 @@ $stmt_classes->close();
 
 
 // Hàm để tạo badge trạng thái điểm danh
-function get_attendance_badge_details($status) {
+function get_attendance_badge_details($status)
+{
     switch ($status) {
         case 'co mat':
             return '<span class="badge status-badge status-present"><i class="fa-solid fa-check-circle me-1"></i> Có mặt</span>';
@@ -47,9 +48,17 @@ function get_attendance_badge_details($status) {
 
 <style>
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
+
     .attendance-card {
         background-color: #fff;
         border-radius: var(--border-radius);
@@ -58,20 +67,24 @@ function get_attendance_badge_details($status) {
         border: 1px solid var(--border-color);
         opacity: 0;
         animation: fadeInUp 0.6s ease-out forwards;
-        overflow: hidden; /* Quan trọng cho accordion */
+        overflow: hidden;
+        /* Quan trọng cho accordion */
     }
+
     .card-main-info {
         padding: 25px;
         display: flex;
         gap: 20px;
         align-items: center;
     }
+
     .attendance-chart {
         flex-shrink: 0;
         position: relative;
         width: 100px;
         height: 100px;
     }
+
     .attendance-chart .percentage {
         position: absolute;
         top: 50%;
@@ -81,38 +94,46 @@ function get_attendance_badge_details($status) {
         font-weight: 700;
         color: var(--primary-color-dark);
     }
+
     .attendance-details {
         flex-grow: 1;
     }
+
     .attendance-details h5 {
         font-size: 18px;
         font-weight: 600;
         margin: 0 0 5px 0;
     }
+
     .attendance-details p {
         margin: 0;
         color: var(--gray-text);
     }
+
     .attendance-stats {
         display: flex;
         gap: 15px;
         margin-top: 10px;
         font-size: 14px;
     }
+
     .attendance-stats span {
         display: flex;
         align-items: center;
         gap: 5px;
     }
+
     .attendance-stats i {
         color: var(--gray-text);
     }
+
     .card-toggle-footer {
         background-color: #f8f9fa;
         padding: 10px 25px;
         text-align: center;
         border-top: 1px solid var(--border-color);
     }
+
     .card-toggle-footer .btn-toggle-details {
         font-weight: 500;
         color: var(--primary-color);
@@ -120,9 +141,11 @@ function get_attendance_badge_details($status) {
         border: none;
         cursor: pointer;
     }
+
     .card-toggle-footer .btn-toggle-details i {
         transition: transform 0.3s ease;
     }
+
     .card-toggle-footer .btn-toggle-details:not(.collapsed) i {
         transform: rotate(180deg);
     }
@@ -133,33 +156,55 @@ function get_attendance_badge_details($status) {
         padding: 0;
         margin: 0;
     }
+
     .attendance-list-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 15px 25px;
     }
+
     .attendance-list-item:not(:last-child) {
         border-bottom: 1px solid var(--border-color);
     }
+
     .status-badge {
-        font-size: 13px; padding: 6px 12px; font-weight: 600; border-radius: 50px;
+        font-size: 13px;
+        padding: 6px 12px;
+        font-weight: 600;
+        border-radius: 50px;
     }
-    .status-present { background-color: #d1e7dd; color: #0f5132; }
-    .status-absent { background-color: #f8d7da; color: #842029; }
-    .status-late { background-color: #fff3cd; color: #664d03; }
-    .status-none { background-color: #e2e3e5; color: #41464b; }
+
+    .status-present {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .status-absent {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+
+    .status-late {
+        background-color: #fff3cd;
+        color: #664d03;
+    }
+
+    .status-none {
+        background-color: #e2e3e5;
+        color: #41464b;
+    }
 </style>
 <div class="content-pane">
     <h2 class="mb-4">Tình hình chuyên cần</h2>
 
     <?php if (!empty($classes)): ?>
         <div class="accordion" id="attendanceAccordion">
-            <?php 
+            <?php
             $index = 0;
             foreach ($classes as $class):
                 $id_lop = $class['id_lop'];
-                
+
                 // Lấy dữ liệu điểm danh cho từng lớp
                 $sql_attendance = "
                     SELECT lh.ngay_hoc, dd.trang_thai
@@ -179,50 +224,50 @@ function get_attendance_badge_details($status) {
                 $present_count = 0;
                 $absent_count = 0;
                 $late_count = 0;
-                foreach($attendance_data as $att) {
+                foreach ($attendance_data as $att) {
                     if ($att['trang_thai'] === 'co mat') $present_count++;
                     elseif ($att['trang_thai'] === 'vang') $absent_count++;
                     elseif ($att['trang_thai'] === 'muon') $late_count++;
                 }
                 $attendance_rate = ($total_sessions > 0) ? round(($present_count / $total_sessions) * 100) : 0;
             ?>
-            <div class="attendance-card" style="animation-delay: <?php echo $index * 100; ?>ms;">
-                <div class="card-main-info">
-                    <div class="attendance-chart">
-                        <canvas id="chart-<?php echo $id_lop; ?>"></canvas>
-                        <div class="percentage" data-rate="<?php echo $attendance_rate; ?>">0%</div>
-                    </div>
-                    <div class="attendance-details">
-                        <h5><?php echo htmlspecialchars($class['ten_lop']); ?></h5>
-                        <p><?php echo htmlspecialchars($class['ten_khoahoc']); ?></p>
-                        <div class="attendance-stats">
-                            <span><i class="fa-solid fa-check text-success"></i> <?php echo $present_count; ?></span>
-                            <span><i class="fa-solid fa-times text-danger"></i> <?php echo $absent_count; ?></span>
-                            <span><i class="fa-solid fa-clock text-warning"></i> <?php echo $late_count; ?></span>
+                <div class="attendance-card" style="animation-delay: <?php echo $index * 100; ?>ms;">
+                    <div class="card-main-info">
+                        <div class="attendance-chart">
+                            <canvas id="chart-<?php echo $id_lop; ?>"></canvas>
+                            <div class="percentage" data-rate="<?php echo $attendance_rate; ?>">0%</div>
+                        </div>
+                        <div class="attendance-details">
+                            <h5><?php echo htmlspecialchars($class['ten_lop']); ?></h5>
+                            <p><?php echo htmlspecialchars($class['ten_khoahoc']); ?></p>
+                            <div class="attendance-stats">
+                                <span><i class="fa-solid fa-check text-success"></i> <?php echo $present_count; ?></span>
+                                <span><i class="fa-solid fa-times text-danger"></i> <?php echo $absent_count; ?></span>
+                                <span><i class="fa-solid fa-clock text-warning"></i> <?php echo $late_count; ?></span>
+                            </div>
                         </div>
                     </div>
+                    <?php if ($total_sessions > 0): ?>
+                        <div class="card-toggle-footer">
+                            <button class="btn-toggle-details collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<?php echo $id_lop; ?>">
+                                Xem chi tiết <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div id="collapse-<?php echo $id_lop; ?>" class="accordion-collapse collapse" data-bs-parent="#attendanceAccordion">
+                            <ul class="attendance-list">
+                                <?php foreach ($attendance_data as $att_row): ?>
+                                    <li class="attendance-list-item">
+                                        <span><i class="fa-solid fa-calendar-day me-2 text-muted"></i><?php echo date("d/m/Y", strtotime($att_row['ngay_hoc'])); ?></span>
+                                        <?php echo get_attendance_badge_details($att_row['trang_thai']); ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
                 </div>
-                <?php if ($total_sessions > 0): ?>
-                <div class="card-toggle-footer">
-                    <button class="btn-toggle-details collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<?php echo $id_lop; ?>">
-                        Xem chi tiết <i class="fa-solid fa-chevron-down"></i>
-                    </button>
-                </div>
-                <div id="collapse-<?php echo $id_lop; ?>" class="accordion-collapse collapse" data-bs-parent="#attendanceAccordion">
-                    <ul class="attendance-list">
-                        <?php foreach($attendance_data as $att_row): ?>
-                        <li class="attendance-list-item">
-                            <span><i class="fa-solid fa-calendar-day me-2 text-muted"></i><?php echo date("d/m/Y", strtotime($att_row['ngay_hoc'])); ?></span>
-                            <?php echo get_attendance_badge_details($att_row['trang_thai']); ?>
-                        </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-                <?php endif; ?>
-            </div>
-            <?php 
-            $index++;
-            endforeach; 
+            <?php
+                $index++;
+            endforeach;
             ?>
         </div>
     <?php else: ?>
@@ -234,42 +279,52 @@ function get_attendance_badge_details($status) {
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const charts = document.querySelectorAll('.attendance-chart canvas');
+    document.addEventListener('DOMContentLoaded', function() {
+        const charts = document.querySelectorAll('.attendance-chart canvas');
 
-    charts.forEach(chartCanvas => {
-        const percentageEl = chartCanvas.nextElementSibling;
-        const rate = parseFloat(percentageEl.getAttribute('data-rate'));
-        const ctx = chartCanvas.getContext('2d');
+        charts.forEach(chartCanvas => {
+            const percentageEl = chartCanvas.nextElementSibling;
+            const rate = parseFloat(percentageEl.getAttribute('data-rate'));
+            const ctx = chartCanvas.getContext('2d');
 
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                datasets: [{
-                    data: [rate, 100 - rate],
-                    backgroundColor: ['#0db33b', '#e9ecef'],
-                    borderColor: '#fff',
-                    borderWidth: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                cutout: '80%',
-                plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                animation: { animateRotate: true, animateScale: true }
-            }
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [rate, 100 - rate],
+                        backgroundColor: ['#0db33b', '#e9ecef'],
+                        borderColor: '#fff',
+                        borderWidth: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '80%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true
+                    }
+                }
+            });
+
+            // Hiệu ứng số đếm
+            let currentPercentage = 0;
+            const counter = setInterval(() => {
+                if (currentPercentage >= rate) {
+                    currentPercentage = rate;
+                    clearInterval(counter);
+                }
+                percentageEl.textContent = Math.round(currentPercentage) + '%';
+                currentPercentage++;
+            }, 15);
         });
-        
-        // Hiệu ứng số đếm
-        let currentPercentage = 0;
-        const counter = setInterval(() => {
-            if (currentPercentage >= rate) {
-                currentPercentage = rate;
-                clearInterval(counter);
-            }
-            percentageEl.textContent = Math.round(currentPercentage) + '%';
-            currentPercentage++;
-        }, 15);
     });
-});
 </script>

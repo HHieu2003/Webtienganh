@@ -16,7 +16,6 @@ switch ($nav) {
         include("main/about.php");
         break;
     case 'hoccungai':
-        // Include content-only wrapper so the page is rendered inside the site's header/footer
         include("hoccungai/hoccungai_complete.php");
         break;
 
@@ -44,7 +43,6 @@ switch ($nav) {
         include("main/dangkykhoahoc.php");
         break;
 
-    // --- BẮT ĐẦU THÊM CÁC TRANG MỚI ---
     case 'lecturers':
         include("main/lecturers.php");
         break;
@@ -73,7 +71,6 @@ switch ($nav) {
     case 'contact':
         include("main/contact.php");
         break;
-    // --- KẾT THÚC THÊM CÁC TRANG MỚI ---
 
     case 'home':
     default: // Nếu 'nav' không khớp với bất kỳ case nào, sẽ chạy default

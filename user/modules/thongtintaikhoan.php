@@ -1,7 +1,5 @@
 <?php
 // user/modules/thongtintaikhoan.php
-
-// Giữ nguyên toàn bộ logic PHP xử lý form của bạn vì nó đã hoạt động tốt.
 $info_message = '';
 $info_message_type = '';
 $password_message = '';
@@ -29,10 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!is_dir($target_dir)) {
                 mkdir($target_dir, 0777, true);
             }
-            
+
             $file_name = time() . '_' . basename($file['name']);
             $target_file = $target_dir . $file_name;
-            
+
             if (move_uploaded_file($file['tmp_name'], $target_file)) {
                 // Xóa ảnh cũ nếu có
                 $sql_old = "SELECT hinh_anh FROM hocvien WHERE id_hocvien = ?";
@@ -49,13 +47,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
                 $stmt_old->close();
-                
+
                 // Lưu đường dẫn vào database (tương đối từ root)
                 $hinh_anh = 'uploads/students/' . $file_name;
                 $sql_avatar = "UPDATE hocvien SET hinh_anh = ? WHERE id_hocvien = ?";
                 $stmt_avatar = $conn->prepare($sql_avatar);
                 $stmt_avatar->bind_param("si", $hinh_anh, $id_hocvien);
-                
+
                 if ($stmt_avatar->execute()) {
                     $avatar_message = "Cập nhật ảnh đại diện thành công!";
                     $avatar_message_type = 'success';

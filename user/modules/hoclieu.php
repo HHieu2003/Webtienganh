@@ -47,30 +47,54 @@ $stmt->close();
 
 
 // Hàm để lấy icon và màu sắc dựa trên loại file
-function get_file_type_details($file_type) {
-    $file_type = strtolower($file_type ?? ''); 
+function get_file_type_details($file_type)
+{
+    $file_type = strtolower($file_type ?? '');
     switch ($file_type) {
-        case 'pdf': return ['icon' => 'fa-file-pdf', 'color' => '#E53E3E'];
-        case 'doc': case 'docx': return ['icon' => 'fa-file-word', 'color' => '#3B82F6'];
-        case 'xls': case 'xlsx': return ['icon' => 'fa-file-excel', 'color' => '#10B981'];
-        case 'ppt': case 'pptx': return ['icon' => 'fa-file-powerpoint', 'color' => '#F59E0B'];
-        case 'mp4': case 'mov': case 'avi': return ['icon' => 'fa-file-video', 'color' => '#8B5CF6'];
-        case 'jpg': case 'png': case 'jpeg': case 'gif': return ['icon' => 'fa-file-image', 'color' => '#63B3ED'];
-        default: return ['icon' => 'fa-file-alt', 'color' => '#6B7280'];
+        case 'pdf':
+            return ['icon' => 'fa-file-pdf', 'color' => '#E53E3E'];
+        case 'doc':
+        case 'docx':
+            return ['icon' => 'fa-file-word', 'color' => '#3B82F6'];
+        case 'xls':
+        case 'xlsx':
+            return ['icon' => 'fa-file-excel', 'color' => '#10B981'];
+        case 'ppt':
+        case 'pptx':
+            return ['icon' => 'fa-file-powerpoint', 'color' => '#F59E0B'];
+        case 'mp4':
+        case 'mov':
+        case 'avi':
+            return ['icon' => 'fa-file-video', 'color' => '#8B5CF6'];
+        case 'jpg':
+        case 'png':
+        case 'jpeg':
+        case 'gif':
+            return ['icon' => 'fa-file-image', 'color' => '#63B3ED'];
+        default:
+            return ['icon' => 'fa-file-alt', 'color' => '#6B7280'];
     }
 }
 ?>
 
 <style>
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
+
     .animated-item {
         opacity: 0;
         animation: fadeInUp 0.5s ease-out forwards;
     }
-    
+
     .accordion-item {
         background-color: #fff;
         border: 1px solid var(--border-color);
@@ -79,22 +103,27 @@ function get_file_type_details($file_type) {
         box-shadow: var(--shadow);
         transition: box-shadow 0.3s ease;
     }
+
     .accordion-item:hover {
         box-shadow: var(--shadow-hover);
     }
+
     .accordion-header .accordion-button {
         border-radius: var(--border-radius) !important;
         font-weight: 600;
         font-size: 18px;
     }
+
     .accordion-button:not(.collapsed) {
         background-color: var(--primary-color-light);
         color: var(--primary-color-dark);
         box-shadow: none;
     }
+
     .accordion-button:focus {
         box-shadow: 0 0 0 0.25rem rgba(13, 179, 59, 0.25);
     }
+
     .accordion-body {
         padding: 20px;
         background-color: #f8f9fa;
@@ -108,16 +137,43 @@ function get_file_type_details($file_type) {
         height: 100%;
         border: 1px solid var(--border-color);
     }
-    .material-card-header { padding: 20px; display: flex; align-items: center; gap: 15px; }
+
+    .material-card-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
     .file-icon {
-        font-size: 28px; width: 60px; height: 60px;
-        flex-shrink: 0; border-radius: 12px;
-        display: flex; align-items: center; justify-content: center;
+        font-size: 28px;
+        width: 60px;
+        height: 60px;
+        flex-shrink: 0;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         color: #fff;
     }
-    .material-info h5 { font-size: 17px; font-weight: 600; margin: 0 0 5px 0; }
-    .material-info p { font-size: 14px; color: var(--gray-text); margin: 0; }
-    .badge.scope-badge { font-size: 12px; font-weight: 500; }
+
+    .material-info h5 {
+        font-size: 17px;
+        font-weight: 600;
+        margin: 0 0 5px 0;
+    }
+
+    .material-info p {
+        font-size: 14px;
+        color: var(--gray-text);
+        margin: 0;
+    }
+
+    .badge.scope-badge {
+        font-size: 12px;
+        font-weight: 500;
+    }
+
     .material-card-footer {
         padding: 15px 20px;
         border-top: 1px solid var(--border-color);
@@ -125,14 +181,18 @@ function get_file_type_details($file_type) {
         gap: 10px;
         margin-top: auto;
     }
-    .btn-material { flex-grow: 1; font-weight: 500; }
+
+    .btn-material {
+        flex-grow: 1;
+        font-weight: 500;
+    }
 </style>
 <div class="content-pane">
     <h2 class="mb-4">Học liệu khóa học</h2>
 
     <?php if (!empty($classes_with_materials)): ?>
         <div class="accordion" id="classesAccordion">
-            <?php 
+            <?php
             $index = 0;
             foreach ($classes_with_materials as $class_id => $class_data):
                 $material_count = count($class_data['materials']);
@@ -153,7 +213,7 @@ function get_file_type_details($file_type) {
                         <div class="accordion-body">
                             <?php if ($material_count > 0): ?>
                                 <div class="row g-3">
-                                    <?php foreach ($class_data['materials'] as $material): 
+                                    <?php foreach ($class_data['materials'] as $material):
                                         $file_details = get_file_type_details($material['loai_file']);
                                         $file_ext = strtolower($material['loai_file'] ?? '');
                                         $is_viewable = in_array($file_ext, ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'mp4', 'webm', 'txt', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']);
@@ -177,8 +237,8 @@ function get_file_type_details($file_type) {
                                                 </div>
                                                 <div class="material-card-footer">
                                                     <?php if ($is_viewable): ?>
-                                                        <button class="btn btn-sm btn-outline-primary btn-material" 
-                                                                onclick="viewMaterial('<?php echo htmlspecialchars($material['duong_dan_file']); ?>', '<?php echo $file_ext; ?>', '<?php echo htmlspecialchars(addslashes($material['tieu_de'])); ?>')">
+                                                        <button class="btn btn-sm btn-outline-primary btn-material"
+                                                            onclick="viewMaterial('<?php echo htmlspecialchars($material['duong_dan_file']); ?>', '<?php echo $file_ext; ?>', '<?php echo htmlspecialchars(addslashes($material['tieu_de'])); ?>')">
                                                             <i class="fa-solid fa-eye"></i> Xem
                                                         </button>
                                                     <?php endif; ?>
@@ -196,9 +256,9 @@ function get_file_type_details($file_type) {
                         </div>
                     </div>
                 </div>
-            <?php 
-            $index++;
-            endforeach; 
+            <?php
+                $index++;
+            endforeach;
             ?>
         </div>
     <?php else: ?>
@@ -214,23 +274,33 @@ function get_file_type_details($file_type) {
         const modal = new bootstrap.Modal(document.getElementById('fileViewerModal'));
         const modalTitle = document.getElementById('fileViewerModalLabel');
         const modalContent = document.getElementById('fileViewerContent');
-        
+
         modalTitle.textContent = fileTitle;
         let contentHtml = '';
         const baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname.substring(0, window.location.pathname.indexOf("/user/"));
         const fullPublicUrl = `${baseUrl}/${filePath}`;
 
         switch (fileExt) {
-            case 'pdf': case 'txt':
+            case 'pdf':
+            case 'txt':
                 contentHtml = `<iframe src="../${filePath}" width="100%" height="100%" frameborder="0"></iframe>`;
                 break;
-            case 'jpg': case 'jpeg': case 'png': case 'gif':
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+            case 'gif':
                 contentHtml = `<img src="../${filePath}" class="img-fluid" style="display: block; margin: auto; max-height: 100%; object-fit: contain;">`;
                 break;
-            case 'mp4': case 'webm':
+            case 'mp4':
+            case 'webm':
                 contentHtml = `<video controls autoplay style="width: 100%; height: 100%;"><source src="../${filePath}" type="video/${fileExt}"></video>`;
                 break;
-            case 'doc': case 'docx': case 'xls': case 'xlsx': case 'ppt': case 'pptx':
+            case 'doc':
+            case 'docx':
+            case 'xls':
+            case 'xlsx':
+            case 'ppt':
+            case 'pptx':
                 const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fullPublicUrl)}`;
                 contentHtml = `<iframe src="${officeViewerUrl}" width="100%" height="100%" frameborder="0"></iframe>
                                <div class="alert alert-warning small p-2 m-2">Lưu ý: Chức năng xem trước file Office hoạt động tốt nhất khi website đã được đưa lên internet.</div>`;

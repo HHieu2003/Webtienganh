@@ -27,10 +27,6 @@ class DatabaseAdvisor {
     public function getAdvice($message) {
         try {
             $message = strtolower(trim($message));
-            
-            // =================================================================
-            // NEW: PRIORITIZED ROUTING SYSTEM (UPDATED)
-            // =================================================================
             // 1. Highest Priority: Specific course questions
             if ($this->isSpecificCourseQuestion($message)) {
                 $courseName = $this->extractCourseName($message);
@@ -79,9 +75,6 @@ class DatabaseAdvisor {
         }
     }
     
-    // ========================================================================
-    // QUESTION TYPE DETECTION (REFINED & EXPANDED)
-    // ========================================================================
 
     /**
      * NEW: Detects questions about a specific course.
@@ -166,14 +159,6 @@ class DatabaseAdvisor {
         
         return null; // No specific name found
     }
-    
-    // ========================================================================
-    // ADVICE FUNCTIONS (INCLUDING NEW SPECIFIC COURSE HANDLER)
-    // ========================================================================
-
-    /**
-     * NEW: Get detailed information for a specific course.
-     */
     private function getSpecificCourseInfo($courseName) {
         try {
             $sql = "SELECT 

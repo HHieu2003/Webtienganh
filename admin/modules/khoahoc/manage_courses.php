@@ -92,16 +92,18 @@ $result = $stmt->get_result();
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="levelFilterDropdown">
                         <li>
-                            <a class="dropdown-item <?php echo empty($filter_level) ? 'active' : ''; ?>" 
-                               href="./admin.php?nav=courses<?php echo !empty($search_term) ? '&search=' . urlencode($search_term) : ''; ?>">
+                            <a class="dropdown-item <?php echo empty($filter_level) ? 'active' : ''; ?>"
+                                href="./admin.php?nav=courses<?php echo !empty($search_term) ? '&search=' . urlencode($search_term) : ''; ?>">
                                 <i class="fa-solid fa-list me-2"></i>Tất cả cấp độ
                             </a>
                         </li>
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
                         <?php foreach ($available_levels as $level): ?>
                             <li>
-                                <a class="dropdown-item <?php echo $filter_level === $level ? 'active' : ''; ?>" 
-                                   href="./admin.php?nav=courses&filter_level=<?php echo urlencode($level); ?><?php echo !empty($search_term) ? '&search=' . urlencode($search_term) : ''; ?>">
+                                <a class="dropdown-item <?php echo $filter_level === $level ? 'active' : ''; ?>"
+                                    href="./admin.php?nav=courses&filter_level=<?php echo urlencode($level); ?><?php echo !empty($search_term) ? '&search=' . urlencode($search_term) : ''; ?>">
                                     <?php echo htmlspecialchars($level); ?>
                                 </a>
                             </li>
@@ -114,7 +116,7 @@ $result = $stmt->get_result();
                         <i class="fas fa-times"></i> Xóa lọc
                     </a>
                 <?php endif; ?>
-                
+
                 <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCourseModal">
                     <i class="fa-solid fa-plus me-1"></i> Thêm Khóa Học
                 </button>
@@ -123,26 +125,26 @@ $result = $stmt->get_result();
 
         <!-- Filter Statistics -->
         <?php if (!empty($filter_level) || !empty($search_term)): ?>
-        <div class="mt-3">
-            <div class="d-flex gap-2 flex-wrap">
-                <span class="badge bg-light text-dark border">
-                    <i class="fa-solid fa-book-open me-1"></i>
-                    Tổng: <strong><?php echo $total_courses; ?></strong> khóa học
-                </span>
-                <?php if (!empty($filter_level)): ?>
-                    <span class="badge" style="background: linear-gradient(135deg, #0db33b 0%, #0a8a2c 100%);">
-                        <i class="fa-solid fa-filter me-1"></i>
-                        Cấp độ: <strong><?php echo htmlspecialchars($filter_level); ?></strong>
+            <div class="mt-3">
+                <div class="d-flex gap-2 flex-wrap">
+                    <span class="badge bg-light text-dark border">
+                        <i class="fa-solid fa-book-open me-1"></i>
+                        Tổng: <strong><?php echo $total_courses; ?></strong> khóa học
                     </span>
-                <?php endif; ?>
-                <?php if (!empty($search_term)): ?>
-                    <span class="badge bg-info">
-                        <i class="fa-solid fa-search me-1"></i>
-                        Tìm kiếm: <strong><?php echo htmlspecialchars($search_term); ?></strong>
-                    </span>
-                <?php endif; ?>
+                    <?php if (!empty($filter_level)): ?>
+                        <span class="badge" style="background: linear-gradient(135deg, #0db33b 0%, #0a8a2c 100%);">
+                            <i class="fa-solid fa-filter me-1"></i>
+                            Cấp độ: <strong><?php echo htmlspecialchars($filter_level); ?></strong>
+                        </span>
+                    <?php endif; ?>
+                    <?php if (!empty($search_term)): ?>
+                        <span class="badge bg-info">
+                            <i class="fa-solid fa-search me-1"></i>
+                            Tìm kiếm: <strong><?php echo htmlspecialchars($search_term); ?></strong>
+                        </span>
+                    <?php endif; ?>
+                </div>
             </div>
-        </div>
         <?php endif; ?>
     </div>
     <div class="card-body">
@@ -151,9 +153,10 @@ $result = $stmt->get_result();
                 <thead class="table-dark">
                     <tr>
                         <th class="text-center">ID</th>
-                      
+
                         <th>Tên Khóa Học</th>
-                        <th>Cấp Độ</th> <th class="text-center">Thời Gian (Buổi)</th>
+                        <th>Cấp Độ</th>
+                        <th class="text-center">Thời Gian (Buổi)</th>
                         <th class="text-end">Chi Phí (VNĐ)</th>
                         <th class="text-center">Đánh Giá</th>
                         <th class="text-center">Hành Động</th>
@@ -197,220 +200,220 @@ $result = $stmt->get_result();
         </div>
 
         <?php if ($total_pages > 1): ?>
-        <!-- Pagination -->
-        <div class="course-pagination-container">
-            <div class="course-pagination">
-                <?php
-                $query_params = [];
-                if (!empty($search_term)) $query_params[] = 'search=' . urlencode($search_term);
-                if (!empty($filter_level)) $query_params[] = 'filter_level=' . urlencode($filter_level);
-                $query_string = !empty($query_params) ? '&' . implode('&', $query_params) : '';
-                
-                // Previous button
-                if ($current_page > 1):
-                    $prev_link = "./admin.php?nav=courses&course_page=" . ($current_page - 1) . $query_string;
-                ?>
-                    <a href="<?php echo $prev_link; ?>" class="course-pagination-btn">
-                        <i class="fa-solid fa-chevron-left"></i>
-                        <span class="btn-text">Trước</span>
-                    </a>
-                <?php else: ?>
-                    <span class="course-pagination-btn disabled">
-                        <i class="fa-solid fa-chevron-left"></i>
-                        <span class="btn-text">Trước</span>
-                    </span>
-                <?php endif; ?>
-
-                <!-- Page numbers -->
-                <?php
-                $start_page = max(1, $current_page - 2);
-                $end_page = min($total_pages, $current_page + 2);
-
-                if ($start_page > 1):
-                    $first_link = "./admin.php?nav=courses&course_page=1" . $query_string;
-                ?>
-                    <a href="<?php echo $first_link; ?>" class="course-pagination-number">1</a>
-                    <?php if ($start_page > 2): ?>
-                        <span class="course-pagination-dots">...</span>
-                    <?php endif; ?>
-                <?php endif; ?>
-
-                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+            <!-- Pagination -->
+            <div class="course-pagination-container">
+                <div class="course-pagination">
                     <?php
-                    $page_link = "./admin.php?nav=courses&course_page=" . $i . $query_string;
-                    $active_class = ($i == $current_page) ? ' active' : '';
+                    $query_params = [];
+                    if (!empty($search_term)) $query_params[] = 'search=' . urlencode($search_term);
+                    if (!empty($filter_level)) $query_params[] = 'filter_level=' . urlencode($filter_level);
+                    $query_string = !empty($query_params) ? '&' . implode('&', $query_params) : '';
+
+                    // Previous button
+                    if ($current_page > 1):
+                        $prev_link = "./admin.php?nav=courses&course_page=" . ($current_page - 1) . $query_string;
                     ?>
-                    <a href="<?php echo $page_link; ?>" class="course-pagination-number<?php echo $active_class; ?>">
-                        <?php echo $i; ?>
-                    </a>
-                <?php endfor; ?>
-
-                <?php if ($end_page < $total_pages): ?>
-                    <?php if ($end_page < $total_pages - 1): ?>
-                        <span class="course-pagination-dots">...</span>
+                        <a href="<?php echo $prev_link; ?>" class="course-pagination-btn">
+                            <i class="fa-solid fa-chevron-left"></i>
+                            <span class="btn-text">Trước</span>
+                        </a>
+                    <?php else: ?>
+                        <span class="course-pagination-btn disabled">
+                            <i class="fa-solid fa-chevron-left"></i>
+                            <span class="btn-text">Trước</span>
+                        </span>
                     <?php endif; ?>
-                    <?php $last_link = "./admin.php?nav=courses&course_page=" . $total_pages . $query_string; ?>
-                    <a href="<?php echo $last_link; ?>" class="course-pagination-number"><?php echo $total_pages; ?></a>
-                <?php endif; ?>
 
-                <!-- Next button -->
-                <?php if ($current_page < $total_pages):
-                    $next_link = "./admin.php?nav=courses&course_page=" . ($current_page + 1) . $query_string;
-                ?>
-                    <a href="<?php echo $next_link; ?>" class="course-pagination-btn">
-                        <span class="btn-text">Sau</span>
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </a>
-                <?php else: ?>
-                    <span class="course-pagination-btn disabled">
-                        <span class="btn-text">Sau</span>
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </span>
-                <?php endif; ?>
-            </div>
+                    <!-- Page numbers -->
+                    <?php
+                    $start_page = max(1, $current_page - 2);
+                    $end_page = min($total_pages, $current_page + 2);
 
-            <!-- Pagination info -->
-            <div class="course-pagination-info">
-                <?php
-                $start_item = $offset + 1;
-                $end_item = min($offset + $courses_per_page, $total_courses);
-                ?>
-                Hiển thị <?php echo $start_item; ?>-<?php echo $end_item; ?> / <?php echo $total_courses; ?> khóa học
+                    if ($start_page > 1):
+                        $first_link = "./admin.php?nav=courses&course_page=1" . $query_string;
+                    ?>
+                        <a href="<?php echo $first_link; ?>" class="course-pagination-number">1</a>
+                        <?php if ($start_page > 2): ?>
+                            <span class="course-pagination-dots">...</span>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
+                    <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                        <?php
+                        $page_link = "./admin.php?nav=courses&course_page=" . $i . $query_string;
+                        $active_class = ($i == $current_page) ? ' active' : '';
+                        ?>
+                        <a href="<?php echo $page_link; ?>" class="course-pagination-number<?php echo $active_class; ?>">
+                            <?php echo $i; ?>
+                        </a>
+                    <?php endfor; ?>
+
+                    <?php if ($end_page < $total_pages): ?>
+                        <?php if ($end_page < $total_pages - 1): ?>
+                            <span class="course-pagination-dots">...</span>
+                        <?php endif; ?>
+                        <?php $last_link = "./admin.php?nav=courses&course_page=" . $total_pages . $query_string; ?>
+                        <a href="<?php echo $last_link; ?>" class="course-pagination-number"><?php echo $total_pages; ?></a>
+                    <?php endif; ?>
+
+                    <!-- Next button -->
+                    <?php if ($current_page < $total_pages):
+                        $next_link = "./admin.php?nav=courses&course_page=" . ($current_page + 1) . $query_string;
+                    ?>
+                        <a href="<?php echo $next_link; ?>" class="course-pagination-btn">
+                            <span class="btn-text">Sau</span>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    <?php else: ?>
+                        <span class="course-pagination-btn disabled">
+                            <span class="btn-text">Sau</span>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </span>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Pagination info -->
+                <div class="course-pagination-info">
+                    <?php
+                    $start_item = $offset + 1;
+                    $end_item = min($offset + $courses_per_page, $total_courses);
+                    ?>
+                    Hiển thị <?php echo $start_item; ?>-<?php echo $end_item; ?> / <?php echo $total_courses; ?> khóa học
+                </div>
             </div>
-        </div>
         <?php endif; ?>
-        </div>
+    </div>
 </div>
 
 <style>
-/* Course Pagination Styles */
-.course-pagination-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 20px;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.course-pagination {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    background: linear-gradient(135deg, #0db33b 0%, #0a8a2c 100%);
-    padding: 6px 12px;
-    border-radius: 50px;
-    box-shadow: 0 4px 15px rgba(13, 179, 59, 0.2);
-}
-
-.course-pagination-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 9px;
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    text-decoration: none;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(5px);
-}
-
-.course-pagination-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
-    color: white;
-    transform: translateY(-1px) scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.course-pagination-btn.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-.course-pagination-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    text-decoration: none;
-    border-radius: 50%;
-    font-size: 13px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.course-pagination-number:hover {
-    background: rgba(255, 255, 255, 0.25);
-    color: white;
-    transform: translateY(-1px) scale(1.05);
-}
-
-.course-pagination-number.active {
-    background: white;
-    color: #0db33b;
-    transform: scale(1.08);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    border-color: white;
-}
-
-.course-pagination-dots {
-    color: white;
-    padding: 0 4px;
-    font-weight: bold;
-    opacity: 0.6;
-}
-
-.course-pagination-info {
-    background: var(--brand-color-light, #e7f7ec);
-    color: var(--brand-color, #0db33b);
-    padding: 8px 18px;
-    border-radius: 25px;
-    font-size: 13px;
-    font-weight: 600;
-    box-shadow: 0 2px 8px rgba(13, 179, 59, 0.1);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
+    /* Course Pagination Styles */
     .course-pagination-container {
-        justify-content: center;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
     }
-    
-    .course-pagination-btn .btn-text {
-        display: none;
-    }
-    
-    .course-pagination-btn {
-        padding: 6px 10px;
-    }
-    
-    .course-pagination-info {
-        order: -1;
-        width: 100%;
-        text-align: center;
-    }
-}
 
-@media (max-width: 480px) {
-    .course-pagination-number {
-        width: 30px;
-        height: 30px;
-        font-size: 12px;
+    .course-pagination {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        background: linear-gradient(135deg, #0db33b 0%, #0a8a2c 100%);
+        padding: 6px 12px;
+        border-radius: 50px;
+        box-shadow: 0 4px 15px rgba(13, 179, 59, 0.2);
     }
-    
+
     .course-pagination-btn {
-        padding: 5px 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 9px;
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        text-decoration: none;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(5px);
     }
-}
+
+    .course-pagination-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        transform: translateY(-1px) scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .course-pagination-btn.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .course-pagination-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        text-decoration: none;
+        border-radius: 50%;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .course-pagination-number:hover {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        transform: translateY(-1px) scale(1.05);
+    }
+
+    .course-pagination-number.active {
+        background: white;
+        color: #0db33b;
+        transform: scale(1.08);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        border-color: white;
+    }
+
+    .course-pagination-dots {
+        color: white;
+        padding: 0 4px;
+        font-weight: bold;
+        opacity: 0.6;
+    }
+
+    .course-pagination-info {
+        background: var(--brand-color-light, #e7f7ec);
+        color: var(--brand-color, #0db33b);
+        padding: 8px 18px;
+        border-radius: 25px;
+        font-size: 13px;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(13, 179, 59, 0.1);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .course-pagination-container {
+            justify-content: center;
+        }
+
+        .course-pagination-btn .btn-text {
+            display: none;
+        }
+
+        .course-pagination-btn {
+            padding: 6px 10px;
+        }
+
+        .course-pagination-info {
+            order: -1;
+            width: 100%;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .course-pagination-number {
+            width: 30px;
+            height: 30px;
+            font-size: 12px;
+        }
+
+        .course-pagination-btn {
+            padding: 5px 8px;
+        }
+    }
 </style>
 
 <div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
@@ -428,24 +431,24 @@ $result = $stmt->get_result();
                             <input type="text" class="form-control" id="add_ten_khoahoc" name="ten_khoahoc" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                             <label for="add_cap_do" class="form-label">Cấp Độ</label>
-                             <input type="text" class="form-control" id="add_cap_do" name="cap_do" list="levelList" placeholder="Chọn hoặc nhập cấp độ...">
-                             <datalist id="levelList">
-                                 <?php foreach ($available_levels as $level): ?>
-                                     <option value="<?php echo htmlspecialchars($level); ?>">
-                                 <?php endforeach; ?>
-                             </datalist>
-                         </div>
+                            <label for="add_cap_do" class="form-label">Cấp Độ</label>
+                            <input type="text" class="form-control" id="add_cap_do" name="cap_do" list="levelList" placeholder="Chọn hoặc nhập cấp độ...">
+                            <datalist id="levelList">
+                                <?php foreach ($available_levels as $level): ?>
+                                    <option value="<?php echo htmlspecialchars($level); ?>">
+                                    <?php endforeach; ?>
+                            </datalist>
+                        </div>
                     </div>
-                     <div class="mb-3">
+                    <div class="mb-3">
                         <label for="add_mo_ta" class="form-label">Mô Tả</label>
                         <textarea class="form-control" id="add_mo_ta" name="mo_ta" rows="5"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                             <label for="add_thoi_gian" class="form-label">Thời Gian (Số buổi)</label>
-                             <input type="number" class="form-control" id="add_thoi_gian" name="thoi_gian" min="0">
-                         </div>
+                            <label for="add_thoi_gian" class="form-label">Thời Gian (Số buổi)</label>
+                            <input type="number" class="form-control" id="add_thoi_gian" name="thoi_gian" min="0">
+                        </div>
                         <div class="col-md-6 mb-3">
                             <label for="add_chi_phi" class="form-label">Chi Phí (VNĐ) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="add_chi_phi" name="chi_phi" min="0" required>
@@ -478,14 +481,14 @@ $result = $stmt->get_result();
                     <input type="hidden" name="hinh_anh_hien_tai" id="edit_hinh_anh_hien_tai">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                             <label for="edit_ten_khoahoc" class="form-label">Tên Khóa Học <span class="text-danger">*</span></label>
-                             <input type="text" class="form-control" id="edit_ten_khoahoc" name="ten_khoahoc" required>
-                         </div>
-                         <div class="col-md-6 mb-3">
-                             <label for="edit_cap_do" class="form-label">Cấp Độ</label>
-                             <input type="text" class="form-control" id="edit_cap_do" name="cap_do" list="levelList" placeholder="Chọn hoặc nhập cấp độ...">
-                         </div>
-                     </div>
+                            <label for="edit_ten_khoahoc" class="form-label">Tên Khóa Học <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="edit_ten_khoahoc" name="ten_khoahoc" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_cap_do" class="form-label">Cấp Độ</label>
+                            <input type="text" class="form-control" id="edit_cap_do" name="cap_do" list="levelList" placeholder="Chọn hoặc nhập cấp độ...">
+                        </div>
+                    </div>
                     <div class="mb-3">
                         <label for="edit_mo_ta" class="form-label">Mô Tả</label>
                         <textarea class="form-control" id="edit_mo_ta" name="mo_ta" rows="5"></textarea>
@@ -535,25 +538,25 @@ $result = $stmt->get_result();
         const addModalEl = document.getElementById('addCourseModal');
         const editModalEl = document.getElementById('editCourseModal');
         if (addModalEl) {
-             addCourseModal = new bootstrap.Modal(addModalEl);
+            addCourseModal = new bootstrap.Modal(addModalEl);
         }
         if (editModalEl) {
-             editCourseModal = new bootstrap.Modal(editModalEl);
+            editCourseModal = new bootstrap.Modal(editModalEl);
 
-             // Xử lý sự kiện khi modal sửa được hiển thị
-             editModalEl.addEventListener('shown.bs.modal', function () {
-                 // Lấy nội dung hiện tại của textarea (đã được JS đổ vào từ AJAX)
-                 const currentContent = document.getElementById('edit_mo_ta').value;
-                 // Set nội dung cho CKEditor
-                 if (editEditor) {
-                     editEditor.setData(currentContent);
-                 }
-             });
+            // Xử lý sự kiện khi modal sửa được hiển thị
+            editModalEl.addEventListener('shown.bs.modal', function() {
+                // Lấy nội dung hiện tại của textarea (đã được JS đổ vào từ AJAX)
+                const currentContent = document.getElementById('edit_mo_ta').value;
+                // Set nội dung cho CKEditor
+                if (editEditor) {
+                    editEditor.setData(currentContent);
+                }
+            });
         }
 
         // Xử lý submit form thêm mới
         const addForm = document.getElementById('addCourseForm');
-        if(addForm) {
+        if (addForm) {
             addForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 addEditor.updateElement(); // Cập nhật textarea từ CKEditor trước khi gửi
@@ -591,7 +594,7 @@ $result = $stmt->get_result();
 
         // Xử lý submit form sửa
         const editForm = document.getElementById('editCourseForm');
-         if(editForm) {
+        if (editForm) {
             editForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 editEditor.updateElement(); // Cập nhật textarea từ CKEditor
@@ -619,10 +622,10 @@ $result = $stmt->get_result();
                             Swal.fire('Lỗi!', data.message, 'error');
                         }
                     })
-                     .catch(error => {
-                         console.error('Error:', error);
-                         Swal.fire('Lỗi!', 'Có lỗi xảy ra khi cập nhật.', 'error');
-                     });
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Lỗi!', 'Có lỗi xảy ra khi cập nhật.', 'error');
+                    });
             });
         }
 
@@ -645,7 +648,7 @@ $result = $stmt->get_result();
                     document.getElementById('edit_hinh_anh_hien_tai').value = data.hinh_anh || '';
 
                     // Cập nhật giá trị cho textarea ẩn để CKEditor lấy khi modal mở
-                     document.getElementById('edit_mo_ta').value = data.mo_ta || '';
+                    document.getElementById('edit_mo_ta').value = data.mo_ta || '';
 
                     // Hiển thị ảnh hiện tại
                     const currentImageElement = document.getElementById('current_image');
@@ -664,7 +667,7 @@ $result = $stmt->get_result();
 
                     // Mở modal sửa
                     if (editCourseModal) editCourseModal.show();
-                     // CKEditor sẽ tự cập nhật nội dung khi modal 'shown.bs.modal'
+                    // CKEditor sẽ tự cập nhật nội dung khi modal 'shown.bs.modal'
                 }
             })
             .catch(error => {
@@ -677,7 +680,7 @@ $result = $stmt->get_result();
     function deleteCourse(id) {
         Swal.fire({
             title: 'Bạn có chắc chắn?',
-            text: "Bạn sẽ không thể hoàn tác hành động này!",
+            text: "Bạn sẽ không thể hoàn tác hành động này. Mọi dữ liệu liên quan đến khoá học này sẽ đều bị xóa bỏ!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -696,8 +699,8 @@ $result = $stmt->get_result();
                     })
                     .then(response => response.text()) // Nhận phản hồi dạng text
                     .then(textData => {
-                         // Kiểm tra nội dung phản hồi thay vì JSON status
-                         if (textData.includes('Xóa thành công')) {
+                        // Kiểm tra nội dung phản hồi thay vì JSON status
+                        if (textData.includes('Xóa thành công')) {
                             Swal.fire(
                                 'Đã xóa!',
                                 'Khóa học đã được xóa thành công.',
@@ -706,8 +709,8 @@ $result = $stmt->get_result();
                                 location.reload(); // Tải lại trang
                             });
                         } else {
-                             // Nếu có lỗi, textData sẽ chứa thông báo lỗi từ PHP
-                             Swal.fire(
+                            // Nếu có lỗi, textData sẽ chứa thông báo lỗi từ PHP
+                            Swal.fire(
                                 'Lỗi!',
                                 textData || 'Có lỗi xảy ra khi xóa khóa học.', // Hiển thị lỗi từ PHP hoặc thông báo chung
                                 'error'

@@ -1,12 +1,8 @@
 <?php
 // File: pages/main/about.php
-// Phiên bản được thiết kế lại bởi Đối tác lập trình của bạn
 ?>
 
 <style>
-    /* ==========================================================
-       CSS ĐỘC LẬP CHO TRANG GIỚI THIỆU (ABOUT US)
-       ========================================================== */
 
     /* --- Hero Section --- */
     .about-hero {
@@ -450,19 +446,19 @@
             <div class="col-lg-4 col-md-6" data-aos="fade-up" style="margin-bottom: 20px;">
                 <div class="location-card">
                     <div class="location-icon"><i class="fas fa-map-marker-alt"></i></div>
-                    <p>68-70 Hoa Cúc, Phường 7, Quận Phú Nhuận, TP.HCM</p>
+                    <p>27 Lê Văn Lương, Quận Thanh Xuân, TP.HN</p>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6" data-aos="fade-up" style="margin-bottom: 20px;" data-aos-delay="100">
                 <div class="location-card">
                     <div class="location-icon"><i class="fas fa-map-marker-alt"></i></div>
-                    <p>769 Lê Hồng Phong, Phường 12, Quận 10, TP.HCM</p>
+                    <p>321 Lê Hồng Phong, Phường 12, Quận 10, TP.HCM</p>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6" data-aos="fade-up" style="margin-bottom: 20px;" data-aos-delay="200">
                 <div class="location-card">
                     <div class="location-icon"><i class="fas fa-map-marker-alt"></i></div>
-                    <p>53 Gò Dầu, Phường Tân Quý, Quận Tân Phú, TP.HCM</p>
+                    <p>65 Gò Dầu, Phường Tân Quý, Quận Tân Phú, TP.HCM</p>
                 </div>
             </div>
         </div>

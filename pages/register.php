@@ -6,7 +6,7 @@ include("../config/config.php");
 require('../config/PHPMailer/src/Exception.php');
 require('../config/PHPMailer/src/PHPMailer.php');
 require('../config/PHPMailer/src/SMTP.php');
-require('../config/sendmail.php'); // File sendmail của bạn
+require('../config/sendmail.php'); 
 
 $message = '';
 $message_type = ''; // 'success' hoặc 'error'

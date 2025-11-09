@@ -49,36 +49,44 @@ if ($lop_id) {
         margin-bottom: 2rem;
         border: 1px solid var(--border-color);
     }
+
     .class-title-section a {
         flex-shrink: 0;
     }
+
     .class-title-section h1 {
         font-size: 1.75rem;
         font-weight: 700;
         color: var(--dark-text);
     }
+
     .class-title-section p {
         color: var(--gray-text);
         margin-bottom: 0;
     }
+
     .class-stats {
         display: flex;
         gap: 1.5rem;
         align-items: center;
     }
+
     .stat-item {
         display: flex;
         align-items: center;
         gap: 0.75rem;
     }
+
     .stat-item .icon {
         font-size: 1.5rem;
         color: var(--brand-color);
     }
+
     .stat-item .value {
         font-size: 1.25rem;
         font-weight: 600;
     }
+
     .stat-item .label {
         font-size: 0.85rem;
         color: var(--gray-text);
@@ -88,9 +96,10 @@ if ($lop_id) {
         background-color: #fff;
         border-radius: 50px;
         padding: 0.5rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         display: inline-flex;
     }
+
     .management-nav-tabs .nav-link {
         color: var(--gray-text);
         font-weight: 500;
@@ -99,20 +108,23 @@ if ($lop_id) {
         border: none;
         transition: all 0.3s ease;
     }
+
     .management-nav-tabs .nav-link.active {
         background-color: var(--brand-color);
         color: #fff;
         box-shadow: 0 4px 10px rgba(13, 179, 59, 0.3);
     }
-    
+
     @media (max-width: 991.98px) {
         .class-management-header {
             text-align: center;
         }
+
         .class-stats {
             justify-content: center;
             margin-top: 1rem;
         }
+
         .management-nav-tabs {
             flex-wrap: wrap;
             border-radius: 12px;
@@ -125,10 +137,10 @@ if ($lop_id) {
         <div class="class-management-header animated-card">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div class="d-flex align-items-center gap-3 class-title-section">
-                     <a href="<?php echo $back_link; ?>" class="btn btn-light border" title="Quay lại">
+                    <a href="<?php echo $back_link; ?>" class="btn btn-light border" title="Quay lại">
                         <i class="fa-solid fa-arrow-left"></i>
                     </a>
-                    
+
                     <div>
                         <h1><?php echo htmlspecialchars($class_info['ten_lop']); ?></h1>
                         <p><?php echo htmlspecialchars($class_info['ten_khoahoc']); ?></p>
@@ -163,16 +175,16 @@ if ($lop_id) {
         </div>
 
         <?php
-            // Các tệp này sẽ được làm mới ở các bước sau
-            if ($view === 'students') {
-                include(__DIR__ . '/hocvienlop/view_students.php');
-            } elseif ($view === 'schedule') {
-                include(__DIR__ . '/lichhoclop/view_schedule.php');
-            } elseif ($view === 'grades') {
-                include(__DIR__ . '/diemso/view_grades.php');
-            } elseif ($view === 'diemdanh') {
-                include(__DIR__ . '/diemdanh/diemdanh.php');
-            }
+        // Các tệp này sẽ được làm mới ở các bước sau
+        if ($view === 'students') {
+            include(__DIR__ . '/hocvienlop/view_students.php');
+        } elseif ($view === 'schedule') {
+            include(__DIR__ . '/lichhoclop/view_schedule.php');
+        } elseif ($view === 'grades') {
+            include(__DIR__ . '/diemso/view_grades.php');
+        } elseif ($view === 'diemdanh') {
+            include(__DIR__ . '/diemdanh/diemdanh.php');
+        }
         ?>
 
     <?php else: ?>
@@ -181,22 +193,22 @@ if ($lop_id) {
 
     <?php include(__DIR__ . '/lophoc/modals_lophoc.php'); ?>
     <?php if ($lop_id): ?>
-        <?php 
-            // Cập nhật logic lấy học viên đủ điều kiện cho modal
-            $eligible_students = null;
-            if ($lop_id) {
-                $stmt_kh = $conn->prepare("SELECT id_khoahoc FROM lop_hoc WHERE id_lop = ?");
-                $stmt_kh->bind_param('s', $lop_id);
-                $stmt_kh->execute();
-                if($id_khoahoc_res = $stmt_kh->get_result()->fetch_assoc()) {
-                    $id_khoahoc = $id_khoahoc_res['id_khoahoc'];
-                    $sql_eligible = "SELECT hv.id_hocvien, hv.ten_hocvien, hv.email FROM dangkykhoahoc dk JOIN hocvien hv ON dk.id_hocvien = hv.id_hocvien WHERE dk.id_khoahoc = ? AND dk.trang_thai = 'da xac nhan' AND dk.id_lop IS NULL";
-                    $stmt_el = $conn->prepare($sql_eligible);
-                    $stmt_el->bind_param('i', $id_khoahoc);
-                    $stmt_el->execute();
-                    $eligible_students = $stmt_el->get_result();
-                }
+        <?php
+        // Cập nhật logic lấy học viên đủ điều kiện cho modal
+        $eligible_students = null;
+        if ($lop_id) {
+            $stmt_kh = $conn->prepare("SELECT id_khoahoc FROM lop_hoc WHERE id_lop = ?");
+            $stmt_kh->bind_param('s', $lop_id);
+            $stmt_kh->execute();
+            if ($id_khoahoc_res = $stmt_kh->get_result()->fetch_assoc()) {
+                $id_khoahoc = $id_khoahoc_res['id_khoahoc'];
+                $sql_eligible = "SELECT hv.id_hocvien, hv.ten_hocvien, hv.email FROM dangkykhoahoc dk JOIN hocvien hv ON dk.id_hocvien = hv.id_hocvien WHERE dk.id_khoahoc = ? AND dk.trang_thai = 'da xac nhan' AND dk.id_lop IS NULL";
+                $stmt_el = $conn->prepare($sql_eligible);
+                $stmt_el->bind_param('i', $id_khoahoc);
+                $stmt_el->execute();
+                $eligible_students = $stmt_el->get_result();
             }
+        }
         ?>
         <?php include(__DIR__ . '/hocvienlop/modal_add_student.php'); ?>
         <?php include(__DIR__ . '/lichhoclop/modals_lichhoc.php'); ?>
@@ -412,7 +424,10 @@ if ($lop_id) {
             const container = document.querySelector('.card.animated-card');
             if (container) {
                 setTimeout(() => {
-                    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    container.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
                 }, 100);
             }
         });

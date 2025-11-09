@@ -33,7 +33,7 @@
                         <span class="level">IELTS 7.0+</span>
                     </button>
                 </div>
-                 <div class="timeline-line">
+                <div class="timeline-line">
                     <div class="timeline-progress"></div>
                 </div>
             </div>
@@ -241,10 +241,13 @@
         --neutral-gray: #6c757d;
         --text-dark: #212529;
     }
+
     .roadmap-section {
         padding: 40px 0;
-        background-color: #f0fdf4; /* Light green background */
+        background-color: #f0fdf4;
+        /* Light green background */
     }
+
     .roadmap-container {
         background: var(--neutral-white);
         border-radius: 20px;
@@ -259,6 +262,7 @@
         margin-bottom: 30px;
         position: relative;
     }
+
     .tab-buttons {
         display: flex;
         justify-content: space-between;
@@ -266,7 +270,7 @@
         position: relative;
         z-index: 2;
     }
-    
+
     .tab-button {
         background-color: #f1f1f1;
         border: 1px solid #e0e0e0;
@@ -280,20 +284,24 @@
         color: var(--neutral-gray);
         font-weight: 600;
     }
+
     .tab-button:hover {
         background-color: #e7f7ec;
         border-color: var(--brand-color);
     }
+
     .tab-button .stage {
         display: block;
         font-size: 14px;
         font-weight: 500;
         opacity: 0.8;
     }
+
     .tab-button .level {
         display: block;
         font-size: 16px;
     }
+
     .tab-button.active {
         background-color: var(--brand-color);
         color: var(--neutral-white);
@@ -301,7 +309,7 @@
         transform: translateY(-5px);
         box-shadow: 0 8px 15px rgba(13, 179, 59, 0.2);
     }
-    
+
     /* --- Timeline Line and Progress --- */
     .timeline-line {
         position: absolute;
@@ -313,14 +321,17 @@
         border-radius: 2px;
         z-index: 1;
     }
+
     .timeline-progress {
         position: absolute;
         height: 100%;
         background: var(--brand-color);
-        width: 0%; /* Controlled by JS */
+        width: 0%;
+        /* Controlled by JS */
         border-radius: 2px;
         transition: width 0.4s ease-in-out;
     }
+
     .tab-button::after {
         content: '';
         position: absolute;
@@ -335,6 +346,7 @@
         transition: all 0.3s ease;
         z-index: 3;
     }
+
     .tab-button.active::after {
         background-color: var(--brand-color);
         transform: translateX(-50%) scale(1.3);
@@ -344,34 +356,65 @@
     .tab-content-wrapper {
         min-height: 250px;
     }
+
     .tab-content {
         display: none;
         animation: fadeIn 0.5s ease;
     }
+
     .tab-content.active {
         display: block;
     }
+
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
-    .content-columns { display: flex; gap: 30px; }
-    .left-col { flex: 0 0 45%; padding-right: 30px; border-right: 1px solid #e9ecef; }
-    .right-col { flex: 1; }
-    .info-group { margin-bottom: 25px; }
+
+    .content-columns {
+        display: flex;
+        gap: 30px;
+    }
+
+    .left-col {
+        flex: 0 0 45%;
+        padding-right: 30px;
+        border-right: 1px solid #e9ecef;
+    }
+
+    .right-col {
+        flex: 1;
+    }
+
+    .info-group {
+        margin-bottom: 25px;
+    }
+
     .info-group h6 {
         font-weight: 700;
         font-size: 16px;
         color: var(--brand-color-dark);
         margin-bottom: 10px;
     }
+
     .info-group ul {
         padding-left: 20px;
         margin-bottom: 0;
         list-style-type: '✓  ';
         color: #555;
     }
-    .info-group ul li { margin-bottom: 8px; line-height: 1.6; }
+
+    .info-group ul li {
+        margin-bottom: 8px;
+        line-height: 1.6;
+    }
 
     /* ---- Bottom content: Actions and Mascot ---- */
     .course-actions {
@@ -380,6 +423,7 @@
         gap: 20px;
         align-items: center;
     }
+
     .btn-primary-custom {
         background-color: var(--brand-color-dark);
         color: var(--neutral-white);
@@ -391,22 +435,26 @@
         text-decoration: none;
         transition: all 0.3s ease;
     }
+
     .btn-primary-custom:hover {
         background-color: var(--brand-color);
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(13, 179, 59, 0.2);
         color: var(--neutral-white);
     }
+
     .link-secondary-custom {
         color: var(--brand-color-dark);
         font-size: 15px;
         font-weight: 600;
         text-decoration: none;
     }
+
     .link-secondary-custom:hover {
         text-decoration: underline;
         color: var(--brand-color);
     }
+
     .mascot-image-wrapper {
         position: absolute;
         bottom: -10px;
@@ -414,23 +462,56 @@
         width: 110px;
         transition: transform 0.4s ease-in-out;
     }
+
     .roadmap-container:hover .mascot-image-wrapper {
         transform: rotate(3deg) scale(1.05);
     }
-    .mascot-image-wrapper img { max-width: 100%; }
+
+    .mascot-image-wrapper img {
+        max-width: 100%;
+    }
 
     /* ---- Responsive ---- */
     @media (max-width: 991px) {
-        .content-columns { flex-direction: column; }
-        .left-col { border-right: none; padding-right: 0; margin-bottom: 20px; border-bottom: 1px solid #e9ecef; padding-bottom: 20px; }
-        .mascot-image-wrapper { display: none; }
-        .tab-buttons { flex-wrap: wrap; gap: 10px; }
-        .tab-button { width: calc(50% - 5px); }
-        .timeline-line, .tab-button::after { display: none; }
-        .roadmap-timeline { padding-bottom: 0; }
+        .content-columns {
+            flex-direction: column;
+        }
+
+        .left-col {
+            border-right: none;
+            padding-right: 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 20px;
+        }
+
+        .mascot-image-wrapper {
+            display: none;
+        }
+
+        .tab-buttons {
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tab-button {
+            width: calc(50% - 5px);
+        }
+
+        .timeline-line,
+        .tab-button::after {
+            display: none;
+        }
+
+        .roadmap-timeline {
+            padding-bottom: 0;
+        }
     }
+
     @media (max-width: 576px) {
-        .tab-button { width: 100%; }
+        .tab-button {
+            width: 100%;
+        }
     }
 </style>
 

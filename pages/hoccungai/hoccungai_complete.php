@@ -1,11 +1,7 @@
 <?php
-/**
- * HỌC CÙNG AI - MAIN PAGE (PHIÊN BẢN HIỆN ĐẠI HÓA)
- * Complete English Learning System with AI
- * Version: 3.1
- */
 
-require_once 'config.php'; // Đảm bảo đường dẫn này đúng
+
+require_once 'config.php'; 
 include('./config/config.php');
 
 // Check login status

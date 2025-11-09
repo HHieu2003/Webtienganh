@@ -29,15 +29,26 @@ if (!function_exists('course_detail_redirect_to_current')) {
 }
 
 
-// =================================================================
-// PHẦN 2: XỬ LÝ LOGIC (POST REQUESTS VÀ TRUY VẤN DỮ LIỆU)
-// =================================================================
-
 // --- Khởi tạo các biến mặc định ---
 $course = null;
 $page_error = null;
 $course_id = isset($_GET['course_id']) ? (int)$_GET['course_id'] : 0;
 $hocvien_id = $_SESSION['id_hocvien'] ?? null;
+$is_registered = false;
+$registration_status = null;
+
+// Kiểm tra xem học viên đã đăng ký khóa học này chưa
+if ($hocvien_id && $course_id > 0) {
+    $sql_check_registration = "SELECT trang_thai FROM dangkykhoahoc WHERE id_hocvien = ? AND id_khoahoc = ? ORDER BY id_dangky DESC LIMIT 1";
+    $stmt_check_registration = $conn->prepare($sql_check_registration);
+    $stmt_check_registration->bind_param("ii", $hocvien_id, $course_id);
+    $stmt_check_registration->execute();
+    $result_check_registration = $stmt_check_registration->get_result();
+    if ($result_check_registration->num_rows > 0) {
+        $is_registered = true;
+        $registration_status = $result_check_registration->fetch_assoc()['trang_thai'];
+    }
+}
 
 // --- Xử lý POST request NẾU có course_id hợp lệ ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $course_id > 0) {
@@ -71,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $course_id > 0) {
             $_SESSION['review_message'] = 'Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.';
             $_SESSION['review_message_type'] = 'danger';
         }
-        $_SESSION['show_reviews_tab'] = true; // <-- THÊM DÒNG NÀY
+        $_SESSION['show_reviews_tab'] = true; 
         course_detail_redirect_to_current('');
     }
 
@@ -80,8 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $course_id > 0) {
         if (!$hocvien_id) {
             $_SESSION['review_message'] = 'Vui lòng đăng nhập để đánh giá khóa học!';
             $_SESSION['review_message_type'] = 'warning';
-            $_SESSION['show_reviews_tab'] = true; // <-- THÊM DÒNG NÀY
-            course_detail_redirect_to_current('');   // <-- SỬA DÒNG NÀY
+            $_SESSION['show_reviews_tab'] = true; 
+            course_detail_redirect_to_current('');   
         }
     }
 
@@ -96,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $course_id > 0) {
     if ($stmt_check_reg->get_result()->num_rows === 0) {
         $_SESSION['review_message'] = 'Bạn cần hoàn tất đăng ký khóa học này để có thể đánh giá!';
         $_SESSION['review_message_type'] = 'danger';
-        $_SESSION['show_reviews_tab'] = true; // <-- THÊM DÒNG NÀY
+        $_SESSION['show_reviews_tab'] = true; 
         course_detail_redirect_to_current('');
     }
 
@@ -108,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $course_id > 0) {
     if ($stmt_check_existing->get_result()->num_rows > 0) {
         $_SESSION['review_message'] = 'Bạn đã đánh giá khóa học này rồi!';
         $_SESSION['review_message_type'] = 'warning';
-        $_SESSION['show_reviews_tab'] = true; // <-- THÊM DÒNG NÀY
+        $_SESSION['show_reviews_tab'] = true; 
         course_detail_redirect_to_current('');
     }
 
@@ -124,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $course_id > 0) {
         $_SESSION['review_message'] = 'Đã có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại.';
         $_SESSION['review_message_type'] = 'danger';
     }
-    $_SESSION['show_reviews_tab'] = true; // <-- THÊM DÒNG NÀY
+    $_SESSION['show_reviews_tab'] = true; 
     course_detail_redirect_to_current('');
 }
 
@@ -222,7 +233,6 @@ if ($course) {
             --course-border: rgba(9, 77, 54, 0.1);
         }
 
-        /* === BỎ TOÀN BỘ CSS CHO TOAST CŨ, GIỮ NGUYÊN CÁC STYLE KHÁC === */
 
         .course-detail-page {
             background: var(--course-bg);
@@ -1240,6 +1250,89 @@ if ($course) {
                 </div>
             </div>
         </div>
+
+        <!-- Modal Thông báo trạng thái đăng ký -->
+        <?php if ($is_registered): ?>
+        <div class="modal fade" id="registrationStatusModal" tabindex="-1" aria-labelledby="registrationStatusModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border: none; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+                    <div class="modal-header border-0" style="background: linear-gradient(135deg, 
+                        <?php 
+                            if ($registration_status === 'da xac nhan') {
+                                echo 'rgba(13, 179, 59, 0.1), rgba(13, 179, 59, 0.05)';
+                            } elseif ($registration_status === 'cho xac nhan') {
+                                echo 'rgba(13, 110, 253, 0.1), rgba(13, 110, 253, 0.05)';
+                            } else {
+                                echo 'rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05)';
+                            }
+                        ?>); padding: 24px;">
+                        <div class="d-flex align-items-center w-100">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px; background: <?php 
+                                echo $registration_status === 'da xac nhan' ? 'rgba(13, 179, 59, 0.15)' : 
+                                     ($registration_status === 'cho xac nhan' ? 'rgba(13, 110, 253, 0.15)' : 'rgba(255, 193, 7, 0.15)'); 
+                            ?>;">
+                                <i class="fa-solid fa-<?php 
+                                    echo $registration_status === 'da xac nhan' ? 'circle-check' : 
+                                         ($registration_status === 'cho xac nhan' ? 'clock' : 'triangle-exclamation'); 
+                                ?>" style="font-size: 1.8rem; color: <?php 
+                                    echo $registration_status === 'da xac nhan' ? '#0db33b' : 
+                                         ($registration_status === 'cho xac nhan' ? '#0d6efd' : '#ffc107'); 
+                                ?>;"></i>
+                            </div>
+                            <h5 class="modal-title mb-0" id="registrationStatusModalLabel" style="color: #024429; font-weight: 700;">
+                                <?php 
+                                    if ($registration_status === 'da xac nhan') {
+                                        echo 'Thông báo đăng ký thành công';
+                                    } elseif ($registration_status === 'cho xac nhan') {
+                                        echo 'Đăng ký đang chờ xác nhận';
+                                    } else {
+                                        echo 'Thông báo đăng ký đã hủy';
+                                    }
+                                ?>
+                            </h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="padding: 32px; background: #f8fbf9;">
+                        <div class="text-center mb-3">
+                            <h6 style="font-size: 1.15rem; font-weight: 700; color: #024429; margin-bottom: 12px;">
+                                <?php 
+                                    if ($registration_status === 'da xac nhan') {
+                                        echo 'Bạn đã đăng ký khóa học này!';
+                                    } elseif ($registration_status === 'cho xac nhan') {
+                                        echo 'Đăng ký của bạn đang chờ xác nhận!';
+                                    } else {
+                                        echo 'Đăng ký của bạn đã bị hủy!';
+                                    }
+                                ?>
+                            </h6>
+                            <p style="color: #6b7a72; line-height: 1.7; margin: 0;">
+                                <?php 
+                                    if ($registration_status === 'da xac nhan') {
+                                        echo 'Bạn có thể xem thông tin lớp học và lịch học trong trang cá nhân. Hãy chuẩn bị sẵn sàng để bắt đầu hành trình học tập của mình!';
+                                    } elseif ($registration_status === 'cho xac nhan') {
+                                        echo 'Nếu bạn dã thanh toán chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất để xác nhận thông tin lớp học. Nếu bạn chưa thanh toán hãy đăng ký lại. ';
+                                    } else {
+                                        echo 'Bạn có thể đăng ký lại nếu muốn tiếp tục học khóa học này. Chúng tôi luôn sẵn sàng đồng hành cùng bạn!';
+                                    }
+                                ?>
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2 justify-content-center mt-4">
+                            <?php if ($registration_status === 'da xac nhan'): ?>
+                                <a href="../../user/dashboard.php" class="btn btn-success" style="border-radius: 12px; padding: 10px 24px; font-weight: 600;">
+                                    <i class="fa-solid fa-user"></i> Xem trang cá nhân
+                                </a>
+                            <?php endif; ?>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 12px; padding: 10px 24px; font-weight: 600;">
+                                Đóng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
     <?php endif; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -1247,7 +1340,6 @@ if ($course) {
     <?php if (!empty($review_message)): ?>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Chuyển đổi message_type từ PHP sang icon của SweetAlert2
                 // 'danger' của Bootstrap tương ứng với 'error' của SweetAlert2
                 const iconType = '<?php echo $review_message_type; ?>' === 'danger' ? 'error' : '<?php echo $review_message_type; ?>';
 
@@ -1263,9 +1355,46 @@ if ($course) {
     <?php endif; ?>
 
     <script>
-        // Bỏ phần JS điều khiển toast cũ
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Auto-show registration status modal if student is registered
+            <?php if ($is_registered): ?>
+            const registrationStatusModalEl = document.getElementById('registrationStatusModal');
+            if (registrationStatusModalEl) {
+                const registrationModal = new bootstrap.Modal(registrationStatusModalEl, {
+                    backdrop: true,
+                    keyboard: true,
+                    focus: true
+                });
+                
+                // Show modal
+                registrationModal.show();
+                
+                // Add manual event listeners for close buttons
+                const closeButtons = registrationStatusModalEl.querySelectorAll('[data-bs-dismiss="modal"]');
+                closeButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        registrationModal.hide();
+                    });
+                });
+                
+                // Close on backdrop click
+                registrationStatusModalEl.addEventListener('click', function(e) {
+                    if (e.target === registrationStatusModalEl) {
+                        registrationModal.hide();
+                    }
+                });
+                
+                // Close on ESC key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && registrationStatusModalEl.classList.contains('show')) {
+                        registrationModal.hide();
+                    }
+                });
+            }
+            <?php endif; ?>
+
             // Auto-activate reviews tab if hash is #reviews
             if (window.location.hash === '#reviews') {
                 const reviewsTab = document.getElementById('reviews-tab');

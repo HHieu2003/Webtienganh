@@ -71,7 +71,11 @@ $stmt_q->close();
 ?>
 
 <style>
-    .review-container { max-width: 800px; margin: auto; }
+    .review-container {
+        max-width: 800px;
+        margin: auto;
+    }
+
     .question-review-block {
         background: #fff;
         border: 1px solid var(--border-color);
@@ -79,8 +83,20 @@ $stmt_q->close();
         margin-bottom: 20px;
         padding: 20px;
     }
-    .question-review-block p.question-title { font-size: 17px; font-weight: 600; }
-    .answer-review-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+
+    .question-review-block p.question-title {
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+    .answer-review-list {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
     .answer-review-item {
         padding: 12px 15px;
         border-radius: 8px;
@@ -89,12 +105,25 @@ $stmt_q->close();
         align-items: center;
         gap: 10px;
     }
-    .answer-review-item .icon { font-size: 18px; }
+
+    .answer-review-item .icon {
+        font-size: 18px;
+    }
 
     /* Correct Answer */
-    .answer-correct { background-color: #d1e7dd; border-color: #a3cfbb; color: #0f5132; }
+    .answer-correct {
+        background-color: #d1e7dd;
+        border-color: #a3cfbb;
+        color: #0f5132;
+    }
+
     /* Incorrect Answer (Chosen by student) */
-    .answer-incorrect { background-color: #f8d7da; border-color: #f1aeb5; color: #721c24; text-decoration: line-through; }
+    .answer-incorrect {
+        background-color: #f8d7da;
+        border-color: #f1aeb5;
+        color: #721c24;
+        text-decoration: line-through;
+    }
 
     /* CSS cho phần tự luận */
     .essay-submission-box {
@@ -102,18 +131,29 @@ $stmt_q->close();
         border-radius: 8px;
         padding: 15px;
     }
-    .essay-submission-box h6 { font-weight: 600; color: #555; }
+
+    .essay-submission-box h6 {
+        font-weight: 600;
+        color: #555;
+    }
+
     .essay-submission-box .essay-content {
-        white-space: pre-wrap; /* Giữ nguyên định dạng xuống dòng */
+        white-space: pre-wrap;
+        /* Giữ nguyên định dạng xuống dòng */
         font-style: italic;
         color: #333;
     }
+
     .ai-feedback-box {
         margin-top: 15px;
         border-top: 2px dashed #0db33b;
         padding-top: 15px;
     }
-    .ai-feedback-box h6 { font-weight: 600; color: #0a8a2c; }
+
+    .ai-feedback-box h6 {
+        font-weight: 600;
+        color: #0a8a2c;
+    }
 </style>
 
 <div class="content-pane">
@@ -123,19 +163,19 @@ $stmt_q->close();
     </div>
 
     <div class="review-container">
-        <?php 
+        <?php
         $question_number = 1;
         foreach ($questions_data as $id_cauhoi => $data): ?>
             <div class="question-review-block">
                 <p class="question-title"><strong>Câu <?php echo $question_number++; ?>.</strong> <?php echo htmlspecialchars($data['noi_dung']); ?></p>
-                
+
                 <?php if ($data['loai_cauhoi'] === 'trac_nghiem'): ?>
                     <ul class="answer-review-list">
-                        <?php foreach ($data['answers'] as $answer): 
+                        <?php foreach ($data['answers'] as $answer):
                             $student_choice_id = $student_answers[$id_cauhoi]['id_dapan_chon'] ?? null;
                             $is_correct = $answer['la_dung'] == 1;
                             $is_chosen = $student_choice_id == $answer['id_dapan'];
-                            
+
                             $class = '';
                             $icon = '<i class="fa-regular fa-circle icon text-muted"></i>';
 
@@ -154,7 +194,8 @@ $stmt_q->close();
                             </li>
                         <?php endforeach; ?>
                     </ul>
-                <?php else: // Đây là câu hỏi tự luận ?>
+                <?php else: // Đây là câu hỏi tự luận 
+                ?>
                     <div class="essay-submission-box">
                         <h6><i class="fa-solid fa-pen-nib me-2"></i>Bài làm của bạn:</h6>
                         <div class="essay-content"><?php echo htmlspecialchars($student_answers[$id_cauhoi]['tra_loi_tu_luan'] ?? 'Bạn chưa trả lời câu hỏi này.'); ?></div>

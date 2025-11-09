@@ -36,25 +36,25 @@ class FighterChatbot {
     // INITIALIZATION
     // ============================================================================
 
- init() {
-    try {
-        this.initElements();
-        this.bindEvents();
-        this.setupAutoResize();
-        
-        // ✅ THÊM ĐOẠN NÀY: Load lịch sử ngay khi trang load
-        if (this.config.userId > 0) {
-            this.loadChatHistory();
-            this.loadQuickActions();
-            this.historyLoaded = true;
+    init() {
+        try {
+            this.initElements();
+            this.bindEvents();
+            this.setupAutoResize();
+
+            // ✅ THÊM ĐOẠN NÀY: Load lịch sử ngay khi trang load
+            if (this.config.userId > 0) {
+                this.loadChatHistory();
+                this.loadQuickActions();
+                this.historyLoaded = true;
+            }
+
+            console.log('✅ Chatbot initialized successfully');
+        } catch (error) {
+            console.error('❌ Chatbot initialization error:', error);
+            this.showError('Không thể khởi tạo chatbot. Vui lòng tải lại trang.');
         }
-        
-        console.log('✅ Chatbot initialized successfully');
-    } catch (error) {
-        console.error('❌ Chatbot initialization error:', error);
-        this.showError('Không thể khởi tạo chatbot. Vui lòng tải lại trang.');
     }
-}
 
 
     initElements() {
@@ -393,22 +393,22 @@ class FighterChatbot {
     // DATA LOADING
     // ============================================================================
 
-   async loadInitialData() {
-    try {
-        // Load in parallel
-        await Promise.all([
-            this.loadChatHistory(),
-            this.loadQuickActions()
-        ]);
-        
-        // ✅ CHỈ hiển thị welcome message nếu KHÔNG CÓ lịch sử
-        if (this.chatMessages.children.length === 0) {
-            this.showWelcomeMessage();
+    async loadInitialData() {
+        try {
+            // Load in parallel
+            await Promise.all([
+                this.loadChatHistory(),
+                this.loadQuickActions()
+            ]);
+
+            // ✅ CHỈ hiển thị welcome message nếu KHÔNG CÓ lịch sử
+            if (this.chatMessages.children.length === 0) {
+                this.showWelcomeMessage();
+            }
+        } catch (error) {
+            console.error('Load initial data error:', error);
         }
-    } catch (error) {
-        console.error('Load initial data error:', error);
     }
-}
 
 
     async loadChatHistory() {

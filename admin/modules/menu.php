@@ -2,7 +2,6 @@
 // Lấy trang hiện tại từ URL
 $current_page = $_GET['nav'] ?? '';
 
-// --- LOGIC MỚI ĐỂ XÁC ĐỊNH NHÓM NÀO ĐANG ACTIVE ---
 // Mảng chứa các trang con của từng nhóm
 $user_management_pages = ['students', 'lecturers'];
 $training_management_pages = ['courses', 'add_course', 'edit_course', 'lichhoc', 'hoclieu', 'question', 'ds_cauhoi', 'ds_dapan', 'kqhocvien'];

@@ -1,13 +1,14 @@
 <?php
-// File: pages/question/dapan.php (Phiên bản cải tiến thông báo)
+// File: pages/question/dapan.php 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-set_time_limit(120); // QUAN TRỌNG: Tăng thời gian thực thi script lên 120 giây
+set_time_limit(120); // Tăng thời gian thực thi script lên 120 giây
 if (session_status() == PHP_SESSION_NONE) session_start();
 include('./config/config.php');
 
 // --- HÀM GỌI API CHẤM ĐIỂM CỦA AI ---
-function gradeEssayWithAI($question, $answer) {
+function gradeEssayWithAI($question, $answer)
+{
     // API Key của bạn (Nên đặt vào biến môi trường hoặc file config riêng)
     $api_key = "AIzaSyCw79baxbVs0yJ8sxHH2PYUKQN3LDR2kQQ"; // Thay thế bằng API key thực tế
     $api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$api_key}";
@@ -114,7 +115,7 @@ if ($id_baitest <= 0) {
     die("Lỗi: ID bài test không hợp lệ!");
 }
 if (empty($answers)) {
-     die("Lỗi: Không nhận được câu trả lời nào!");
+    die("Lỗi: Không nhận được câu trả lời nào!");
 }
 
 
@@ -130,10 +131,10 @@ try {
     $result_baitest_info = $stmt_baitest_info->get_result();
     $baitest_info = $result_baitest_info->fetch_assoc();
     $stmt_baitest_info->close();
-    
+
     $loai_baitest = $baitest_info['loai_baitest'] ?? 'on_tap';
     $is_placement_test = ($loai_baitest === 'dau_vao'); // Kiểm tra có phải test đầu vào không
-    
+
     // Lấy tất cả câu hỏi và đáp án đúng của bài test
     $sql_questions_info = "
         SELECT c.id_cauhoi, c.noi_dung, c.loai_cauhoi, d.id_dapan
@@ -156,12 +157,12 @@ try {
         if ($row['loai_cauhoi'] === 'trac_nghiem') {
             $total_mc_questions++;
         } else {
-             $total_essay_questions++;
+            $total_essay_questions++;
         }
     }
     $stmt_info->close();
 
-     // Nếu không có câu hỏi nào cho bài test này
+    // Nếu không có câu hỏi nào cho bài test này
     if (empty($questions_master_data)) {
         throw new Exception("Không tìm thấy câu hỏi nào cho bài test này.");
     }
@@ -172,7 +173,7 @@ try {
         // Chỉ xử lý câu trắc nghiệm và câu hỏi tồn tại trong master data
         if (isset($questions_master_data[$question_id]) && $questions_master_data[$question_id]['loai_cauhoi'] === 'trac_nghiem') {
             if (isset($answer_data['id_dapan_chon'])) {
-                 $chosen_answer_id = (int)$answer_data['id_dapan_chon'];
+                $chosen_answer_id = (int)$answer_data['id_dapan_chon'];
                 // So sánh đáp án chọn với đáp án đúng trong master data
                 if (isset($questions_master_data[$question_id]['id_dapan']) && $questions_master_data[$question_id]['id_dapan'] == $chosen_answer_id) {
                     $score++;
@@ -183,7 +184,7 @@ try {
 
     // Tính điểm trắc nghiệm trên thang 10 (nếu có câu trắc nghiệm)
     $final_mc_score = ($total_mc_questions > 0) ? round(($score / $total_mc_questions) * 10, 2) : 0;
-    
+
     // Biến để tính tổng điểm tự luận (dùng để tính điểm trung bình)
     $total_essay_score = 0;
     $essay_count_graded = 0; // Số bài tự luận đã được chấm điểm
@@ -226,20 +227,20 @@ try {
                 $grading_result = gradeEssayWithAI($question_info['noi_dung'], $tra_loi_tu_luan);
                 $diem_tu_luan = $grading_result['score']; // Lấy điểm từ AI (thang 10)
                 $nhan_xet_tu_luan = $grading_result['feedback'];
-                
+
                 // Cộng điểm tự luận để tính trung bình
                 if ($diem_tu_luan !== null) {
                     $total_essay_score += $diem_tu_luan;
                     $essay_count_graded++;
                 }
-                
+
                 // Nếu AI không chấm được (trả về null), trạng thái là 'cho_cham'
                 if ($diem_tu_luan === null) {
                     $trang_thai_cham = 'cho_cham';
                     $nhan_xet_tu_luan = $nhan_xet_tu_luan ?: 'Lỗi chấm điểm tự động. Chờ giáo viên chấm.'; // Thêm thông báo lỗi vào nhận xét
                 }
             } else {
-                 // Nếu không trả lời, trạng thái là 'cho_cham' và điểm là null
+                // Nếu không trả lời, trạng thái là 'cho_cham' và điểm là null
                 $trang_thai_cham = 'cho_cham';
                 $nhan_xet_tu_luan = 'Học viên chưa trả lời.';
             }
@@ -248,21 +249,21 @@ try {
         // Lưu chi tiết vào CSDL
         $stmt_details->bind_param("iiisdss", $id_ketqua, $question_id, $id_dapan_chon, $tra_loi_tu_luan, $diem_tu_luan, $nhan_xet_tu_luan, $trang_thai_cham);
         if (!$stmt_details->execute()) {
-             // Ghi log lỗi chi tiết hơn nếu cần
-             error_log("Lỗi khi lưu chi tiết câu hỏi ID {$question_id}: " . $stmt_details->error);
-             // Không throw exception ngay, cố gắng lưu các câu khác
+            // Ghi log lỗi chi tiết hơn nếu cần
+            error_log("Lỗi khi lưu chi tiết câu hỏi ID {$question_id}: " . $stmt_details->error);
+            // Không throw exception ngay, cố gắng lưu các câu khác
         }
     }
     $stmt_details->close();
-    
+
     // --- PHÂN LOẠI TRÌNH ĐỘ CHO TEST ĐẦU VÀO ---
     $final_total_score = 0; // Khởi tạo biến mặc định
     $trinh_do = ''; // Khởi tạo biến mặc định
-    
+
     if ($is_placement_test) {
         // Tính điểm trung bình tự luận (nếu có)
         $avg_essay_score = ($essay_count_graded > 0) ? round($total_essay_score / $essay_count_graded, 2) : 0;
-        
+
         // Tính điểm tổng kết:
         // - Nếu có cả trắc nghiệm và tự luận: lấy trung bình
         // - Nếu chỉ có trắc nghiệm: lấy điểm trắc nghiệm
@@ -277,7 +278,7 @@ try {
             // Chỉ có tự luận
             $final_total_score = $avg_essay_score;
         }
-        
+
         // Phân loại trình độ dựa trên điểm tổng
         if ($final_total_score >= 8.5) {
             $trinh_do = 'Nâng cao (C1-C2)';
@@ -290,7 +291,7 @@ try {
         } else {
             $trinh_do = 'Sơ cấp (A1)';
         }
-        
+
         // Cập nhật trình độ vào bảng hocvien
         $sql_update_level = "UPDATE hocvien SET trinh_do = ? WHERE id_hocvien = ?";
         $stmt_update_level = $conn->prepare($sql_update_level);
@@ -314,23 +315,29 @@ try {
             <p style='margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;'>Trình độ này sẽ được lưu vào hồ sơ của bạn để gợi ý khóa học phù hợp.</p>
         </div>";
     }
-    
+
     $mc_score_message = ($total_mc_questions > 0) ? "Điểm trắc nghiệm: <strong>" . htmlspecialchars($score) . "/" . htmlspecialchars($total_mc_questions) . " (" . htmlspecialchars($final_mc_score) . "/10)</strong><br>" : '';
     $essay_message = ($total_essay_questions > 0) ? "Phần tự luận đã được chấm tự động (nếu có).<br>" : '';
-    
+
     // Tạo message hoàn chỉnh
     $full_message = "Bạn đã hoàn thành bài kiểm tra.<br>" . $mc_score_message . $essay_message . $placement_message . "<br><br>Vui lòng xem chi tiết trong trang cá nhân.";
-    
-    ?>
+
+?>
     <!DOCTYPE html>
     <html lang="vi">
+
     <head>
         <meta charset="UTF-8">
         <title>Kết quả bài kiểm tra</title>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <style>body { font-family: sans-serif; }</style>
+        <style>
+            body {
+                font-family: sans-serif;
+            }
+        </style>
     </head>
+
     <body>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -350,24 +357,30 @@ try {
             });
         </script>
     </body>
-    </html>
-    <?php
-    exit();
 
+    </html>
+<?php
+    exit();
 } catch (Exception $e) {
     $conn->rollback();
     error_log("Lỗi khi nộp bài test ID {$id_baitest} của học viên ID {$id_hocvien}: " . $e->getMessage());
 
     // --- HIỂN THỊ THÔNG BÁO SWEETALERT2 KHI CÓ LỖI ---
-    ?>
+?>
     <!DOCTYPE html>
     <html lang="vi">
+
     <head>
         <meta charset="UTF-8">
         <title>Lỗi nộp bài</title>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <style>body { font-family: sans-serif; }</style>
+        <style>
+            body {
+                font-family: sans-serif;
+            }
+        </style>
     </head>
+
     <body>
         <script>
             Swal.fire({
@@ -384,8 +397,9 @@ try {
             });
         </script>
     </body>
+
     </html>
-    <?php
+<?php
     exit();
 } finally {
     // Đảm bảo đóng kết nối CSDL ngay cả khi có lỗi
