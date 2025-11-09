@@ -497,7 +497,7 @@ function get_test_type_badge($type)
                                     <a href="./admin.php?nav=ds_cauhoi&id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-primary btn-sm" title="Quản lý câu hỏi"><i class="fa-solid fa-list-check"></i></a>
                                     <button onclick="openEditModal(<?php echo $row['id_baitest']; ?>)" class="btn btn-warning btn-sm" title="Sửa bài test"><i class="fa-solid fa-pen-to-square"></i></button>
                                     <a href="./admin.php?nav=kqhocvien&id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-info btn-sm text-white" title="Xem kết quả"><i class="fa-solid fa-square-poll-vertical"></i></a>
-                                    <a href="./modules/cauhoi/delete_test.php?id_baitest=<?php echo $row['id_baitest']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Xóa bài test này sẽ xóa tất cả dữ liệu liên quan. Bạn chắc chắn?');" title="Xóa"><i class="fa-solid fa-trash"></i></a>
+                                    <button onclick="confirmDeleteTest(<?php echo $row['id_baitest']; ?>, '<?php echo htmlspecialchars(addslashes($row['ten_baitest'])); ?>')" class="btn btn-danger btn-sm" title="Xóa"><i class="fa-solid fa-trash"></i></button>
                                 </td>
                             </tr>
                         <?php endwhile; ?>
@@ -735,6 +735,78 @@ function get_test_type_badge($type)
         } catch (error) {
             Swal.fire('Lỗi!', 'Không thể lấy dữ liệu bài test.', 'error');
         }
+    }
+
+    /**
+     * Hàm xác nhận xóa bài test với SweetAlert2
+     */
+    function confirmDeleteTest(testId, testName) {
+        Swal.fire({
+            title: 'Xác nhận xóa bài test?',
+            html: `
+                <div style="text-align: left; padding: 10px;">
+                    <p style="margin-bottom: 15px;">Bạn đang thực hiện xóa bài test:</p>
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid #dc3545;">
+                        <strong style="color: #dc3545;">${testName}</strong>
+                    </div>
+                    <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                        <p style="margin: 0; color: #856404; font-weight: 600;">
+                            <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                            Cảnh báo quan trọng:
+                        </p>
+                        <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #856404;">
+                            <li>Tất cả câu hỏi trong bài test sẽ bị xóa</li>
+                            <li>Kết quả làm bài của học viên sẽ bị xóa</li>
+                            <li>Hành động này <strong>không thể hoàn tác</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-trash-alt"></i> Xóa ngay',
+            cancelButtonText: '<i class="fas fa-times"></i> Hủy bỏ',
+            customClass: {
+                popup: 'swal-wide',
+                confirmButton: 'btn-lg',
+                cancelButton: 'btn-lg'
+            },
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                return fetch(`./modules/cauhoi/delete_test.php?id_baitest=${testId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.text();
+                    })
+                    .catch(error => {
+                        Swal.showValidationMessage(`Lỗi: ${error}`);
+                    });
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Đã xóa!',
+                    html: `
+                        <div style="text-align: center; padding: 10px;">
+                            <i class="fas fa-check-circle" style="font-size: 60px; color: #28a745; margin-bottom: 15px;"></i>
+                            <p style="font-size: 16px; margin-bottom: 10px;">Bài test đã được xóa thành công</p>
+                            <p style="color: #6c757d; font-size: 14px; margin: 0;">Trang sẽ tự động tải lại...</p>
+                        </div>
+                    `,
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    allowOutsideClick: false
+                }).then(() => {
+                    window.location.reload();
+                });
+            }
+        });
     }
 
     document.addEventListener('DOMContentLoaded', function() {

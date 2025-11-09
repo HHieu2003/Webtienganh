@@ -3,29 +3,61 @@ $form_message = '';
 $form_message_type = ''; // 'success' hoặc 'error'
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_consult'])) {
-    // Lấy dữ liệu từ form
-    $ten_hocvien = $_POST['ten_hocvien'];
-    $so_dien_thoai = $_POST['so_dien_thoai'];
-    $email = $_POST['email'];
+    // Lấy dữ liệu từ form và làm sạch
+    $ten_hocvien = trim($_POST['ten_hocvien']);
+    $so_dien_thoai = trim($_POST['so_dien_thoai']);
+    $email = trim($_POST['email']);
     $khung_gio = $_POST['khung_gio'];
 
+    // Kiểm tra các trường bắt buộc
     if (empty($ten_hocvien) || empty($so_dien_thoai) || empty($khung_gio)) {
         $form_message = "Vui lòng điền đầy đủ thông tin bắt buộc!";
         $form_message_type = 'error';
-    } else {
-        // Sử dụng prepared statements để chống SQL Injection
-        $sql_form = "INSERT INTO tuvan (ten_hocvien, so_dien_thoai, email, khung_gio) VALUES (?, ?, ?, ?)";
-        $stmt_form = $conn->prepare($sql_form);
-        $stmt_form->bind_param("ssss", $ten_hocvien, $so_dien_thoai, $email, $khung_gio);
-
-        if ($stmt_form->execute()) {
-            $form_message = "Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.";
-            $form_message_type = 'success';
-        } else {
-            $form_message = "Lỗi: Không thể gửi yêu cầu. Vui lòng thử lại.";
+    }
+    // Validate số điện thoại (10-11 số, bắt đầu bằng 0)
+    elseif (!preg_match('/^0[0-9]{9,10}$/', $so_dien_thoai)) {
+        $form_message = "Số điện thoại không hợp lệ! Vui lòng nhập đúng định dạng (10-11 số, bắt đầu bằng 0).";
+        $form_message_type = 'error';
+    }
+    // Validate email nếu có nhập
+    elseif (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $form_message = "Địa chỉ email không hợp lệ! Vui lòng kiểm tra lại.";
+        $form_message_type = 'error';
+    }
+    // Kiểm tra tên học viên (chỉ chữ cái và khoảng trắng, ít nhất 2 ký tự)
+    elseif (!preg_match('/^[a-zA-ZÀ-ỹ\s]{2,}$/u', $ten_hocvien)) {
+        $form_message = "Họ và tên không hợp lệ! Vui lòng chỉ nhập chữ cái (tối thiểu 2 ký tự).";
+        $form_message_type = 'error';
+    }
+    else {
+        // Kiểm tra số điện thoại đã tồn tại trong 24h gần đây (tránh spam)
+        $sql_check = "SELECT id FROM tuvan WHERE so_dien_thoai = ? AND ngay_gui >= DATE_SUB(NOW(), INTERVAL 24 HOUR)";
+        $stmt_check = $conn->prepare($sql_check);
+        $stmt_check->bind_param("s", $so_dien_thoai);
+        $stmt_check->execute();
+        $result_check = $stmt_check->get_result();
+        
+        if ($result_check->num_rows > 0) {
+            $form_message = "Bạn đã gửi yêu cầu tư vấn trong 24h qua. Vui lòng chờ chúng tôi liên hệ!";
             $form_message_type = 'error';
+            $stmt_check->close();
+        } else {
+            $stmt_check->close();
+            
+            // Sử dụng prepared statements để chống SQL Injection
+            $sql_form = "INSERT INTO tuvan (ten_hocvien, so_dien_thoai, email, khung_gio) VALUES (?, ?, ?, ?)";
+            $stmt_form = $conn->prepare($sql_form);
+            $stmt_form->bind_param("ssss", $ten_hocvien, $so_dien_thoai, $email, $khung_gio);
+
+            if ($stmt_form->execute()) {
+                $form_message = "Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.";
+                $form_message_type = 'success';
+            } else {
+                $form_message = "Lỗi: Không thể gửi yêu cầu. Vui lòng thử lại.";
+                $form_message_type = 'error';
+            }
+            $stmt_form->close();
         }
-        $stmt_form->close();
     }
 }
 ?>
@@ -79,11 +111,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_consult'])) {
                             </div>
                         <?php endif; ?>
 
+                        
                         <div class="form-group mb-3">
-                            <input type="text" name="ten_hocvien" class="final-form-control" placeholder="Họ và Tên *" required>
+                            <input type="text" name="ten_hocvien" class="final-form-control" placeholder="Họ và Tên *" required pattern="[a-zA-ZÀ-ỹ\s]{2,}" title="Vui lòng chỉ nhập chữ cái (tối thiểu 2 ký tự)">
                         </div>
                         <div class="form-group mb-3">
-                            <input type="tel" name="so_dien_thoai" class="final-form-control" placeholder="Số điện thoại *" required>
+                            <input type="tel" name="so_dien_thoai" class="final-form-control" placeholder="Số điện thoại *" required pattern="0[0-9]{9,10}" title="Số điện thoại phải bắt đầu bằng 0 và có 10-11 số">
                         </div>
                         <div class="form-group mb-3">
                             <input type="email" name="email" class="final-form-control" placeholder="Email của bạn">

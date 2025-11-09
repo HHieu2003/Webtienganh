@@ -9,8 +9,8 @@ $id_hocvien = $_SESSION['id_hocvien'];
 // --- Xử lý bộ lọc ---
 $filter = $_GET['filter'] ?? 'all';
 $where_clause = '';
-// Chỉ hiển thị các khóa học đã được xác nhận thanh toán và đã được xếp lớp
-$base_condition = "dk.trang_thai = 'da xac nhan' AND dk.id_lop IS NOT NULL";
+// Chỉ hiển thị các khóa học đã được xác nhận thanh toán (bao gồm cả chưa xếp lớp)
+$base_condition = "dk.trang_thai = 'da xac nhan'";
 
 switch ($filter) {
     case 'active':
@@ -20,6 +20,10 @@ switch ($filter) {
     case 'completed':
         // Đã hoàn thành: là các lớp có trạng thái 'da xong'
         $where_clause = "AND lh.trang_thai = 'da xong'";
+        break;
+    case 'pending':
+        // Chờ xếp lớp: chưa có id_lop
+        $where_clause = "AND dk.id_lop IS NULL";
         break;
         // 'all' sẽ không thêm điều kiện nào khác
 }
@@ -49,8 +53,13 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 // Hàm để tạo badge trạng thái mới
-function get_status_badge_new($status)
+function get_status_badge_new($status, $has_class)
 {
+    // Nếu chưa xếp lớp
+    if (!$has_class) {
+        return '<span class="badge status-badge status-pending">Đang xếp lớp</span>';
+    }
+    
     if ($status === 'dang hoc') {
         return '<span class="badge status-badge status-active">Đang học</span>';
     } elseif ($status === 'da xong') {
@@ -247,13 +256,21 @@ function get_status_badge_new($status)
                                     <img src="../<?php echo htmlspecialchars($row['hinh_anh']); ?>" alt="<?php echo htmlspecialchars($row['ten_khoahoc']); ?>">
                                 </a>
                                 <div class="card-status">
-                                    <?php echo get_status_badge_new($row['trang_thai_lop']); ?>
+                                    <?php echo get_status_badge_new($row['trang_thai_lop'], !empty($row['ten_lop'])); ?>
                                 </div>
                             </div>
                             <div class="card-content">
                                 <h3><?php echo htmlspecialchars($row['ten_khoahoc']); ?></h3>
                                 <div class="course-meta">
-                                    <p><i class="fa-solid fa-school"></i> <strong>Lớp:</strong> <?php echo htmlspecialchars($row['ten_lop'] ?? 'N/A'); ?></p>
+                                    <p><i class="fa-solid fa-school"></i> <strong>Lớp:</strong> 
+                                        <?php 
+                                        if (!empty($row['ten_lop'])) {
+                                            echo htmlspecialchars($row['ten_lop']);
+                                        } else {
+                                            echo '<span class="text-warning">Đang xếp lớp...</span>';
+                                        }
+                                        ?>
+                                    </p>
                                     <p><i class="fa-solid fa-chalkboard-user"></i> <strong>GV:</strong> <?php echo htmlspecialchars($row['ten_giangvien'] ?? 'Chưa xếp'); ?></p>
                                 </div>
 
@@ -268,7 +285,9 @@ function get_status_badge_new($status)
                                 </div>
                             </div>
                             <div class="card-actions">
-                                <?php if ($row['trang_thai_lop'] === 'dang hoc'): ?>
+                                <?php if (empty($row['ten_lop'])): ?>
+                                    <span class="text-warning d-block text-center"><i class="fa-solid fa-clock"></i> Đang chờ xếp lớp</span>
+                                <?php elseif ($row['trang_thai_lop'] === 'dang hoc'): ?>
                                     <a href="dashboard.php?nav=lichhoc&id_khoahoc=<?php echo $row['id_khoahoc']; ?>" class="btn-primary-custom w-100">Lịch học</a>
                                 <?php elseif ($row['trang_thai_lop'] === 'da xong'): ?>
                                     <a href="dashboard.php?nav=bangdiem" class="btn btn-outline-secondary w-100">Xem lại kết quả</a>
