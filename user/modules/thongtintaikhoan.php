@@ -6,9 +6,79 @@ $info_message = '';
 $info_message_type = '';
 $password_message = '';
 $password_message_type = '';
+$avatar_message = '';
+$avatar_message_type = '';
 $id_hocvien = $_SESSION['id_hocvien'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Xử lý upload ảnh đại diện
+    if (isset($_POST['update_avatar']) && isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+        $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        $max_size = 5 * 1024 * 1024; // 5MB
+        $file = $_FILES['avatar'];
+
+        if (!in_array($file['type'], $allowed_types)) {
+            $avatar_message = "Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP)!";
+            $avatar_message_type = 'danger';
+        } elseif ($file['size'] > $max_size) {
+            $avatar_message = "Kích thước file không được vượt quá 5MB!";
+            $avatar_message_type = 'danger';
+        } else {
+            // Đường dẫn upload (từ user/modules/ lên root rồi vào uploads/students/)
+            $target_dir = "../uploads/students/";
+            if (!is_dir($target_dir)) {
+                mkdir($target_dir, 0777, true);
+            }
+            
+            $file_name = time() . '_' . basename($file['name']);
+            $target_file = $target_dir . $file_name;
+            
+            if (move_uploaded_file($file['tmp_name'], $target_file)) {
+                // Xóa ảnh cũ nếu có
+                $sql_old = "SELECT hinh_anh FROM hocvien WHERE id_hocvien = ?";
+                $stmt_old = $conn->prepare($sql_old);
+                $stmt_old->bind_param("i", $id_hocvien);
+                $stmt_old->execute();
+                $result_old = $stmt_old->get_result();
+                if ($row_old = $result_old->fetch_assoc()) {
+                    if (!empty($row_old['hinh_anh'])) {
+                        $old_file = "../" . $row_old['hinh_anh'];
+                        if (file_exists($old_file)) {
+                            unlink($old_file);
+                        }
+                    }
+                }
+                $stmt_old->close();
+                
+                // Lưu đường dẫn vào database (tương đối từ root)
+                $hinh_anh = 'uploads/students/' . $file_name;
+                $sql_avatar = "UPDATE hocvien SET hinh_anh = ? WHERE id_hocvien = ?";
+                $stmt_avatar = $conn->prepare($sql_avatar);
+                $stmt_avatar->bind_param("si", $hinh_anh, $id_hocvien);
+                
+                if ($stmt_avatar->execute()) {
+                    $avatar_message = "Cập nhật ảnh đại diện thành công!";
+                    $avatar_message_type = 'success';
+                    echo "<script>
+                        setTimeout(function() {
+                            window.location.href = './dashboard.php?nav=thongtin';
+                        }, 1500);
+                    </script>";
+                } else {
+                    $avatar_message = "Lỗi khi lưu ảnh vào database: " . $conn->error;
+                    $avatar_message_type = 'danger';
+                }
+                $stmt_avatar->close();
+            } else {
+                $avatar_message = "Lỗi khi upload file!";
+                $avatar_message_type = 'danger';
+            }
+        }
+    } elseif (isset($_POST['update_avatar'])) {
+        $avatar_message = "Vui lòng chọn file ảnh!";
+        $avatar_message_type = 'danger';
+    }
+
     // Xử lý cập nhật thông tin cá nhân
     if (isset($_POST['update_info'])) {
         $ten_hocvien = trim($_POST['ten_hocvien']);
@@ -90,6 +160,7 @@ $stmt_student->close();
             opacity: 0;
             transform: translateY(20px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
@@ -106,20 +177,20 @@ $stmt_student->close();
         opacity: 0;
         animation: fadeInUp 0.6s ease-out forwards;
     }
-    
+
     .form-card-header {
         margin-bottom: 20px;
         padding-bottom: 10px;
         border-bottom: 1px solid var(--border-color);
     }
-    
+
     .form-card-header h5 {
         font-weight: 600;
         font-size: 18px;
         color: var(--dark-text);
         margin: 0;
     }
-    
+
     .form-card-header i {
         color: var(--primary-color);
     }
@@ -150,9 +221,7 @@ $stmt_student->close();
     }
 
     @media (max-width: 500px) {
-        .input-group-text:last-child{
-          
-        }
+        .input-group-text:last-child {}
     }
 </style>
 <div class="content-pane">
@@ -163,7 +232,50 @@ $stmt_student->close();
                 <div class="form-card-header">
                     <h5><i class="fa-solid fa-user-pen me-2"></i>Thông tin cá nhân</h5>
                 </div>
-                
+
+                <!-- Phần ảnh đại diện -->
+                <div class="text-center mb-4 pt-3">
+                    <label class="form-label fw-bold">Ảnh đại diện</label>
+                    <?php
+                    $sql_avatar = "SELECT hinh_anh FROM hocvien WHERE id_hocvien = ?";
+                    $stmt_avatar = $conn->prepare($sql_avatar);
+                    $stmt_avatar->bind_param("i", $id_hocvien);
+                    $stmt_avatar->execute();
+                    $result_avatar = $stmt_avatar->get_result();
+                    $student_avatar = '../images/logo.png';
+                    if ($row_avatar = $result_avatar->fetch_assoc()) {
+                        if (!empty($row_avatar['hinh_anh'])) {
+                            $student_avatar = "../" . $row_avatar['hinh_anh'];
+                        }
+                    }
+                    $stmt_avatar->close();
+                    ?>
+                    <div class="mb-3">
+                        <img id="avatar-preview"
+                            src="<?php echo htmlspecialchars($student_avatar); ?>"
+                            alt="Avatar"
+                            class="img-thumbnail rounded-circle mb-2"
+                            style="width: 150px; height: 150px; object-fit: cover;"
+                            onerror="this.src='../images/logo.png';">
+                    </div>
+                    <form method="POST" action="./dashboard.php?nav=thongtin" enctype="multipart/form-data" class="mb-3">
+                        <input type="file"
+                            name="avatar"
+                            id="avatar"
+                            class="form-control mb-2"
+                            accept="image/*"
+                            onchange="previewAvatar(this)">
+                        <button type="submit" name="update_avatar" class="btn btn-primary btn-sm mt-2">
+                            <i class="fas fa-upload me-1"></i>Cập nhật ảnh
+                        </button>
+                    </form>
+                    <?php if (!empty($avatar_message)): ?>
+                        <div class="alert alert-<?php echo $avatar_message_type; ?> py-2 px-3 small">
+                            <?php echo $avatar_message; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
                 <?php if (!empty($info_message)): ?>
                     <div class="alert alert-<?php echo $info_message_type; ?> mb-4"><?php echo $info_message; ?></div>
                 <?php endif; ?>
@@ -178,7 +290,7 @@ $stmt_student->close();
                     </div>
                     <div class="mb-3">
                         <label for="so_dien_thoai" class="form-label">Số điện thoại</label>
-                         <div class="input-group">
+                        <div class="input-group">
                             <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
                             <input type="tel" name="so_dien_thoai" id="so_dien_thoai" class="form-control" value="<?php echo htmlspecialchars($student['so_dien_thoai']); ?>" required>
                         </div>
@@ -186,7 +298,7 @@ $stmt_student->close();
                     <div class="mb-4">
                         <label for="email" class="form-label">Email</label>
                         <div class="input-group">
-                             <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                            <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
                             <input type="email" id="email" class="form-control" value="<?php echo htmlspecialchars($student['email']); ?>" readonly>
                             <span class="input-group-text verified"><i class="fa-solid fa-circle-check"></i> Đã xác thực</span>
                         </div>
@@ -198,7 +310,7 @@ $stmt_student->close();
 
         <div class="col-lg-6">
             <div class="form-card" style="animation-delay: 200ms;">
-                 <div class="form-card-header">
+                <div class="form-card-header">
                     <h5><i class="fa-solid fa-key me-2"></i>Bảo mật & Mật khẩu</h5>
                 </div>
 
@@ -210,21 +322,21 @@ $stmt_student->close();
                     <div class="mb-3">
                         <label for="old_password" class="form-label">Mật khẩu cũ</label>
                         <div class="input-group">
-                             <span class="input-group-text"><i class="fa-solid fa-lock-open"></i></span>
+                            <span class="input-group-text"><i class="fa-solid fa-lock-open"></i></span>
                             <input type="password" name="old_password" id="old_password" class="form-control" required>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label for="new_password" class="form-label">Mật khẩu mới</label>
-                         <div class="input-group">
-                             <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
                             <input type="password" name="new_password" id="new_password" class="form-control" placeholder="Ít nhất 6 ký tự" required>
                         </div>
                     </div>
                     <div class="mb-4">
                         <label for="confirm_password" class="form-label">Xác nhận mật khẩu mới</label>
-                         <div class="input-group">
-                             <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
                             <input type="password" name="confirm_password" id="confirm_password" class="form-control" required>
                         </div>
                     </div>
@@ -234,3 +346,17 @@ $stmt_student->close();
         </div>
     </div>
 </div>
+
+<script>
+    function previewAvatar(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function(e) {
+                document.getElementById('avatar-preview').src = e.target.result;
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>

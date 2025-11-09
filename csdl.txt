@@ -41,6 +41,8 @@ CREATE TABLE `hocvien` (
   `is_admin` BOOLEAN DEFAULT FALSE
 ) ENGINE=InnoDB;
 
+ ALTER TABLE hocvien ADD COLUMN hinh_anh VARCHAR(255) NULL AFTER is_admin;
+
 CREATE TABLE `khoahoc` (
   `id_khoahoc` INT PRIMARY KEY AUTO_INCREMENT,
   `ten_khoahoc` VARCHAR(100),

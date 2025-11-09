@@ -627,11 +627,11 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="./index.php?nav=question">Trắc Nghiệm Online</a>
                                 <a class="dropdown-item" href="./index.php?nav=hoccungai">Học Cùng AI</a>
-                                <a class="dropdown-item" href="./index.php?nav=blog">Blog Kiến Thức</a>
+                                <a class="dropdown-item" href="./index.php?nav=events">Sự Kiện</a>
                             </div>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="./index.php?nav=events">Sự Kiện</a>
+                            <a class="nav-link" href="./index.php?nav=blog">Blog Kiến Thức</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="./index.php?nav=contact">Liên Hệ</a>
@@ -686,10 +686,10 @@ $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin']; // Kiểm tra 
                 <div id="materials-submenu" class="dropdown-menu">
                     <a class="dropdown-item" href="./index.php?nav=question">Trắc Nghiệm Online</a>
                     <a class="dropdown-item" href="./index.php?nav=hoccungai">Học Cùng AI</a>
-                    <a class="dropdown-item" href="./index.php?nav=blog">Blog Kiến Thức</a>
+                    <a class="dropdown-item" href="./index.php?nav=events">Sự Kiện</a>
                 </div>
             </li>
-            <li><a href="./index.php?nav=events">Sự Kiện</a></li>
+            <li><a href="./index.php?nav=blog">Blog Kiến Thức</a></li>
             <li><a href="./index.php?nav=contact">Liên Hệ</a></li>
         </ul>
 

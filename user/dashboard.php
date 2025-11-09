@@ -11,6 +11,31 @@ $id_hocvien = $_SESSION['id_hocvien'];
 $ten_hocvien = $_SESSION['user'];
 $nav = $_GET['nav'] ?? 'home';
 
+// Lấy ảnh đại diện của học viên
+$student_avatar = '../images/logo.png'; // Ảnh mặc định
+$sql_avatar = "SELECT hinh_anh FROM hocvien WHERE id_hocvien = ?";
+$stmt_avatar = $conn->prepare($sql_avatar);
+$stmt_avatar->bind_param("i", $id_hocvien);
+$stmt_avatar->execute();
+$result_avatar = $stmt_avatar->get_result();
+if ($row_avatar = $result_avatar->fetch_assoc()) {
+    if (!empty($row_avatar['hinh_anh'])) {
+        $avatar_path = "../" . $row_avatar['hinh_anh'];
+        // Kiểm tra file có tồn tại không
+        if (file_exists($avatar_path)) {
+            $student_avatar = $avatar_path;
+        } else {
+            // File không tồn tại, reset về NULL trong database
+            $sql_reset = "UPDATE hocvien SET hinh_anh = NULL WHERE id_hocvien = ?";
+            $stmt_reset = $conn->prepare($sql_reset);
+            $stmt_reset->bind_param("i", $id_hocvien);
+            $stmt_reset->execute();
+            $stmt_reset->close();
+        }
+    }
+}
+$stmt_avatar->close();
+
 // --- Lấy các số liệu thống kê cho toàn bộ dashboard ---
 
 // Đếm tổng số khóa học đang học
@@ -294,7 +319,7 @@ $is_learning_active = in_array($nav, ['khoahoc', 'lichhoctuan', 'diemdanh', 'tie
             <div class="account-sidebar-content">
                 <div class="account-header">
                     <div class="avatar">
-                        <img src="../images/logo.png" alt="Avatar">
+                        <img src="<?php echo htmlspecialchars($student_avatar); ?>" alt="Avatar" onerror="this.src='../images/logo.png';">
                     </div>
                     <h3><?php echo htmlspecialchars($ten_hocvien); ?></h3>
                     <p class="account-level">Học viên</p>

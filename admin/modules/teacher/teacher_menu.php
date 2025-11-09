@@ -4,6 +4,26 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+// Lấy thông tin giảng viên từ database
+$id_giangvien = $_SESSION['id_giangvien'] ?? null;
+$teacher_avatar = '../images/logo.png'; // Ảnh mặc định
+
+if ($id_giangvien) {
+    $sql_teacher = "SELECT hinh_anh FROM giangvien WHERE id_giangvien = ?";
+    $stmt_teacher = $conn->prepare($sql_teacher);
+    $stmt_teacher->bind_param("i", $id_giangvien);
+    $stmt_teacher->execute();
+    $result_teacher = $stmt_teacher->get_result();
+    if ($row_teacher = $result_teacher->fetch_assoc()) {
+        if (!empty($row_teacher['hinh_anh'])) {
+            // Database đã chứa đường dẫn đầy đủ từ gốc: uploads/lecturers/...
+            // Nên chỉ cần thêm ../ để đi từ admin/ về root
+            $teacher_avatar = "../" . $row_teacher['hinh_anh'];
+        }
+    }
+    $stmt_teacher->close();
+}
+
 // Lấy trang hiện tại từ URL để xác định link/menu nào đang active
 $current_page = $_GET['nav'] ?? '';
 
@@ -19,11 +39,6 @@ $teaching_management_pages = [
 ];
 
 $is_teaching_management_active = in_array($current_page, $teaching_management_pages);
-// === MỚI: Xác định đường dẫn avatar ===
-// Giả định rằng bạn lưu đường dẫn ảnh trong session là 'hinh_anh' khi giảng viên đăng nhập
-$avatar_path = (isset($_SESSION['hinh_anh']) && !empty($_SESSION['hinh_anh'])) 
-                ? '../' . htmlspecialchars($_SESSION['hinh_anh']) 
-                : '../images/default-avatar.png'; // Đường dẫn đến avatar mặc định
 ?>
 <style>
     /* Nâng cấp giao diện chung cho menu giảng viên */
@@ -102,7 +117,7 @@ $avatar_path = (isset($_SESSION['hinh_anh']) && !empty($_SESSION['hinh_anh']))
 
 <div class="sidebar-header teacher-header">
     <div class="teacher-info">
-        <img src="../images/logo.png" alt="Avatar">
+        <img src="<?php echo htmlspecialchars($teacher_avatar); ?>" alt="Avatar Giảng viên" onerror="this.src='../images/logo.png';">
         <div>
             <p class="name"><?php echo htmlspecialchars($_SESSION['teacher_name']); ?></p>
             <span class="role">Giảng viên</span>
